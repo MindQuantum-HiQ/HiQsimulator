@@ -1,0 +1,15 @@
+backends
+========
+
+.. autosummary::
+	
+	hiq.projectq.backends.SimulatorMPI
+
+
+Module contents
+---------------
+
+.. automodule:: projectq.backends
+    :members:
+    :special-members: __init__
+    :imported-members:
