@@ -1,2 +1,1 @@
-mpi4py
 projectq>=0.4.0
