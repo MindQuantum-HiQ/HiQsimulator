@@ -1,2 +1,1 @@
 cmake
-mpi4py
