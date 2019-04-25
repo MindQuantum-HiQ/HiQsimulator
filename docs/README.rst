@@ -30,7 +30,7 @@ In most cases, you can learn what packages are required from error messages spil
 Possible missing packages include `six`, `markupsafe`, `jinja2`, `pygments`, `docutils`, `snowballstemmer`, `pytz`, `babel`, and `alabaster`.
 
 The config file of Huawei HiQ can be found at `/conf.py`.
-Note that Sphinx was configured to generate static HTML files for ReadTheDocs website hosting and to be synchronized and linked with the [Github source repository](https://github.com/HiQ/HiQ/).
+Note that Sphinx was configured to generate static HTML files for ReadTheDocs website hosting and to be synchronized and linked with the [Github source repository](https://github.com/Huawei-HiQ/HiQsimulator/).
 For now, we will ignore this setting and only allow local document generation using the Makefile script.
 Main docs are written in  *reStructuredText* documents (`*.rst`).
 
