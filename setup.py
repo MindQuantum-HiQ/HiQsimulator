@@ -110,7 +110,7 @@ scheduler = Feature(
 if os.environ.get('READTHEDOCS') == 'False':
     setup(
         name='hiqsimulator',
-        version='__version__',
+        version=__version__,
         author='hiq',
         author_email='hiqinfo@huawei.com',
         description='A high performance distributed quantum simulator',
