@@ -106,18 +106,38 @@ scheduler = Feature(
     ext_modules=[CMakeExtension('_sched_cpp', 'hiq/projectq/cengines/_sched_cpp')]
 )
 
-setup(
-    name='hiqsimulator',
-    version='__version__',
-    author='hiq',
-    author_email='hiqinfo@huawei.com',
-    description='A high performance distributed quantum simulator',
-    long_description=long_description,
-    url="https://github.com/Huawei-HiQ/HiQsimulator",
-    features={'cppsim-mpi': cppsim_mpi, 'scheduler': scheduler, 'cppstabsim': cppstabsim},
-    install_requires=requirements,
-    cmdclass=dict(build_ext=CMakeBuild),
-    zip_safe=False,
-    license='Apache 2',
-    packages=find_packages()
-)
+
+if os.environ.get('READTHEDOCS') == 'False':
+    setup(
+        name='hiqsimulator',
+        version='__version__',
+        author='hiq',
+        author_email='hiqinfo@huawei.com',
+        description='A high performance distributed quantum simulator',
+        long_description=long_description,
+        url="https://github.com/Huawei-HiQ/HiQsimulator",
+        features={'cppsim-mpi': cppsim_mpi, 'scheduler': scheduler, 'cppstabsim': cppstabsim},
+        install_requires=requirements,
+        cmdclass=dict(build_ext=CMakeBuild),
+        zip_safe=False,
+        license='Apache 2',
+        packages=find_packages()
+    )
+else:
+    setup(
+        name='hiqsimulator',
+        version='__version__',
+        author='hiq',
+        author_email='hiqinfo@huawei.com',
+        description='A high performance distributed quantum simulator',
+        long_description=long_description,
+        url="https://github.com/Huawei-HiQ/HiQsimulator",
+        install_requires=requirements,
+        zip_safe=False,
+        license='Apache 2',
+        packages=['hiq/projectq/backends'
+            , 'hiq/projectq/backends/_sim'
+            , 'hiq/projectq/cengines'
+            , 'hiq/projectq/ops'
+        ]
+    )
