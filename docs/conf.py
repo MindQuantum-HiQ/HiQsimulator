@@ -19,7 +19,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../hiq'))
 
 # -- General configuration ------------------------------------------------
 
@@ -39,7 +39,7 @@ extensions = [
 
 autosummary_generate = True
 
-autodoc_mock_imports = ["mpi4py","pybind11"]
+autodoc_mock_imports = ['mpi4py','projectq']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
