@@ -39,7 +39,7 @@ extensions = [
 
 autosummary_generate = True
 
-autodoc_mock_imports = ['mpi4py']
+autodoc_mock_imports = ["mpi4py", "projectq"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
