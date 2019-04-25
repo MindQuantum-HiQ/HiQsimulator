@@ -132,7 +132,7 @@ else:
         description='A high performance distributed quantum simulator',
         long_description=long_description,
         url="https://github.com/Huawei-HiQ/HiQsimulator",
-        install_requires='docs/requirements_rtd.txt',
+        install_requires=docs/requirements_rtd,
         zip_safe=False,
         license='Apache 2',
         packages=['hiq/projectq/backends'
