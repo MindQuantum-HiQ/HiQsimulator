@@ -354,7 +354,6 @@ texinfo_documents = [
 
 # -- Options for sphinx.ext.linkcode --------------------------------------
 import inspect
-import projectq
 import hiq
 
 def linkcode_resolve(domain, info):
@@ -410,8 +409,8 @@ def linkcode_resolve(domain, info):
             except:
                 return None
         # Only require relative path project/relative_path
-        project_path = inspect.getsourcefile(projectq)[:-11]
+        project_path = hiq.__path__.__dict__["_path"][0]
         relative_path = os.path.relpath(filepath, project_path)
-        url = (github_url + github_tag + "/projectq/" + relative_path + "#L" +
+        url = (github_url + github_tag + "/hiq/" + filepath + "#L" +
                str(line_number))
         return url
