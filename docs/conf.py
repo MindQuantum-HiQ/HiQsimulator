@@ -354,6 +354,7 @@ texinfo_documents = [
 
 # -- Options for sphinx.ext.linkcode --------------------------------------
 import inspect
+import projectq
 import hiq
 
 def linkcode_resolve(domain, info):
