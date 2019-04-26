@@ -21,6 +21,9 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../hiq'))
 
+# Mock
+autodoc_mock_imports = ["hiq.projcetq.backends._sim._cppsim_mpi", "hiq.projectq.cengines._sched_cpp"]
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
