@@ -6,7 +6,8 @@ The HiQ compiler engines package.
 .. autosummary::
 	hiq.projectq.cengines.GreedyScheduler
 	hiq.projectq.cengines.HiQMainEngine
-
+        hiq.projectq.cengines.DummyBackend
+        hiq.projectq.cengines.FakeSimulator
 
 Module contents
 ---------------
