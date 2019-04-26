@@ -28,7 +28,7 @@ How to cite
 
 When using Huawei HiQsimulator for research projects, please cite
 
--  Huawei HiQ team, “Huawei HiQ: A High-performance Quantum Computing Simulator and Programming Framework”, http://hiq.huaweicloud.com.
+-  Huawei HiQ team, 'Huawei HiQ: A High-performance Quantum Computing Simulator and Programming Framework', http://hiq.huaweicloud.com.
 
 
 License
