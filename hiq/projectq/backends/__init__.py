@@ -12,5 +12,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from ._sim._simulator_mpi import SimulatorMPI
-from ._sim._cppstabsim import StabilizerSimulator
+"""
+Contains back-ends for HiQ.
+
+This includes:
+
+* a full-amplitude quantum simulator
+* a single amplitude simulator
+* a tabilizer circuit simulator
+"""
+
+from ._sim import SimulatorMPI
+from ._sim import StabilizerSimulator
