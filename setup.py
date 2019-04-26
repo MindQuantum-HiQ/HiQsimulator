@@ -121,8 +121,8 @@ scheduler = Feature(
 
 if on_rtd:
     setup(
-        name='hiqsimulator',
-        version='__version__',
+        name='HiQsimulator',
+        version=__version__,
         author='hiq',
         author_email='hiqinfo@huawei.com',
         description='A high performance distributed quantum simulator',
@@ -139,7 +139,7 @@ if on_rtd:
     )
 else:
     setup(
-        name='hiqsimulator',
+        name=HiQsimulator,
         version=__version__,
         author='hiq',
         author_email='hiqinfo@huawei.com',
