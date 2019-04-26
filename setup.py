@@ -14,10 +14,22 @@ exec(open('_version.py').read())
 # Readme file as long_description:
 long_description = open('README.rst').read()
 
-# Read in requirements.txt
-with open('requirements.txt', 'r') as f_requirements:
-    requirements = f_requirements.readlines()
-requirements = [r.strip() for r in requirements]
+# Readthedocs env value
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+
+def get_install_requires():
+
+    if on_rtd:
+        requirements_file = 'docs/requirements_rtd.txt'
+    else:
+        requirements_file = 'requirements.txt'
+
+    # Read in requirements.txt
+    with open(requirements_file, 'r') as f_requirements:
+        requirements = f_requirements.readlines()
+    requirements = [r.strip() for r in requirements]
+
+    return requirements
 
 class get_pybind_include(object):
     """Helper class to determine the pybind11 include path
@@ -107,7 +119,25 @@ scheduler = Feature(
 )
 
 
-if os.environ.get('READTHEDOCS') == 'False':
+if on_rtd:
+    setup(
+        name='hiqsimulator',
+        version='__version__',
+        author='hiq',
+        author_email='hiqinfo@huawei.com',
+        description='A high performance distributed quantum simulator',
+        long_description=long_description,
+        url="https://github.com/Huawei-HiQ/HiQsimulator",
+        install_requires=get_install_requires(),
+        zip_safe=False,
+        license='Apache 2',
+        packages=['hiq/projectq/backends'
+            , 'hiq/projectq/backends/_sim'
+            , 'hiq/projectq/cengines'
+            , 'hiq/projectq/ops'
+        ]
+    )
+else:
     setup(
         name='hiqsimulator',
         version=__version__,
@@ -117,27 +147,9 @@ if os.environ.get('READTHEDOCS') == 'False':
         long_description=long_description,
         url="https://github.com/Huawei-HiQ/HiQsimulator",
         features={'cppsim-mpi': cppsim_mpi, 'scheduler': scheduler, 'cppstabsim': cppstabsim},
-        install_requires=requirements,
+        install_requires=get_install_requires(),
         cmdclass=dict(build_ext=CMakeBuild),
         zip_safe=False,
         license='Apache 2',
         packages=find_packages()
-    )
-else:
-    setup(
-        name='hiqsimulator',
-        version='__version__',
-        author='hiq',
-        author_email='hiqinfo@huawei.com',
-        description='A high performance distributed quantum simulator',
-        long_description=long_description,
-        url="https://github.com/Huawei-HiQ/HiQsimulator",
-        install_requires=requirements,
-        zip_safe=False,
-        license='Apache 2',
-        packages=['hiq/projectq/backends'
-            , 'hiq/projectq/backends/_sim'
-            , 'hiq/projectq/cengines'
-            , 'hiq/projectq/ops'
-        ]
     )
