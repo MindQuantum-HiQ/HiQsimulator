@@ -1,6 +1,8 @@
 backends
 ========
 
+The HiQ backends package.
+
 .. autosummary::
 	
 	hiq.projectq.backends.SimulatorMPI
