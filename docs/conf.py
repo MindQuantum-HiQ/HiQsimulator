@@ -28,8 +28,6 @@ autodoc_mock_imports = [
     "hiq.projectq.cengines._sched_cpp",
     "mpi4py","pybind11"]
 
-mpi4py.MPI.Is_thread_main() = mock.Mock(return_value=(True))
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
