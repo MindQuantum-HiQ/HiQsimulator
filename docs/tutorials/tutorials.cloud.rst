@@ -7,7 +7,7 @@ composer and the coding environment.
 
 **I. Login**
 
-First, open the `HiQ home page <http://hiq.huaweicloud.com/>`__ and
+First, open the `HiQ Home Page <http://hiq.huaweicloud.com/>`__ and
 click "`Experience Quantum
 Programming <http://hiq.huaweicloud.com/ide.html>`__" or "HiQ Simulator"
 from the main menu to find the login prompt. 
