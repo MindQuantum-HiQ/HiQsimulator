@@ -31,16 +31,16 @@ When you run
 .. code-block:: bash
    :linenos:
 
-    sudo pip3 install --user hiqsimulator
+    sudo pip3 install --user HiQsimulator
 
 all dependencies should be installed automatically.
 
-or, alternatively, copy or clone the repository to your machine(e.g., to your /home directory), enter
+or, alternatively, clone the repository to your machine(e.g., to your /home directory), enter
 
 .. code-block:: bash
    :linenos:
 
-    git clone https://github.com/Huawei-HiQ/HiQsimulator.git 
+    git clone --recursive https://github.com/Huawei-HiQ/HiQsimulator.git 
     cd HiQsimulator
     python3 -m pip install --user .
 
