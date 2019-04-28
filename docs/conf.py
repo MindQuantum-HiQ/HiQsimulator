@@ -357,7 +357,7 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 # -- Options for sphinx.ext.linkcode --------------------------------------
-import inspect
+import dill
 import hiq
 
 def linkcode_resolve(domain, info):
@@ -367,8 +367,6 @@ def linkcode_resolve(domain, info):
     if on_rtd:
         rtd_tag = os.environ.get('READTHEDOCS_VERSION')
         if rtd_tag == 'latest':
-            github_tag = 'develop'
-        elif rtd_tag == 'stable':
             github_tag = 'master'
         else:
             # RTD changes "/" in branch name to "-"
@@ -413,8 +411,8 @@ def linkcode_resolve(domain, info):
             except:
                 return None
         # Only require relative path project/relative_path
-        # project_path = hiq.__path__.__dict__["_path"][0]
-        # relative_path = os.path.relpath(filepath, project_path)
+        project_path = dill.source.getsourcefile(hiq)
+        relative_path = os.path.relpath(filepath, project_path)
         url = (github_url + github_tag + "/hiq/" + filepath + "#L" +
                str(line_number))
         return url
