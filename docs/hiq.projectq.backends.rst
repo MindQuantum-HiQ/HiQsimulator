@@ -11,7 +11,7 @@ The HiQ backends package.
 Module contents
 ---------------
 
-.. automodule:: projectq.backends
+.. automodule:: hiq.projectq.backends
     :members:
     :special-members: __init__
     :imported-members:
