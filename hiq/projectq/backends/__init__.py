@@ -19,7 +19,7 @@ This includes:
 
 * a full-amplitude quantum simulator
 * a single amplitude simulator
-* a tabilizer circuit simulator
+* a stabilizer circuit simulator
 """
 
 from ._sim import SimulatorMPI
