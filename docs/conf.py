@@ -22,7 +22,11 @@ import sys
 sys.path.insert(0, os.path.abspath('../hiq'))
 
 # Mock
-autodoc_mock_imports = ["hiq.projcetq.backends._sim._cppsim_mpi", "hiq.projectq.cengines._sched_cpp", "pybind11"]
+autodoc_mock_imports = [
+    "hiq.projectq.backends._sim._cppsim_mpi",
+    "hiq.projectq.backends._sim._cppstabsim",
+    "hiq.projectq.cengines._sched_cpp",
+    "mpi4py","pybind11"]
 
 # -- General configuration ------------------------------------------------
 
