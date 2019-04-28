@@ -44,13 +44,6 @@ rc.thread_level = 'funneled'
 rc.finalize = True
 from mpi4py import MPI  # properly loads and initializes MPI environment
 
-if not MPI.Is_thread_main():
-     raise RuntimeError("Incorrect MPI initialization: MPI must be initialized with Init_thread()!")
-
-if MPI.Query_thread() < MPI.THREAD_FUNNELED:
-    raise RuntimeError("Incorrect MPI thread level: thread level must be >= THREAD_FUNNELED!")
-
-
 class SimulatorMPI(BasicEngine):
     """
     SimulatorMPI is a compiler engine which simulates a quantum computer using
@@ -87,6 +80,12 @@ class SimulatorMPI(BasicEngine):
         through the state vector multiple times. Depending on the system (and,
         especially, number of threads), this may or may not be beneficial.
         """
+        if not MPI.Is_thread_main():
+            raise RuntimeError("Incorrect MPI initialization: MPI must be initialized with Init_thread()!")
+
+        if MPI.Query_thread() < MPI.THREAD_FUNNELED:
+            raise RuntimeError("Incorrect MPI thread level: thread level must be >= THREAD_FUNNELED!")
+    
         if rnd_seed is None:
             rnd_seed = random.randint(0, 4294967295)
         BasicEngine.__init__(self)
