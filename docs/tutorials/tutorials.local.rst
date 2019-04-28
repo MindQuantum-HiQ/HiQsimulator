@@ -50,10 +50,10 @@ or, alternatively, copy or clone the repository to your machine(e.g., to your /h
     You can find more information in the `projectq tutorials <https://projectq.readthedocs.io/en/latest/index.html>`__.
 
 
-Running instructions
+How to Start Running
 ---------------------
 
-**Running locally:**
+**Running on a single node:**
 
 If you just run the simulator on a server, simply run:
 
@@ -86,8 +86,11 @@ For example, the above example can be split over 4 MPI nodes (each with 2 proces
 
     mpirun  python3 myExample.py       # Execute program
 
+Then, copy the running script and program to all cluster nodes with the same directory.
+You can also create an NFS share directory and execute script and program in the shared directory.
+Detailed methods can be found in `Ubuntu NFS <https://help.ubuntu.com/lts/serverguide/network-file-system.html.en>`__.
 
-Submit task:
+Finally, submit task:
 
 .. code-block:: bash
    :linenos:
