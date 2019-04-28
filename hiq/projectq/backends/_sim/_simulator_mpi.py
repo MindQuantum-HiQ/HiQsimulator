@@ -44,11 +44,11 @@ rc.thread_level = 'funneled'
 rc.finalize = True
 from mpi4py import MPI  # properly loads and initializes MPI environment
 
-# if not MPI.Is_thread_main():
-#     raise RuntimeError("Incorrect MPI initialization: MPI must be initialized with Init_thread()!")
+if not MPI.Is_thread_main():
+     raise RuntimeError("Incorrect MPI initialization: MPI must be initialized with Init_thread()!")
 
-# if MPI.Query_thread() < MPI.THREAD_FUNNELED:
-#    raise RuntimeError("Incorrect MPI thread level: thread level must be >= THREAD_FUNNELED!")
+if MPI.Query_thread() < MPI.THREAD_FUNNELED:
+    raise RuntimeError("Incorrect MPI thread level: thread level must be >= THREAD_FUNNELED!")
 
 
 class SimulatorMPI(BasicEngine):
