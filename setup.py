@@ -139,7 +139,7 @@ if on_rtd:
     )
 else:
     setup(
-        name=HiQsimulator,
+        name='HiQsimulator',
         version=__version__,
         author='hiq',
         author_email='hiqinfo@huawei.com',
