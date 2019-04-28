@@ -11,7 +11,7 @@ The Huawei HiQsimulator is a part of Huawei HiQ, includes a single-amplitude sim
 Getting started
 ---------------
 
-To start using Huawei HiQsimulator, simply follow the installation instructions and code examples in the `Tutorials <http://hiq.readthedocs.io/en/latest/tutorials.html>`__.
+To start using Huawei HiQsimulator, simply follow the installation instructions and code examples in the `Tutorials <https://hiqsimulator.readthedocs.io/en/latest/tutorials.html>`__.
 More example codes can be found on `GitHub <https://github.com/Huawei-HiQ/HiQsimulator>`__.
 
 How to contribute
