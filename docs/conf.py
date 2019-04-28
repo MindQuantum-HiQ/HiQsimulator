@@ -26,7 +26,9 @@ autodoc_mock_imports = [
     "hiq.projectq.backends._sim._cppsim_mpi",
     "hiq.projectq.backends._sim._cppstabsim",
     "hiq.projectq.cengines._sched_cpp",
-    "mpi4py","mpi4py.MPI","pybind11"]
+    "mpi4py","pybind11"]
+
+mpi4py.MPI.Is_thread_main() = mock.Mock(return_value=(True))
 
 # -- General configuration ------------------------------------------------
 
