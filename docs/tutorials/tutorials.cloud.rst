@@ -1,4 +1,4 @@
-Programming on Huawei cloud
+Programming on Huawei Cloud
 ===========================
 
 Composing a quantum circuit and simulate it using HiQ GUI is intuitive.
