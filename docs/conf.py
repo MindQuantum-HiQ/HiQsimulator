@@ -357,6 +357,7 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 # -- Options for sphinx.ext.linkcode --------------------------------------
+import inspect
 import dill
 import hiq
 
