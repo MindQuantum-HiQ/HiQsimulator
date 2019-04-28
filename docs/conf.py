@@ -358,7 +358,7 @@ texinfo_documents = [
 
 # -- Options for sphinx.ext.linkcode --------------------------------------
 import inspect
-import projectq
+import hiq
 
 def linkcode_resolve(domain, info):
     # Copyright 2018 ProjectQ (www.projectq.ch), all rights reserved.
