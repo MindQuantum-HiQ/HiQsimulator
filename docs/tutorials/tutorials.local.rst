@@ -19,23 +19,15 @@ After having installed the build tools (for g++):
     sudo apt-get install libboost-all-dev
     sudo apt-get install libgoogle-glog-dev
 
-You only need to install Python and Pip:
+You need to install Python and Pip:
 
 .. code-block:: bash
    :linenos:
 
     sudo apt-get install python3 python3-pip
 
-When you run
 
-.. code-block:: bash
-   :linenos:
-
-    sudo pip3 install --user HiQsimulator
-
-all dependencies should be installed automatically.
-
-or, alternatively, clone the repository to your machine(e.g., to your /home directory), enter
+After completing the above preparations, you can start to clone the repository to your machine(e.g., to your /home directory), enter
 
 .. code-block:: bash
    :linenos:
@@ -51,9 +43,8 @@ or, alternatively, clone the repository to your machine(e.g., to your /home dire
     
 .. note::    
     If you download the project code by copying or other methods, 
-    the directory pybind11 in the project is git Submodule, 
-    please make sure that the pybind11 source code is also downloaded correctly. 
-    The source code for pybind11 is in `github <https://github.com/pybind/pybind11>`__
+    the directory pybind11 in the project is git Submodule, please make sure that the 
+    `pybind11 source code <https://github.com/pybind/pybind11>`__ is also downloaded correctly. 
 
 How to Start Running
 ---------------------
