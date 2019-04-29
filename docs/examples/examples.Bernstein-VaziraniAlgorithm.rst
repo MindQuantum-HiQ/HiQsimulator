@@ -69,7 +69,7 @@ of :math:`f_s​`, but Bernstein-Vazirani algorithm only needs
         
     if __name__ == "__main__":
         # create a main compiler engine with a simulator backend:
-        backend = SimulatorMPI(gate_fusion=True)
+        backend = SimulatorMPI(gate_fusion=True, num_local_qubits=20)
         
         cache_depth = 10
         rule_set = DecompositionRuleSet(modules=[projectq.setups.decompositions])
