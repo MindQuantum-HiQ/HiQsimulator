@@ -88,7 +88,7 @@ Below, we will briefly introduce the compiling environment:
                 LocalOptimizer(cache_depth),
                 GreedyScheduler()]
 
-    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20), engines)
+    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, *num_local_qubits=20*), engines)
     
 .. note::
     The parameter num_local_qubits represents the number of qubits supported by an MPI node, 
