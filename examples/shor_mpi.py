@@ -130,7 +130,7 @@ if __name__ == "__main__":
                        ]
 
     # make the compiler and run the circuit on the simulator backend
-    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True), compilerengines)
+    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20), compilerengines)
 
     N = 0
     if MPI.COMM_WORLD.Get_rank() == 0:
