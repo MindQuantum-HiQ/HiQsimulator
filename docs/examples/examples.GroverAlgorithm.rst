@@ -156,7 +156,7 @@ The quantum circuit of Grover’s algorithm is:
 
     if __name__ == "__main__":
         # create a main compiler engine with a simulator backend:
-        backend = SimulatorMPI(gate_fusion=True)
+        backend = SimulatorMPI(gate_fusion=True,num_local_qubits=20)
 
         cache_depth = 10
         rule_set = DecompositionRuleSet(modules=[projectq.setups.decompositions])
@@ -362,7 +362,7 @@ where :math:`m=\pi 2^{n-2}` and :math:`\sin^2(\beta)=1/2^{n}`.
 
     if __name__ == "__main__":
         # create a main compiler engine with a simulator backend:
-        backend = SimulatorMPI(gate_fusion=True)
+        backend = SimulatorMPI(gate_fusion=True, num_local_qubits=20)
         # backend = CircuitDrawer()
         # locations = {}
         # for i in range(module.nqubits):
