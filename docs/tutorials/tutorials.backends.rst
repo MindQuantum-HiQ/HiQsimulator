@@ -88,10 +88,10 @@ Below, we will briefly introduce the compiling environment:
                 LocalOptimizer(cache_depth),
                 GreedyScheduler()]
 
-    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, *num_local_qubits=20*), engines)
+    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20), engines)
     
 .. note::
-    The parameter num_local_qubits represents the number of qubits supported by an MPI node, 
+    The parameter **num_local_qubits** represents the number of qubits supported by an MPI node, 
     depending on the available memory of the node. The 20 qubits probably require about 16M of memory. 
     For each additional qubit, the required memory will double. 
     In actual use, the appropriate value can be set according to the algorithm requirements, 
