@@ -73,7 +73,7 @@ def run_phase_estimation(eng, U, state, m, n):
 if __name__ == "__main__":
 
     # create a main compiler engine with a simulator backend:
-    backend = SimulatorMPI(gate_fusion=True)
+    backend = SimulatorMPI(gate_fusion=True, num_local_qubits=20)
     # backend = CircuitDrawer()
     # locations = {}
     # for i in range(module.nqubits):
