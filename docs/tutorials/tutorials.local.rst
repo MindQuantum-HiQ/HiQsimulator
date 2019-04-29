@@ -14,7 +14,7 @@ After having installed the build tools (for g++):
 .. code-block:: bash
    :linenos:
 
-    sudo apt-get install build-essential
+    sudo apt-get install build-essential cmake
     sudo apt-get install openmpi-bin openmpi-doc libopenmpi-dev
     sudo apt-get install libboost-all-dev
     sudo apt-get install libgoogle-glog-dev
@@ -49,7 +49,6 @@ or, alternatively, clone the repository to your machine(e.g., to your /home dire
     The HiQsimulator relies on Projectq (programming language, compiler), which will be installed automatically.
     You can find more information in the `projectq tutorials <https://projectq.readthedocs.io/en/latest/index.html>`__.
 
-
 How to Start Running
 ---------------------
 
@@ -60,7 +59,7 @@ If you just run the simulator on a server, simply run:
 .. code-block:: bash
    :linenos:
 
-   mpirun -np 2 python3 myExample.py
+   mpirun -np 2 python3 ./examples/teleport_mpi.py 
 
 The parameter **-np** indicates the number of parallel processes.
 The parameters can be adjusted according to the CPU resources of the server, 
@@ -77,14 +76,14 @@ For example, the above example can be split over 4 MPI nodes (each with 2 proces
    :linenos:
 
     #!/usr/bin/env bash
-    #SBATCH -N 4                         # 4 nodes are requested
-    #SBATCH -t 00:03:00                  # Walltime, 3 minutes
-    #SBATCH -n 8                         # 8 processes are requested
-    #SBATCH --ntasks-per-socket=1        # 1 process per allocated socket
-    #SBATCH --hint=compute_bound         # Use all cores in each socket, one thread per core
-    #SBATCH --exclusive                  # node should not be shared with other jobs
+    #SBATCH -N 4                                     # 4 nodes are requested
+    #SBATCH -t 00:03:00                              # Walltime, 3 minutes
+    #SBATCH -n 8                                     # 8 processes are requested
+    #SBATCH --ntasks-per-socket=1                    # 1 process per allocated socket
+    #SBATCH --hint=compute_bound                     # Use all cores in each socket, one thread per core
+    #SBATCH --exclusive                              # node should not be shared with other jobs
 
-    mpirun  python3 myExample.py       # Execute program
+    mpirun  python3 ./examples/teleport_mpi.py       # Execute program
 
 Then, copy the running script and program to all cluster nodes with the same directory.
 You can also create an NFS share directory and execute script and program in the shared directory.
@@ -127,7 +126,7 @@ is placed under the directory of examples. The code reads:
     from mpi4py import MPI
 
     # Create main engine to compile the code to machine instructions(required)
-    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True))
+    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20))
 
     # Use the method provided by the main engine to create a qubit
     q1 = eng.allocate_qubit()
