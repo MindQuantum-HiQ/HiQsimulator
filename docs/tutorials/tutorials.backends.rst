@@ -88,7 +88,7 @@ Below, we will briefly introduce the compiling environment:
                 LocalOptimizer(cache_depth),
                 GreedyScheduler()]
 
-    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True), engines)
+    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20), engines)
 
 3. Program the algorithm logic.
 
