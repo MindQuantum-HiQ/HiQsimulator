@@ -48,6 +48,12 @@ or, alternatively, clone the repository to your machine(e.g., to your /home dire
 .. note::
     The HiQsimulator relies on Projectq (programming language, compiler), which will be installed automatically.
     You can find more information in the `projectq tutorials <https://projectq.readthedocs.io/en/latest/index.html>`__.
+    
+.. note::    
+    If you download the project code by copying or other methods, 
+    the directory pybind11 in the project is git Submodule, 
+    please make sure that the pybind11 source code is also downloaded correctly. 
+    The source code for pybind11 is in 'github <https://github.com/pybind/pybind11>__'
 
 How to Start Running
 ---------------------
