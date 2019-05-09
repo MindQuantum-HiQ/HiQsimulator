@@ -29,7 +29,7 @@ class FakeSimulator:
 
 
 class DummyBackend(BasicEngine):
-    def __init__(self, cluster_size: int, num_global: int):
+    def __init__(self, cluster_size, num_global):
         BasicEngine.__init__(self)
 
         self._num_global = num_global
@@ -53,26 +53,26 @@ class DummyBackend(BasicEngine):
         self._simulator = FakeSimulator()
         self._dealloc = False
 
-    def set_qubits_perm(self, p: List[int]) -> None:
+    def set_qubits_perm(self, p):
         self._locals = p[:len(self._locals)]
         self._globals = p[-len(self._globals):]
 
-    def get_qubits_ids(self) -> List[int]:
+    def get_qubits_ids(self):
         return self._locals + self._globals
 
-    def get_local_qubits_ids(self) -> List[int]:
+    def get_local_qubits_ids(self):
         return self._locals[:]
 
-    def get_global_qubits_ids(self) -> List[int]:
+    def get_global_qubits_ids(self):
         return self._globals[:]
 
-    def is_available(self, cmd: Command) -> bool:
+    def is_available(self, cmd):
         try:
             return BasicEngine.is_available(self, cmd)
         except LastEngineException:
             return True
 
-    def _do_swap(self, pairs: List[int]) -> None:
+    def _do_swap(self, pairs):
         if len(pairs) == 0:
             return
         assert len(pairs) % 2 == 0
@@ -91,7 +91,7 @@ class DummyBackend(BasicEngine):
 
         print("[DUMMY] Doing swap: qubits = {}".format(len(pairs) // 2))
 
-    def _fuse(self, cmd: Command) -> None:
+    def _fuse(self, cmd):
         self._gates += 1
         self._nothing = False
 
@@ -117,7 +117,7 @@ class DummyBackend(BasicEngine):
             print("[DUMMY] Error: Too big cluster")
             exit(1)
 
-    def _run(self) -> None:
+    def _run(self):
         last_gates = self._last_gates
         self._last_gates = self._gates
 
@@ -135,7 +135,7 @@ class DummyBackend(BasicEngine):
             s = "[DUMMY] Doing run: DEFAULT matrix size = {}; ids = {}; gates = {}"
         print(s.format(len(self._cluster), self._cluster, self._gates - last_gates))
 
-    def receive(self, command_list: List[Command]) -> None:
+    def receive(self, command_list):
         sys.stdout = sys.stderr
         for cmd in command_list:
             assert not self._dealloc or isinstance(cmd.gate, (DeallocateQubitGate, FlushGate))
@@ -166,28 +166,28 @@ class DummyBackend(BasicEngine):
         sys.stdout.flush()
         sys.stdout = sys.__stdout__
 
-    def _clear(self) -> None:
+    def _clear(self):
         self._cluster = set()
         self._is_diag_cluster = True
         self._is_empty_cluster = True
         self._nothing = True
 
     @staticmethod
-    def _cmd_to_all_qubits(cmd: Command) -> List[int]:
+    def _cmd_to_all_qubits(cmd):
         return [qb.id for qr in cmd.all_qubits for qb in qr]
 
     @staticmethod
-    def _cmd_to_qubits(cmd: Command) -> List[int]:
+    def _cmd_to_qubits(cmd):
         return [qb.id for qr in cmd.qubits for qb in qr]
 
     @staticmethod
-    def _cmd_to_ctrl_qubits(cmd: Command) -> List[int]:
+    def _cmd_to_ctrl_qubits(cmd):
         return [qb.id for qb in cmd.control_qubits]
 
-    def _is_local_qubit(self, i: int) -> bool:
+    def _is_local_qubit(self, i):
         return i in self.get_local_qubits_ids()
 
-    def _is_global_qubit(self, i: int) -> bool:
+    def _is_global_qubit(self, i):
         return i in self.get_global_qubits_ids()
 
     def print_statistics(self):
