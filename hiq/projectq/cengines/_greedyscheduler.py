@@ -193,7 +193,7 @@ class GreedyScheduler(BasicEngine):
         for c in sorted(self._deallocations_cache, key=lambda cmd: cmd.qubits[0][0].id, reverse=True):
             self.send([c])
 
-        self._deallocations_cache.clear()
+        del self._deallocations_cache[:]
 
     def receive(self, command_list):
         if not self._init:
