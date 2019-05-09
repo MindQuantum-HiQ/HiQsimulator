@@ -272,7 +272,7 @@ if __name__ == "__main__":
     Matrix=para()[1]
     InvMatrix=np.linalg.inv(Matrix)
     # create a main compiler engine with a simulator backend:
-    backend = SimulatorMPI(gate_fusion=True, num_local_qubits=20)
+    backend = SimulatorMPI(gate_fusion=True, num_local_qubits=22)
     # backend = CircuitDrawer()
     # locations = {}
     # for i in range(module.nqubits):
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     		   TagRemover(),
     		   LocalOptimizer(cache_depth)
     		   #,CommandPrinter()
-    	   , GreedyScheduler()
+    	     , GreedyScheduler()
     		   ]
     
     eng = HiQMainEngine(backend, engines) 
