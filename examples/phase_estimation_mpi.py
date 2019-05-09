@@ -29,7 +29,7 @@ def _bits_required_to_achieve_accuracy(n, epsilon):
     Returns:
         n_updated (int): number of bits required to acchieve the given accuracy and probability
     """
-    tmp = math.log2(2 + 1/(2*epsilon))
+    tmp = math.log((2 + 1/(2*epsilon)), 2)
     tmp = math.ceil(tmp)
     n_updated = int(n + tmp)
     return n_updated
@@ -65,7 +65,7 @@ def run_phase_estimation(eng, U, state, m, n):
 
     # Phase 2. performs the inverse QFT operation
     # Step 2.1 swap the qubits
-    for k in range(math.floor(n/2)):
+    for k in range(int(math.floor(n/2))):
         Swap | (state[OFFSET+k], state[OFFSET+n-k-1])
     # Step 2.2 perfrom the original inverse QFT
     get_inverse(QFT) | state[OFFSET:]
