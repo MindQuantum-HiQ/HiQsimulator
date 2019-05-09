@@ -1,3 +1,4 @@
+from __future__ import division
 import math
 
 from projectq.ops import H, Z, X, Measure, All, Ph, Rz
