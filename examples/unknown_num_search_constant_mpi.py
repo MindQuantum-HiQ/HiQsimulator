@@ -34,7 +34,7 @@ def run_unknown_number_grover(eng, Dataset, oracle, threshold):
         solution (list<int>): the location of Solution.
     """
     N = len(Dataset)     
-    n = math.ceil(math.log2(N))
+    n = int(math.ceil(math.log(N,2)))
     
     # number of iterations we have to run:
     num_it = int(math.sqrt(N)*9/4)
@@ -112,7 +112,7 @@ def oracle(eng, x, Dataset, n0, output):
     fun = np.maximum(fun, 0)
     fun = np.minimum(fun, 1)
     a = sum(fun)
-    n = math.ceil(math.log2(len(Dataset)))
+    n = int(math.ceil(math.log(len(Dataset),2)))
     
     while a>0:
         num=[0]*n
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     		   TagRemover(),
     		   LocalOptimizer(cache_depth)
     		   #,CommandPrinter()
-    	   , GreedyScheduler()
+    	     , GreedyScheduler()
     		   ]
     
     eng = HiQMainEngine(backend, engines) 
@@ -181,8 +181,7 @@ if __name__ == "__main__":
             "    marked elements in advance. This algorithm fixes this requirement")
     print("= Change the set to be searched by modifying the dataset variable")
     # search for the index of the max element
-    print("= The dataset is: ", end='')
-    print(dataset)
+    print("= The dataset is: {}".format(dataset))
     marked_index = run_unknown_number_grover(eng, dataset, oracle, dataset[0])
     if marked_index == None:
         print("= The algorithm fails to find a marked element")
@@ -190,4 +189,4 @@ if __name__ == "__main__":
         print("= The searched marked element is: {}".format(dataset[marked_index]))
         print("= The index of the marked element is: {}".format(marked_index))
     print("=======================================================================")
-    
+ 
