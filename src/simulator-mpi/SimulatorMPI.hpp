@@ -54,7 +54,17 @@ using intrin::kernel_core_diag;
 namespace mpi = boost::mpi;
 namespace bc = boost::container;
 
-class SimulatorMPI {
+#ifdef _WIN32
+#  ifdef SIMULATOR_LIBRARY_EXPORT
+#    define EXPORT_API __declspec(dllexport)
+#  else
+#    define EXPORT_API __declspec(dllimport)
+#  endif // SIMULATOR_LIBRARY_EXPORT
+#else
+#  define EXPORT_API
+#endif // _WIN32
+
+class EXPORT_API SimulatorMPI {
  public:
   using Index = int64_t;
   using Float = double;

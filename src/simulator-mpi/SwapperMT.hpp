@@ -30,7 +30,7 @@
 #include <glog/logging.h>
 
 
-class SwapperMT {
+class EXPORT_API SwapperMT {
 
 public:
     typedef std::complex<double> value_type;
