@@ -36,7 +36,7 @@ def run_grover(eng, Dataset, oracle, threshold):
         solution (list<int>): the location of Solution.
     """
     N = len(Dataset)     
-    n = math.ceil(math.log2(N))
+    n = int(math.ceil(math.log(N,2)))
     
     # number of iterations we have to run:
     num_it = int(math.sqrt(N)*9/4)
@@ -66,6 +66,7 @@ def run_grover(eng, Dataset, oracle, threshold):
         #run j iterations
         with Loop(eng, j):
             # oracle adds a (-1)-phase to the solution
+
             oracle(eng, x, Dataset,threshold, oracle_out)
     
             # reflection across uniform superposition
@@ -98,24 +99,25 @@ def run_grover(eng, Dataset, oracle, threshold):
     return("no answer")   
     
 
-def oracle(eng, x, Dataset, n0, output):
+def oracle(eng, qubits, Dataset, n0, output):
     """
     Marks the solutions by flipping the output qubit.
 
     Args:
         eng (MainEngine): Main compiler engine the algorithm is being run on.
-        x (Qureg): n-qubit quantum register Grover search is run on.
+        qubits (Qureg): n-qubit quantum register Grover search is run on.
         Dataset(list): The dataset.
         n0: The threshold.
         output (Qubit): Output qubit to flip in order to mark the solution..
     """
     fun = [0]*len(Dataset)
-    fun = [x-n0 for x in Dataset]
+    fun = [(elem - n0) for elem in Dataset]
     fun = np.maximum(fun, 0)
     fun = np.minimum(fun, 1)
     a = sum(fun)
-    n = math.ceil(math.log2(len(Dataset)))
-    
+    n = int(math.ceil(math.log(len(Dataset),2)))
+   
+ 
     while a>0:
         num=[0]*n
         p = fun.tolist().index(1)
@@ -132,15 +134,17 @@ def oracle(eng, x, Dataset, n0, output):
             p = num1.index(1)
             a1 = a1-1
             num1[p]=0
-            X | x[p]             
-        with Control(eng, x):
+            X | qubits[p]
+             
+        with Control(eng, qubits):
             X | output
+
         a1=sum(num)
         while a1>0:
             p = num.index(1)
             a1 = a1-1
             num[p]=0
-            X | x[p] 
+            X | qubits[p] 
         
         
 def find_maximum(eng, Dataset):
@@ -158,7 +162,7 @@ def find_maximum(eng, Dataset):
     # choose a base at random:
     a=run_grover(eng, Dataset, oracle, Dataset[y])
     i=0
-    while i<int(math.log2(len(Dataset))):
+    while i<int(math.log(len(Dataset), 2)):
         if a!="no answer":
             a1=a
             a=run_grover(eng, Dataset, oracle, Dataset[a1])
@@ -191,7 +195,7 @@ if __name__ == "__main__":
     		   TagRemover(),
     		   LocalOptimizer(cache_depth)
     		   #,CommandPrinter()
-    	   , GreedyScheduler()
+    	           , GreedyScheduler()
     		   ]
     
     eng = HiQMainEngine(backend, engines) 
@@ -205,8 +209,8 @@ if __name__ == "__main__":
     print("= The algorithm searches for the index of the maximum element in a set")
     print("= Change the set to be searched by modifying the dataset variable")
     # search for the index of the max element
-    print("= The dataset is: ", end='')
-    print(Dataset)
+    print("= The dataset is: {}".format(Dataset))
+    
     max_index = find_maximum(eng, Dataset)
     if max_index == None:
         print("= The algorithm fails to find the maximum element and its index")
