@@ -88,6 +88,20 @@ struct PrintVector: public Printer<PrintVector<V>> {
     }
 };
 
+template<>
+struct PrintVector<std::vector<bool>>
+     : public Printer<PrintVector<std::vector<bool>>> {
+    const std::vector<bool>& v;
+    PrintVector(const std::vector<bool>& aSV): v(aSV) {}
+
+    template<class Stream>
+    void do_out(Stream& out) const {
+        for(size_t i = 0; i < v.size(); ++i) {
+	     out << format("%d:%.7g ") % i % double(v[i]);
+        }
+    }
+};
+
 template<class V>
 struct PrintMap: public Printer<PrintMap<V>> {
     const V& v;

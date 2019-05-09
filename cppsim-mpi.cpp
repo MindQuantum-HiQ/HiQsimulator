@@ -188,7 +188,7 @@ int main(int argc, const char** argv) {
     for( auto id: {L-2} ) {
         LOG(INFO) << endl << endl;
 //         DLOG(INFO) << format("apply_controlled_gate(I, {%d}, {%d, %d})") % id % (L-1) % (L-2);
-        sim.ApplyGate(RZpi, {id}, {sim.LocalQubitsCount() - 1, L-1});
+        sim.ApplyGate(RZpi, {int64_t(id)}, {int64_t(sim.LocalQubitsCount() - 1), int64_t(L-1)});
         sim.Run();
 //         checkStateVectorPlacement(sim);
         hiq::printAmplitudes(sim);
