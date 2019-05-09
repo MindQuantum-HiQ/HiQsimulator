@@ -1,3 +1,4 @@
+from __future__ import division
 import math
 import cmath
 import random
@@ -170,14 +171,13 @@ if __name__ == "__main__":
     print("= The algorithm solve the linear equations Ax=b, where A is a kind of Toeplitz matrix")
     print("= Change the dimension of the system by modifying the dimension variable")
     # search for the index of the max element
-    print("= The dimension is: ", end='')
-    print(2**n)
+    print("= The dimension is: {}".format(2**n))
     print("= The distance between quantum output and classical output: ")
     qstate=qstate.real
     print(qstate-cstate)
     print("=======================================================================")
     x=range(0,2**n)
-        #compare Toeplitz and the Quantum
+    #compare Toeplitz and the Quantum
     #plt.scatter(x,qstate)
     #plt.scatter(x,cstate)
     #plt.show()
@@ -191,11 +191,3 @@ if __name__ == "__main__":
 #     plt.scatter(x,cstate1)    
 #     plt.show()
 # =============================================================================
-
-
-    
-    
-    
-    
-    
-    
