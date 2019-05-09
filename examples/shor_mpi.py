@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     N = MPI.COMM_WORLD.bcast(N, root=0)
 
-    print("\tFactoring N = {}: \033[0m".format(N), end="\n", flush=True)
+    print("\tFactoring N = {}: \033[0m".format(N), end="\n")
 
     # choose a base at random:
     rnd = MPI.COMM_WORLD.bcast(Random().random(), root=0)
