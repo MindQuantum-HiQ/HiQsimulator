@@ -67,7 +67,7 @@ if __name__ == "__main__":
     		   TagRemover(),
     		   LocalOptimizer(cache_depth),
     		   #CommandPrinter(),
-    	     GreedyScheduler()
+           GreedyScheduler()
     		   ]
     
     eng = HiQMainEngine(backend, engines)  
