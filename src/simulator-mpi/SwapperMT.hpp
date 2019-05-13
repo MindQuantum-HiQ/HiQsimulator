@@ -30,13 +30,13 @@
 #include <glog/logging.h>
 
 
-class SwapperMT {
+class EXPORT_API SwapperMT {
 
 public:
     typedef std::complex<double> value_type;
     typedef SwapBuffers<value_type> swap_buffers_type;
 
-    static const size_t MaxGlobal;
+    static const uint64_t MaxGlobal;
 
     mpi::communicator world;
 

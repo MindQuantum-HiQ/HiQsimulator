@@ -26,7 +26,7 @@
 using boost::sync_queue_is_closed;
 using boost::format;
 
-const size_t SwapperMT::MaxGlobal = 17;
+const uint64_t SwapperMT::MaxGlobal = 17;
 
 void f_producer(SwapperMT& s, const std::vector<uint64_t>& swap_bits) {
     size_t start_free_idx = 0;

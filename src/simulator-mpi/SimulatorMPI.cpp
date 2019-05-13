@@ -728,7 +728,11 @@ void SimulatorMPI::calcLocalApproxDistribution(const size_t n) {
   CHECK(vec_.size() % n == 0);
   size_t K = vec_.size() / n;
 
+#ifndef _MSC_VER
 #pragma omp distribute parallel for
+#else
+#pragma omp parallel for
+#endif // _MSC_VER
   for (size_t i = 0; i < n; ++i) {
     for (size_t j = 0; j < K; ++j) {
       block_distribution[i] += std::norm(vec_[i * K + j]);
@@ -786,7 +790,7 @@ std::vector<bool> SimulatorMPI::MeasureQubits(std::vector<Index> const &ids) {
 
   auto start_measure_time = Clock::now();
 
-  uint64_t n = std::min(vec_.size(), 1ul << 15);
+  uint64_t n = std::min(vec_.size(), std::size_t(1ul << 15));
   calcLocalApproxDistribution(n);
 
   total_block_distribution.resize(n * world_.size(), bc::default_init);

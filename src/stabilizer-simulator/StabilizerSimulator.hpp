@@ -23,7 +23,11 @@
 #include <algorithm>
 #include "simulator-mpi/alignedallocator.hpp"
 
-#include <x86intrin.h>
+#ifdef _MSC_VER
+#  include <intrin.h>
+#else
+#  include <x86intrin.h>
+#endif // _MSC_VER
 
 
 constexpr unsigned max_storage_depth = 10;
@@ -168,7 +172,7 @@ public:
         uint32_t mask = -1;
         uint64_t red1 = r1^r2;
         uint32_t red2 = ((red1 >> 32)&mask) ^ (red1&mask);
-        set_phase_bit(stab, get_phase_bit(stab) ^ (_popcnt32(red2) & 1));
+        set_phase_bit(stab, get_phase_bit(stab) ^ (_mm_popcnt_u32(red2) & 1));
     }
 
     void s(unsigned qubit){
@@ -278,7 +282,7 @@ public:
         uint32_t mask = (1ULL << 32) - 1;
         uint32_t eh_sm = ((eh[0] >> 32)&mask) ^ (eh[0]&mask);
         uint32_t el_sm = ((el[0] >> 32)&mask) ^ (el[0]&mask);
-        int exponent = 2 * _popcnt32(eh_sm) + _popcnt32(el_sm);
+        int exponent = 2 * _mm_popcnt_u32(eh_sm) + _mm_popcnt_u32(el_sm);
         // compute positive modulo.
         unsigned int phase = (((exponent + 2 * get_phase_bit(stabilizer_h) +
                                 2 * get_phase_bit(stabilizer_i)) % 4) + 4) % 4;

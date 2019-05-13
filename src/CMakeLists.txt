@@ -1,6 +1,3 @@
-include_directories(${Boost_INCLUDE_DIR})
+add_library(permutations STATIC simulator-mpi/funcs.cpp)
 
-add_library(permutations STATIC
-simulator-mpi/funcs.hpp
-simulator-mpi/funcs.cpp
-)
+target_link_libraries(permutations Boost::boost glog::glog)

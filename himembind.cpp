@@ -12,7 +12,12 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-#include <unistd.h>
+#ifdef _MSC_VER
+#  include <process.h>
+#  define execvp _execvp
+#else
+#  include <unistd.h>
+#endif // _MSC_VER
 #include <stdlib.h>
 #include <stdio.h>
 #include <hwloc.h>

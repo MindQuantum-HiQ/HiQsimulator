@@ -31,7 +31,7 @@ struct SwapArrays {
 
     std::vector<T> svalues;
     std::vector<T> rvalues;
-    std::vector<size_t> indices;
+    std::vector<uint64_t> indices;
 
     SwapArrays() {}
 
