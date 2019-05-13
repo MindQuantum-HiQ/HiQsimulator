@@ -18,16 +18,36 @@
 #include <pybind11/stl.h>
 #include <pybind11/pytypes.h>
 
+#include <vector>
+#include <complex>
+#include <iostream>
+#if defined(_OPENMP)
+#  include <omp.h>
+#endif
 #include "stabilizer-simulator/StabilizerSimulator.hpp"
 
+namespace py = pybind11;
+
+using c_type = std::complex<double>;
+using ArrayType = std::vector<c_type, aligned_allocator<c_type,64>>;
+using MatrixType = std::vector<ArrayType>;
+using QuRegs = std::vector<std::vector<unsigned>>;
+
 PYBIND11_MODULE(_cppstabsim, m) {
-    pybind11::class_<StabilizerSimulator>(m, "StabilizerSimulator")
-        .def(pybind11::init<>())
-        .def("sync", &StabilizerSimulator::sync)
-        .def("allocate_qureg", &StabilizerSimulator::AllocateQureg)
-        .def("h", &StabilizerSimulator::h)
-        .def("s", &StabilizerSimulator::s)
-        .def("cnot", &StabilizerSimulator::cnot)
-        .def("measure", &StabilizerSimulator::measure)
-        ;
+     py::class_<StabilizerSimulator>(m, "Simulator")
+	  .def(py::init<unsigned, unsigned>())
+	  .def("X", &StabilizerSimulator::X)
+	  .def("S", &StabilizerSimulator::S)
+	  .def("H", &StabilizerSimulator::H)
+	  .def("CNOT", &StabilizerSimulator::CNOT)
+	  .def("allocate_qubit", &StabilizerSimulator::allocate_qubit)
+	  .def("deallocate_qubit", &StabilizerSimulator::deallocate_qubit)
+	  .def("get_classical_value", &StabilizerSimulator::get_classical_value)
+	  .def("is_classical", &StabilizerSimulator::is_classical)
+	  .def("measure_qubits", &StabilizerSimulator::measure_qubits_return)
+	  .def("get_probability", &StabilizerSimulator::get_probability)
+	  .def("collapse_wavefunction", &StabilizerSimulator::collapse_wavefunction)
+	  .def("set_qubits", &StabilizerSimulator::set_qubits)
+	  .def("run", &StabilizerSimulator::sync)
+	  ;
 }

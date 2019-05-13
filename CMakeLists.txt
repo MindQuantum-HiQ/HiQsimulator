@@ -174,6 +174,7 @@ add_library(SimulatorMPI_o
             src/simulator-mpi/SwapperMT.cpp
             src/simulator-mpi/SimulatorMPI.cpp)
 target_link_libraries(SimulatorMPI_o permutations Boost::mpi OpenMP::OpenMP_CXX)
+add_avx2_to_target(SimulatorMPI_o)
 if(WIN32)
   target_compile_definitions(SimulatorMPI_o PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 endif()
