@@ -13,4 +13,4 @@
 #   limitations under the License.
 
 from ._simulator_mpi import SimulatorMPI
-from ._cppstabsim import StabilizerSimulator
+from ._stabilizer_simulator import StabilizerSimulator
