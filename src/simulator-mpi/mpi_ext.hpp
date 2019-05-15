@@ -15,22 +15,34 @@
 #ifndef MPI_EXT_HPP
 #define MPI_EXT_HPP
 
-#include <complex>
 #include <boost/mpi.hpp>
+#include <complex>
 
 using dcomplex = std::complex<double>;
 using dcplus = std::plus<dcomplex>;
 
-namespace boost { namespace mpi {
-template<> inline MPI_Datatype get_mpi_datatype<dcomplex>(const dcomplex&) {
- return MPI_DOUBLE_COMPLEX;
-}
-template<> struct is_mpi_complex_datatype<dcomplex> : boost::mpl::true_ {};
-} }
+namespace boost
+{
+namespace mpi
+{
+     template <>
+     inline MPI_Datatype get_mpi_datatype<dcomplex>(const dcomplex&)
+     {
+          return MPI_DOUBLE_COMPLEX;
+     }
+     template <>
+     struct is_mpi_complex_datatype<dcomplex> : boost::mpl::true_ {};
+}  // namespace mpi
+}  // namespace boost
 
 // optional; works as expected for assertion (4)
-namespace boost { namespace mpi {
-template<> struct is_commutative<dcplus, dcomplex> : mpl::true_ {};
-} }
+namespace boost
+{
+namespace mpi
+{
+     template <>
+     struct is_commutative<dcplus, dcomplex> : mpl::true_ {};
+}  // namespace mpi
+}  // namespace boost
 
-#endif //MPI_EXT_HPP
+#endif  // MPI_EXT_HPP

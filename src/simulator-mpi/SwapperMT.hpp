@@ -15,81 +15,92 @@
 #ifndef SWAPPERMT_HPP
 #define SWAPPERMT_HPP
 
-#include <list>
-#include <vector>
-#include <complex>
-#include <atomic>
-#include <thread>
+#include <glog/logging.h>
 
-#include <boost/mpi.hpp>
+#include <atomic>
 #include <boost/format.hpp>
+#include <boost/mpi.hpp>
+#include <complex>
+#include <list>
+#include <thread>
+#include <vector>
 
 #include "simulator-mpi/SimulatorMPI.hpp"
 #include "simulator-mpi/SwapArrays.hpp"
 
-#include <glog/logging.h>
+class EXPORT_API SwapperMT
+{
+    public:
+     typedef std::complex<double> value_type;
+     typedef SwapBuffers<value_type> swap_buffers_type;
 
+     static const uint64_t MaxGlobal;
 
-class EXPORT_API SwapperMT {
+     mpi::communicator world;
 
-public:
-    typedef std::complex<double> value_type;
-    typedef SwapBuffers<value_type> swap_buffers_type;
+     SimulatorMPI::StateVector& state_vector;
+     const uint64_t rank;
+     const uint64_t M;
+     const size_t comm_size;
 
-    static const uint64_t MaxGlobal;
+     uint64_t n;
 
-    mpi::communicator world;
+     swap_buffers_type& buffs;
 
-    SimulatorMPI::StateVector& state_vector;
-    const uint64_t rank;
-    const uint64_t M;
-    const size_t comm_size;
+     uint64_t n_bits;
 
-    uint64_t n;
+     SwapperMT(mpi::communicator& aWorld,
+               SimulatorMPI::StateVector& aStateVector, size_t aRank,
+               uint64_t aM, size_t aComm_size, swap_buffers_type& aBuffs,
+               uint64_t nBits)
+         : world(aWorld),
+           state_vector(aStateVector),
+           rank(aRank),
+           M(aM),
+           comm_size(aComm_size),
+           n(calcSendCount(comm_size, M, aBuffs.size())),
+           buffs(aBuffs),
+           n_bits(nBits)
+     {
+          DLOG(INFO) << boost::format("SwapperMT(): n: %d, comm_size: %d") % n %
+                            comm_size;
+     }
 
-    swap_buffers_type& buffs;
+     ~SwapperMT()
+     {}
 
-    uint64_t n_bits;
+     static uint64_t calcSendCount(size_t comm_size, uint64_t M,
+                                   uint64_t maxSendBytes)
+     {
+          size_t state_vector_size = (1ul << M);
 
-    SwapperMT(mpi::communicator& aWorld, SimulatorMPI::StateVector& aStateVector, size_t aRank, uint64_t aM, size_t aComm_size, swap_buffers_type& aBuffs, uint64_t nBits )
-              : world(aWorld)
-              , state_vector(aStateVector), rank(aRank), M(aM), comm_size(aComm_size), n( calcSendCount(comm_size, M, aBuffs.size()) )
-              , buffs(aBuffs), n_bits(nBits)
-    {
-        DLOG(INFO) << boost::format("SwapperMT(): n: %d, comm_size: %d") % n % comm_size;
+          uint64_t n0 = ((maxSendBytes / sizeof(value_type)) / comm_size);
+          n0 = n0 < 1 ? 1 : n0;
+          uint64_t n = (state_vector_size / comm_size) < n0
+                           ? (state_vector_size / comm_size)
+                           : n0;
 
-    }
+          return n;
+     }
 
-    ~SwapperMT() {}
+     void runProducer(const std::vector<uint64_t>& aSwap_bits);
+     void runConsumer2(const mpi::communicator& comm);
 
-    static uint64_t calcSendCount(size_t comm_size, uint64_t M, uint64_t maxSendBytes) {
-        size_t state_vector_size = (1ul << M);
+     void join()
+     {
+          if (this->producer.joinable())
+               this->producer.join();
 
-        uint64_t n0 = ((maxSendBytes / sizeof(value_type)) / comm_size);
-        n0 = n0 < 1 ? 1 : n0;
-        uint64_t n = (state_vector_size/comm_size) < n0 ? (state_vector_size/comm_size) : n0;
+          if (this->consumer2.joinable())
+               this->consumer2.join();
+     }
 
-        return n;
-    }
+     void doSwap(int rank, const mpi::communicator& comm, uint64_t color,
+                 const std::vector<uint64_t>& aSwap_bits);
 
-    void runProducer(const std::vector<uint64_t>& aSwap_bits);
-    void runConsumer2(const mpi::communicator& comm);
-
-    void join() {
-        if( this->producer.joinable() )
-            this->producer.join();
-
-        if( this->consumer2.joinable() )
-            this->consumer2.join();
-    }
-
-    void doSwap(int rank, const mpi::communicator& comm, uint64_t color, const std::vector<uint64_t>& aSwap_bits);
-
-private:
-
-    std::thread producer;
-    std::thread consumer2;
-
+    private:
+     std::thread producer;
+     std::thread consumer2;
 };
 
-#endif //SWAPPERMT_HPP
+#endif  // SWAPPERMT_HPP

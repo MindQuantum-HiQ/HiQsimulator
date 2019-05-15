@@ -12,20 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cmath>
-#include <cstdlib>
-#include <vector>
-#include <complex>
-#include <functional>
 #include <algorithm>
+#include <cmath>
+#include <complex>
+#include <cstdlib>
+#include <functional>
+#include <vector>
 
-namespace nointrin {
+namespace nointrin
+{
 template <class T>
-inline T add(T a, T b){ return a+b; }
-
-template <class T>
-inline T mul(T a, T b){ return a*b; }
+inline T add(T a, T b)
+{
+     return a + b;
 }
+
+template <class T>
+inline T mul(T a, T b)
+{
+     return a * b;
+}
+}  // namespace nointrin
 
 #define LOOP_COLLAPSE1 2
 #define LOOP_COLLAPSE2 3
@@ -38,4 +45,3 @@ inline T mul(T a, T b){ return a*b; }
 #include "kernel3.hpp"
 #include "kernel4.hpp"
 #include "kernel5.hpp"
-

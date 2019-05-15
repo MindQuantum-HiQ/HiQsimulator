@@ -18,9 +18,15 @@ if(CMAKE_VERSION VERSION_LESS 3.11 OR APPLE)
   # CMake's native CUDA compilation
   # On Mac using Homebrew the libomp library might not be in the path, so
   # we need to use the custom find
-  find_package(NOpenMP REQUIRED) # NOpenMP is FindOpenMP.cmake from 3.12
+  set(_openmp_name NOpenMP)
+  find_package(NOpenMP) # NOpenMP is FindOpenMP.cmake from 3.12
 else()
-  find_package(OpenMP REQUIRED)
+  set(_openmp_name OpenMP)
+  find_package(OpenMP)
+endif()
+
+if(${_openmp_name}_FOUND)
+  set(OpenMP_tgt OpenMP::OpenMP_CXX)
 endif()
 
 # ==============================================================================
@@ -45,4 +51,3 @@ find_package(glog REQUIRED)
 find_package(hwloc REQUIRED)
 
 # ==============================================================================
-
