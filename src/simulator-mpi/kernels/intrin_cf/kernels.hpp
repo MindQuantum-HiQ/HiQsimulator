@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cmath>
-#include <cstdlib>
-#include <vector>
-#include <complex>
-#include <functional>
 #include <algorithm>
+#include <cmath>
+#include <complex>
+#include <cstdlib>
+#include <functional>
+#include <vector>
+
 #include "../intrin/cintrin.hpp"
 
 #define LOOP_COLLAPSE1 2
@@ -31,4 +32,3 @@
 #include "kernel3.hpp"
 #include "kernel4.hpp"
 #include "kernel5.hpp"
-

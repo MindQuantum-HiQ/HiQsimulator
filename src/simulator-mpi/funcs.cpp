@@ -14,13 +14,14 @@
 
 #include "funcs.hpp"
 
-namespace hiq {
-std::ostream& operator<<(std::ostream& out, const std::vector<bool>& v) {
-    for(size_t i = v.size(); i > 0; --i ) {
-        out << int(v[i-1]);
-    }
+namespace hiq
+{
+std::ostream& operator<<(std::ostream& out, const std::vector<bool>& v)
+{
+     for (size_t i = v.size(); i > 0; --i) {
+          out << int(v[i - 1]);
+     }
 
-    return out;
+     return out;
 }
-}
-
+}  // namespace hiq
