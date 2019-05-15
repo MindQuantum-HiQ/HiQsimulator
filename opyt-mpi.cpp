@@ -23,7 +23,9 @@
 #include <boost/serialization/complex.hpp>
 
 #include "simulator-mpi/mpi_ext.hpp"
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif // _OPENMP
 
 int main(int argc, char** argv) {
   boost::mpi::environment env(boost::mpi::threading::level::multiple);

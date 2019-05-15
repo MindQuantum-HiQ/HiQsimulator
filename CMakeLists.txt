@@ -104,12 +104,13 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
 
 # ==============================================================================
 
-add_executable(qswap qswap.cpp)
-target_link_libraries(qswap permutations Boost::program_options)
+add_executable(qswap $<TARGET_OBJECTS:permutations> qswap.cpp)
+target_link_libraries(qswap Boost::program_options)
 
 # --------------------------------------
 
-add_executable(qswap-mpi qswap-mpi.cpp src/simulator-mpi/SwapperMT.cpp)
+add_executable(qswap-mpi $<TARGET_OBJECTS:permutations> qswap-mpi.cpp
+                         src/simulator-mpi/SwapperMT.cpp)
 target_compile_definitions(qswap-mpi PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 target_link_libraries(qswap-mpi
                       permutations
@@ -118,7 +119,7 @@ target_link_libraries(qswap-mpi
                       Boost::mpi
                       Boost::serialization
                       Boost::thread
-                      OpenMP::OpenMP_CXX)
+                      ${OpenMP_tgt})
 
 # ------------------------------------------------------------------------------
 
@@ -128,7 +129,7 @@ target_link_libraries(opyt
                       Boost::mpi
                       Boost::serialization
                       Boost::thread
-                      OpenMP::OpenMP_CXX
+                      ${OpenMP_tgt}
                       glog::glog)
 
 # --------------------------------------
@@ -140,7 +141,7 @@ target_link_libraries(opyt-mpi
                       Boost::mpi
                       Boost::serialization
                       Boost::thread
-                      OpenMP::OpenMP_CXX
+                      ${OpenMP_tgt}
                       glog::glog)
 
 # ------------------------------------------------------------------------------
@@ -151,7 +152,7 @@ target_link_libraries(socket-test
                       Boost::mpi
                       Boost::serialization
                       Boost::thread
-                      OpenMP::OpenMP_CXX)
+                      ${OpenMP_tgt})
 
 # ------------------------------------------------------------------------------
 
@@ -169,17 +170,19 @@ target_link_libraries(_sched_cpp PUBLIC glog::glog)
 
 # ------------------------------------------------------------------------------
 
-add_library(SimulatorMPI_o
-            OBJECT
-            src/simulator-mpi/SwapperMT.cpp
-            src/simulator-mpi/SimulatorMPI.cpp)
-target_link_libraries(SimulatorMPI_o permutations Boost::mpi OpenMP::OpenMP_CXX)
+add_library(SimulatorMPI_o OBJECT src/simulator-mpi/SimulatorMPI.cpp
+                           src/simulator-mpi/SwapperMT.cpp)
+target_link_libraries(SimulatorMPI_o
+                      permutations
+                      Boost::mpi
+                      ${OpenMP_tgt})
 add_avx2_to_target(SimulatorMPI_o)
 if(WIN32)
   target_compile_definitions(SimulatorMPI_o PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 endif()
 
-add_library(SimulatorMPI SHARED $<TARGET_OBJECTS:SimulatorMPI_o>)
+add_library(SimulatorMPI SHARED $<TARGET_OBJECTS:SimulatorMPI_o>
+                                $<TARGET_OBJECTS:permutations>)
 target_link_libraries(SimulatorMPI
                       permutations
                       ${MPI_LIBRARIES}
@@ -187,7 +190,7 @@ target_link_libraries(SimulatorMPI
                       Boost::mpi
                       Boost::serialization
                       Boost::thread
-                      OpenMP::OpenMP_CXX)
+                      ${OpenMP_tgt})
 
 # ------------------------------------------------------------------------------
 
@@ -200,7 +203,7 @@ target_link_libraries(cppsim-mpi
                       Boost::serialization
                       Boost::thread
                       glog::glog
-                      OpenMP::OpenMP_CXX)
+                      ${OpenMP_tgt})
 
 # ------------------------------------------------------------------------------
 
@@ -212,7 +215,7 @@ target_link_libraries(_cppsim_mpi
                              Boost::serialization
                              Boost::thread
                              glog::glog
-                             OpenMP::OpenMP_CXX)
+                             ${OpenMP_tgt})
 
 # ------------------------------------------------------------------------------
 

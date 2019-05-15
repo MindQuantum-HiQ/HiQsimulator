@@ -17,7 +17,9 @@
 #include <cstdint>
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif // _OPENMP
 #include <chrono>
 
 using boost::format;

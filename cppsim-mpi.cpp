@@ -23,7 +23,9 @@
 #include "simulator-mpi/funcs.hpp"
 #include <boost/format.hpp>
 #include <boost/container/vector.hpp>
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif // _OPENMP
 
 #include <glog/logging.h>
 

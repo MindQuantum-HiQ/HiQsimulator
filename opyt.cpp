@@ -12,7 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif // _OPENMP
 #include <cstdint>
 #include <vector>
 #include <iostream>
@@ -270,7 +272,9 @@ int new_algo(uint64_t L, uint64_t M, std::vector<uint64_t>& trgts, std::vector<u
 int main(int argc, char**argv ) {
     uint64_t L = 0;
     uint64_t M = 0;
+#ifdef _OPENMP
     uint64_t nthreads = 1;
+#endif // _OPENMP
     uint64_t rank = 0;
     std::vector<uint64_t> trgts;
     std::vector<uint64_t> ctrls;
@@ -282,7 +286,9 @@ int main(int argc, char**argv ) {
             ("help", "produce help message")
             ("L", po::value<uint64_t>(&L), "total number of qubits")
             ("M", po::value<uint64_t>(&M), "number of local qubits")
-            ("nthreads", po::value<uint64_t>(&nthreads), "number of OMP threads")
+#ifdef _OPENMP
+	    ("nthreads", po::value<uint64_t>(&nthreads), "number of OMP threads")
+#endif // _OPENMP
             ("rank", po::value<uint64_t>(&rank), "rank")
             ("trgts", po::value<std::vector<uint64_t>>(&trgts)->multitoken(), "target qubits")
             ("ctrls", po::value<std::vector<uint64_t>>(&ctrls)->multitoken(), "control qubits")
@@ -300,8 +306,9 @@ int main(int argc, char**argv ) {
 
 
     cout << format("algo: %s, L: %d, M: %d, trgts: %s, ctrls: %s") % algo % L % M % print(trgts) % print(ctrls) << endl;
-
+#ifdef _OPENMP
     omp_set_num_threads(nthreads);
+#endif // _OPENMP
 
     if(algo == "orig") {
         orig_algo(L, M, trgts, ctrls);

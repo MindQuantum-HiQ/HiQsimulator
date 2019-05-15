@@ -17,7 +17,9 @@
 #include <cmath>
 
 #include <glog/logging.h>
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif // _OPENMP
 #include "funcs.hpp"
 #include "mpi_ext.hpp"
 #include "SwapperMT.hpp"
