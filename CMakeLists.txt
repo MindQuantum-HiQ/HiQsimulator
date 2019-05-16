@@ -95,8 +95,6 @@ set(CMAKE_MINSIZEREL_POSTFIX "rm")
 
 # ==============================================================================
 
-message("*** Building ${CMAKE_BUILD_TYPE} configuration ***")
-
 add_subdirectory(pybind11)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src)

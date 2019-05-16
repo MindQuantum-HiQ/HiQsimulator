@@ -9,7 +9,33 @@ cmake_dependent_option(USE_INTRIN_BUFFER
                        "USE_INTRIN"
                        OFF)
 
+# ------------------------------------------------------------------------------
+
 option(USE_CLANG_FORMAT "Setup clangformat target" OFF)
+
+# ------------------------------------------------------------------------------
+
+option(USE_SA "Turn on static analysis during compiling and linking" OFF)
+cmake_dependent_option(USE_SA_CPPCHECK
+                       "Run cppcheck on each file"
+                       OFF
+                       "USE_SA"
+                       OFF)
+cmake_dependent_option(USE_SA_CLANG_TIDY
+                       "Run clang-tidy on each file"
+                       OFF
+                       "USE_SA"
+                       OFF)
+cmake_dependent_option(USE_SA_IWYU
+                       "Run include-what-you-use on each file"
+                       OFF
+                       "USE_SA"
+                       OFF)
+cmake_dependent_option(USE__SA_LWYU
+                       "Run link-what-you-use at the linking stage"
+                       OFF
+                       "USE_SA"
+                       OFF)
 
 # ==============================================================================
 
@@ -23,7 +49,7 @@ else(USE_INTRIN)
   add_definitions(-DNOINTRIN)
 endif()
 
-# ==============================================================================
+# ------------------------------------------------------------------------------
 
 if(USE_CLANG_FORMAT)
   include(ClangFormat)
@@ -35,3 +61,65 @@ if(USE_CLANG_FORMAT)
        "${PROJECT_SOURCE_DIR}/src/*.cpp")
   clangformat_setup("${main_srcs};${src_srcs}")
 endif()
+
+# ------------------------------------------------------------------------------
+
+if(USE_SA)
+  if(USE_SA_CPPCHECK)
+    find_program(_cppcheck NAMES cppcheck DOC "cppcheck executable path")
+    mark_as_advanced(_cppcheck)
+    if(NOT _cppcheck)
+      message(WARNING "Unable to find the path to the cppcheck executable")
+    else()
+      set(USE_SA_CPPCHECK_C_ARGS
+          ""
+          CACHE STRING "Arguments to pass to cppcheck for C code")
+      set(USE_SA_CPPCHECK_CXX_ARGS
+          "-std=c++11"
+          CACHE STRING "Arguments to pass to cppcheck for C++ code")
+      set(CMAKE_C_CPPCHECK "${_cppcheck};${USE_SA_CPPCHECK_C_ARGS}")
+      set(CMAKE_CXX_CPPCHECK "${_cppcheck};${USE_SA_CPPCHECK_CXX_ARGS}")
+    endif()
+  endif()
+
+  if(USE_SA_CLANG_TIDY)
+    find_program(_clang_tidy NAMES clang-tidy DOC "clang-tidy executable path")
+    mark_as_advanced(_clang_tidy)
+    if(NOT _clang_tidy)
+      message(WARNING "Unable to find the path to the clang-tidy executable")
+    else()
+      set(USE_SA_CLANG_TIDY_C_ARGS
+          "-checks=*,-cppcoreguidelines-*,-hicpp-*"
+          CACHE STRING "Arguments to pass to clang-tidy for C code")
+      set(USE_SA_CLANG_TIDY_CXX_ARGS
+          "-checks=*"
+          CACHE STRING "Arguments to pass to clang-tidy for C++ code")
+      set(CMAKE_C_CLANG_TIDY "${_clang_tidy};${USE_SA_CLANG_TIDY_C_ARGS}")
+      set(CMAKE_CXX_CLANG_TIDY "${_clang_tidy};${USE_SA_CLANG_TIDY_CXX_ARGS}")
+    endif()
+  endif()
+
+  if(USE_SA_IWYU)
+    find_program(_iwyu
+                 NAMES iwyu include-what-you-use
+                 DOC "include-what-you-use executable path")
+    mark_as_advanced(_iwyu)
+    if(NOT _iwyu)
+      message(WARNING "Unable to find the path to the _iwyu executable")
+    else()
+      set(USE_SA_IWYU_C_ARGS
+          ""
+          CACHE STRING "Arguments to pass to include-what-you-use for C code")
+      set(USE_SA_IWYU_CXX_ARGS
+          ""
+          CACHE STRING "Arguments to pass to include-what-you-use for C++ code")
+      set(CMAKE_C_INCLUDE_WHAT_YOU_USE "${_iwyu};${USE_SA_IWYU_C_ARGS}")
+      set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${_iwyu};${USE_SA_IWYU_CXX_ARGS}")
+    endif()
+  endif()
+  if(USE_SA_LWYU)
+    set(CMAKE_LINK_WHAT_YOU_USE TRUE)
+  endif()
+endif()
+
+# ------------------------------------------------------------------------------
