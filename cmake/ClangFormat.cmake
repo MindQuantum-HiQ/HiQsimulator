@@ -3,10 +3,80 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
+set(_clang_format_default_options
+    "AccessModifierOffset: -5"
+    "AllowShortFunctionsOnASingleLine: None"
+    "AllowShortIfStatementsOnASingleLine: false"
+    "AllowShortLoopsOnASingleLine: false"
+    "BreakBeforeBraces: Custom"
+    "BraceWrapping:"
+    "  AfterClass: true"
+    "  AfterControlStatement: false"
+    "  AfterEnum: true"
+    "  AfterExternBlock: true"
+    "  AfterFunction: true"
+    "  AfterNamespace: true"
+    "  AfterStruct: false"
+    "  AfterUnion: true"
+    "  BeforeCatch: true"
+    "  BeforeElse: true"
+    "  SplitEmptyFunction: false"
+    "  SplitEmptyRecord: false"
+    "  SplitEmptyNamespace: false"
+    "BreakInheritanceList: BeforeComma"
+    "ColumnLimit: 80"
+    "IndentWidth: 5"
+    "KeepEmptyLinesAtTheStartOfBlocks: false"
+    "NamespaceIndentation: Inner"
+    "ReflowComments: true"
+    "SortIncludes: true"
+    "SpaceAfterCStyleCast: true"
+    "SpaceAfterTemplateKeyword: true"
+    "SpaceBeforeAssignmentOperators: true"
+    "SpaceBeforeInheritanceColon: true"
+    "SpaceBeforeParens: ControlStatements"
+    "SpaceBeforeRangeBasedForLoopColon: false"
+    "SpacesInAngles: false"
+    "SpacesInCStyleCastParentheses: false"
+    "SpaceInEmptyParentheses: false"
+    "Standard: Cpp11"
+    "TabWidth: 4"
+    "UseTab: Never")
+
+set(_clang_format_5_options
+    "AlignEscapedNewlines: Right"
+    "CompactNamespaces: true"
+    "FixNamespaceComments: true"
+    "SortUsingDeclarations: true")
+
+set(_clang_format_6_options "IncludeBlocks: Regroup"
+                            "IndentPPDirectives: AfterHash")
+
+macro(_generate_clang_format_config_content content)
+  set(${content} ${_clang_format_default_options})
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.99)
+    list(APPEND ${content} ${_clang_format_5_options})
+  endif()
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.99)
+    list(APPEND ${content} ${_clang_format_6_options})
+  endif()
+  list(SORT ${content})
+  list(REMOVE_ITEM ${content} "BraceWrapping:")
+  list(FIND ${content} "  AfterClass: true" _idx)
+  list(INSERT ${content} ${_idx} "BraceWrapping:")
+  set(${content} "BasedOnStyle: Google;;${${content}}")
+endmacro()
+
 function(clangformat_setup clangformat_srcs)
   if(NOT CLANGFORMAT_EXECUTABLE)
     set(CLANGFORMAT_EXECUTABLE clang-format)
   endif()
+
+  _generate_clang_format_config_content(_clang_format_content)
+  file(WRITE ${PROJECT_SOURCE_DIR}/.clang-format "")
+  foreach(line ${_clang_format_content})
+    file(APPEND ${PROJECT_SOURCE_DIR}/.clang-format "${line}\n")
+  endforeach(line)
 
   if(NOT EXISTS ${CLANGFORMAT_EXECUTABLE})
     find_program(clangformat_executable_tmp ${CLANGFORMAT_EXECUTABLE})
