@@ -52,8 +52,8 @@ uint64_t calcSwaps(uint64_t aL, uint64_t aM, std::vector<uint64_t> anInvPerm,
 
                if (new_rank != rank) {
                     res += new_index;
-                    //				cout << format("(%d: %d)->(%d: %d)") % rank %
-                    //index % new_rank % new_index << endl;
+                    //				cout << format("(%d: %d)->(%d: %d)") % rank
+                    //% index % new_rank % new_index << endl;
                }
           }
 

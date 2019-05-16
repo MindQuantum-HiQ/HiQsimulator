@@ -31,7 +31,7 @@ using boost::format;
 
 class Item
 {
-    public:
+public:
      using Index = int64_t;
      using IndexVector = std::vector<Index>;
      using Complex = std::complex<double>;
@@ -65,7 +65,7 @@ class Item
 
 class Fusion
 {
-    public:
+public:
      using Index = int64_t;
      using IndexSet = std::set<Index>;
      using IndexVector = std::vector<Index>;
@@ -187,7 +187,7 @@ class Fusion
           matrix = std::move(newmatrix);
      }
 
-    private:
+private:
      void handle_controls(Matrix& matrix, IndexVector& indexList,
                           IndexVector const& ctrlList)
      {
@@ -225,7 +225,7 @@ class Fusion
           }
      }
 
-    public:
+public:
      IndexSet set_;
      ItemVector items_;
      IndexSet ctrl_set_;

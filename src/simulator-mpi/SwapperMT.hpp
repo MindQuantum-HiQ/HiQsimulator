@@ -30,7 +30,7 @@
 
 class EXPORT_API SwapperMT
 {
-    public:
+public:
      typedef std::complex<double> value_type;
      typedef SwapBuffers<value_type> swap_buffers_type;
 
@@ -98,7 +98,7 @@ class EXPORT_API SwapperMT
      void doSwap(int rank, const mpi::communicator& comm, uint64_t color,
                  const std::vector<uint64_t>& aSwap_bits);
 
-    private:
+private:
      std::thread producer;
      std::thread consumer2;
 };

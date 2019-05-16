@@ -95,7 +95,7 @@ struct SwapBuffers {
           }
      }
 
-    private:
+private:
      std::list<SwapArrays<T>> arrs;
 
      swap_arrays_type* allocateArrays()

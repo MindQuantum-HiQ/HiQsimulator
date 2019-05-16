@@ -28,6 +28,10 @@ endif()
 if(USE_CLANG_FORMAT)
   include(ClangFormat)
 
-  file(GLOB_RECURSE clangformat_srcs LIST_DIRECTORIES FALSE "*.hpp" "*.cpp")
-  clangformat_setup("${clangformat_srcs}")
+  file(GLOB main_srcs LIST_DIRECTORIES FALSE "*.h" "*.hpp" "*.cpp")
+  file(GLOB_RECURSE src_srcs
+       LIST_DIRECTORIES FALSE
+       "${PROJECT_SOURCE_DIR}/src/*.h" "${PROJECT_SOURCE_DIR}/src/*.hpp"
+       "${PROJECT_SOURCE_DIR}/src/*.cpp")
+  clangformat_setup("${main_srcs};${src_srcs}")
 endif()

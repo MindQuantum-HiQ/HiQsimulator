@@ -17,9 +17,9 @@
 
 #include <cstdint>
 #ifdef _MSC_VER
-#  include <intrin.h>
-#  define __builtin_popcountll __popcnt64
-#endif // _MSC_VER
+#     include <intrin.h>
+#     define __builtin_popcountll __popcnt64
+#endif  // _MSC_VER
 
 typedef uint64_t msk_t;
 typedef int64_t id_num_t;
@@ -31,4 +31,4 @@ typedef int64_t id_num_t;
 #define unite(x, y) (x | y)
 #define submask(x, y) (!(x & ~y))
 
-#endif // SCHEDULER_DEFS_H
+#endif  // SCHEDULER_DEFS_H

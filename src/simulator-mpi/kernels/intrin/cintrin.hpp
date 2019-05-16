@@ -20,19 +20,19 @@
 #include <complex>
 
 #ifndef _mm256_set_m128d
-#     define _mm256_set_m128d(hi, lo) \
+#     define _mm256_set_m128d(hi, lo)                                          \
           _mm256_insertf128_pd(_mm256_castpd128_pd256(lo), (hi), 0x1)
 #endif
 #ifndef _mm256_storeu2_m128d
-#     define _mm256_storeu2_m128d(hiaddr, loaddr, a)                    \
-          do {                                                          \
-               __m256d _a = (a);                                        \
-               _mm_storeu_pd((loaddr), _mm256_castpd256_pd128(_a));     \
-               _mm_storeu_pd((hiaddr), _mm256_extractf128_pd(_a, 0x1)); \
+#     define _mm256_storeu2_m128d(hiaddr, loaddr, a)                           \
+          do {                                                                 \
+               __m256d _a = (a);                                               \
+               _mm_storeu_pd((loaddr), _mm256_castpd256_pd128(_a));            \
+               _mm_storeu_pd((hiaddr), _mm256_extractf128_pd(_a, 0x1));        \
           } while (0)
 #endif
 #ifndef _mm256_loadu2_m128d
-#     define _mm256_loadu2_m128d(hiaddr, loaddr) \
+#     define _mm256_loadu2_m128d(hiaddr, loaddr)                               \
           _mm256_set_m128d(_mm_loadu_pd(hiaddr), _mm_loadu_pd(loaddr))
 #endif
 
@@ -44,7 +44,7 @@ class cintrin;
 template <>
 class cintrin<double>
 {
-    public:
+public:
      using calc_t = double;
      using ret_t = cintrin<calc_t>;
 

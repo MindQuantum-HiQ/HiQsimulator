@@ -30,7 +30,7 @@
 template <typename T, unsigned int Alignment>
 class aligned_allocator
 {
-    public:
+public:
      typedef T* pointer;
      typedef T const* const_pointer;
      typedef T& reference;

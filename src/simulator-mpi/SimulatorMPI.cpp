@@ -28,14 +28,14 @@ constexpr size_t SimulatorMPI::kNotFound_;
 
 class GlogSingleton
 {
-    public:
+public:
      static GlogSingleton &instance()
      {
           static GlogSingleton qqq;
           return qqq;
      }
 
-    private:
+private:
      GlogSingleton()
      {
           google::InitGoogleLogging("SimulatorMPI");
