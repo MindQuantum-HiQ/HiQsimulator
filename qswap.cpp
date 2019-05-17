@@ -20,10 +20,6 @@
 
 #include "simulator-mpi/funcs.hpp"
 
-using std::cout;
-using std::endl;
-using namespace boost;
-
 namespace po = boost::program_options;
 
 uint64_t calcSwaps(uint64_t aL, uint64_t aM, std::vector<uint64_t> anInvPerm,
@@ -52,16 +48,17 @@ uint64_t calcSwaps(uint64_t aL, uint64_t aM, std::vector<uint64_t> anInvPerm,
 
                if (new_rank != rank) {
                     res += new_index;
-                    //				cout << format("(%d: %d)->(%d: %d)") % rank
-                    //% index % new_rank % new_index << endl;
+                    //				std::cout << format("(%d: %d)->(%d: %d)") %
+                    // rank % index % new_rank % new_index << std::endl;
                }
           }
 
           auto end = std::chrono::high_resolution_clock::now();
           std::chrono::duration<double, std::milli> elapsed_us = end - start;
-          std::cout << format("rank: %d, ") % rank
-                    << format("elapsed time: %.3f ms") % elapsed_us.count()
-                    << endl;
+          std::cout << boost::format("rank: %d, ") % rank
+                    << boost::format("elapsed time: %.3f ms") %
+                           elapsed_us.count()
+                    << std::endl;
      }
 
      return res;
@@ -96,17 +93,19 @@ uint64_t calcSwaps1(uint64_t aL, uint64_t aM, std::vector<uint64_t> aSwapBits)
                res += new_index;
 
                if (new_rank != rank) {
-                    cout << format("(%d: %d)->(%d: %d),  dst_idx: %d") % rank %
-                                index % new_rank % new_index % dst_idx
-                         << endl;
+                    std::cout
+                        << boost::format("(%d: %d)->(%d: %d),  dst_idx: %d") %
+                               rank % index % new_rank % new_index % dst_idx
+                        << std::endl;
                }
           }
 
           auto end = std::chrono::high_resolution_clock::now();
           std::chrono::duration<double, std::milli> elapsed_us = end - start;
-          std::cout << format("rank: %d, ") % rank
-                    << format("elapsed time: %.3f ms") % elapsed_us.count()
-                    << endl;
+          std::cout << boost::format("rank: %d, ") % rank
+                    << boost::format("elapsed time: %.3f ms") %
+                           elapsed_us.count()
+                    << std::endl;
      }
 
      return res;
@@ -160,14 +159,14 @@ int main(int argc, const char** argv)
      po::notify(vm);
 
      if (vm.count("help")) {
-          cout << desc << "\n";
+          std::cout << desc << "\n";
           return 0;
      }
 
-     cout << format("L: %d, M: %d") % L % M << endl;
+     std::cout << boost::format("L: %d, M: %d") % L % M << std::endl;
 
-     printPairs(cout, "Current permutation:", perm_pairs);
-     printPairs(cout, "Do swaps:", swap_pairs);
+     printPairs(std::cout, "Current permutation:", perm_pairs);
+     printPairs(std::cout, "Do swaps:", swap_pairs);
 
      auto perm = permuteQubits(naturalOrdering(L), perm_pairs);
 

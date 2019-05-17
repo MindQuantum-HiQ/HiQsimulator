@@ -27,8 +27,6 @@
 #include "alignedallocator.hpp"
 #include "funcs.hpp"
 
-using boost::format;
-
 class Item
 {
 public:
@@ -115,7 +113,8 @@ public:
                M[i][i] = factor;
 
           DLOG(INFO)
-              << format("perform_fusion(): items_.size(): %d, num qubits: %d") %
+              << boost::format(
+                     "perform_fusion(): items_.size(): %d, num qubits: %d") %
                      items_.size() % N;
           out_flags |= MatProps::IS_DIAG;
           for (auto& item: items_) {

@@ -55,9 +55,6 @@ using AlignedIntVec = std::vector<uint32_t, aligned_allocator<uint32_t, 256>>;
 using VecOfMasks = std::vector<AlignedIntVec>;
 using VecOfCNOT = std::vector<std::vector<std::pair<unsigned, unsigned>>>;
 
-using std::begin;
-using std::end;
-
 struct Gates {
 public:
      Gates(unsigned n = 1, unsigned max_d_a = 1)

@@ -25,9 +25,6 @@
 #include "mpi_ext.hpp"
 #include "swapping.hpp"
 
-using boost::format;
-using boost::sync_queue_is_closed;
-
 const uint64_t SwapperMT::MaxGlobal = 17;
 
 void f_producer(SwapperMT& s, const std::vector<uint64_t>& swap_bits)
@@ -103,8 +100,8 @@ void SwapperMT::runConsumer2(const mpi::communicator& comm)
 void SwapperMT::doSwap(int rank, const mpi::communicator& comm, uint64_t color,
                        const std::vector<uint64_t>& aSwap_bits)
 {
-     DLOG(INFO) << format("M: %d, rank: %d, color: %d, swap_bits: %s") % M %
-                       rank % color % print(aSwap_bits);
+     DLOG(INFO) << boost::format("M: %d, rank: %d, color: %d, swap_bits: %s") %
+                       M % rank % color % print(aSwap_bits);
 
      this->runConsumer2(comm);
      this->runProducer(aSwap_bits);

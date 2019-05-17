@@ -21,12 +21,11 @@
 #include "convertors.h"
 #include "definitions.h"
 
-ClusterScheduler::ClusterScheduler(const std::vector<std::vector<id_num_t>> gate,
-                                   const std::vector<std::vector<id_num_t>> gate_ctrl,
-                                   const std::vector<bool> gate_diag,
-                                   const std::vector<id_num_t> locals,
-                                   const std::vector<id_num_t> globals,
-                                   const int cluster_size)
+ClusterScheduler::ClusterScheduler(
+    const std::vector<std::vector<id_num_t>> gate,
+    const std::vector<std::vector<id_num_t>> gate_ctrl,
+    const std::vector<bool> gate_diag, const std::vector<id_num_t> locals,
+    const std::vector<id_num_t> globals, const int cluster_size)
     : cluster_size_(cluster_size), gate_diag_(gate_diag)
 {
      CHECK(gate.size() == gate_ctrl.size() && gate.size() == gate_diag.size())
