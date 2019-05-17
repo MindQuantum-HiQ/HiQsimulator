@@ -23,9 +23,6 @@
 
 #include "definitions.h"
 
-using std::map;
-using std::vector;
-
 class ClusterScheduler
 {
 public:
@@ -33,27 +30,27 @@ public:
      // Uses backtracking on qubits ids
      // Works in O(C(num_qubits, _cluster_size) * num_gates) time,
      // O(C(num_qubits, _cluster_size)) memory
-     vector<int> ScheduleCluster();
+     std::vector<int> ScheduleCluster();
 
-     ClusterScheduler(vector<vector<id_num_t>> _gate,
-                      vector<vector<id_num_t>> _gate_ctrl,
-                      vector<bool> _gate_diag, vector<id_num_t> _locals,
-                      vector<id_num_t> _globals, int _cluster_size);
+     ClusterScheduler(std::vector<std::vector<id_num_t>> gate,
+                      std::vector<std::vector<id_num_t>> gate_ctrl,
+                      std::vector<bool> gate_diag, std::vector<id_num_t> locals,
+                      std::vector<id_num_t> globals, int cluster_size);
 
      ~ClusterScheduler()
      {}
 
 private:
-     const int ClusterSize;
-     int best_ans;
-     msk_t best_cluster;
-     msk_t locals;
-     msk_t globals;
-     map<msk_t, msk_t> used;
-     vector<msk_t> gate, gate_ctrl;
-     vector<bool> gate_diag;
-     vector<id_num_t> pos_to_id;
-     map<id_num_t, int> id_to_pos;
+     const int cluster_size_;
+     int best_ans_;
+     msk_t best_cluster_;
+     msk_t locals_;
+     msk_t globals_;
+     std::map<msk_t, msk_t> used_;
+     std::vector<msk_t> gate_, gate_ctrl_;
+     std::vector<bool> gate_diag_;
+     std::vector<id_num_t> pos_to_id_;
+     std::map<id_num_t, int> id_to_pos_;
 
      // Generates qubits combinations, containing no more than ClusterSize
      // qubits
@@ -62,60 +59,60 @@ private:
      // Tries to improve answer by given qubits combination
      inline void CalcCombination(msk_t cur_cluster)
      {
-          if (used[cur_cluster] != 0) {
+          if (used_[cur_cluster] != 0) {
                return;
           }
           msk_t cur_bad = 0;
           int cur_ans = 0;
 
-          for (int i = 0; i < static_cast<int>(gate.size()); ++i) {
+          for (int i = 0; i < static_cast<int>(gate_.size()); ++i) {
                if (CanTake(i, cur_cluster, cur_bad)) {
                     ++cur_ans;
                }
                else {
-                    cur_bad = unite(cur_bad, unite(gate[i], gate_ctrl[i]));
+                    cur_bad = unite(cur_bad, unite(gate_[i], gate_ctrl_[i]));
                }
           }
 
-          if (cur_ans > best_ans ||
-              (cur_ans == best_ans &&
-               count_bits(cur_cluster) < count_bits(best_cluster))) {
-               best_ans = cur_ans;
-               best_cluster = cur_cluster;
+          if (cur_ans > best_ans_ ||
+              (cur_ans == best_ans_ &&
+               count_bits(cur_cluster) < count_bits(best_cluster_))) {
+               best_ans_ = cur_ans;
+               best_cluster_ = cur_cluster;
           }
      }
 
      // Returns gates to be used in current cluster
-     inline vector<int> GetComamndsFromMsk() const
+     inline std::vector<int> GetComamndsFromMsk() const
      {
           msk_t cur_bad = 0;
 
-          vector<int> ans;
-          for (int i = 0; i < static_cast<int>(gate.size()); ++i) {
-               if (CanTake(i, best_cluster, cur_bad)) {
+          std::vector<int> ans;
+          for (int i = 0; i < static_cast<int>(gate_.size()); ++i) {
+               if (CanTake(i, best_cluster_, cur_bad)) {
                     ans.push_back(i);
                }
                else {
-                    cur_bad = unite(cur_bad, unite(gate[i], gate_ctrl[i]));
+                    cur_bad = unite(cur_bad, unite(gate_[i], gate_ctrl_[i]));
                }
           }
 
-          CHECK(static_cast<int>(ans.size()) == best_ans)
+          CHECK(static_cast<int>(ans.size()) == best_ans_)
               << "GetComamndsFromMsk(): Internal error: sizes mismatch";
           return ans;
      }
 
      // Returns huge gate to be used in current cluster if possible
-     inline vector<int> GetCommandsFromLocals() const
+     inline std::vector<int> GetCommandsFromLocals() const
      {
           msk_t cur_bad = 0;
 
-          for (int i = 0; i < static_cast<int>(gate.size()); ++i) {
-               if (CanTake(i, locals, cur_bad)) {
+          for (int i = 0; i < static_cast<int>(gate_.size()); ++i) {
+               if (CanTake(i, locals_, cur_bad)) {
                     return {i};
                }
                else {
-                    cur_bad = unite(cur_bad, unite(gate[i], gate_ctrl[i]));
+                    cur_bad = unite(cur_bad, unite(gate_[i], gate_ctrl_[i]));
                }
           }
 
@@ -127,21 +124,21 @@ private:
      // 1 - diagonal
      inline int GateType(const int pos) const
      {
-          return gate_diag[pos];
+          return gate_diag_[pos];
      }
 
      // Determines if is it possible to apply pos-th gate in given situation.
      inline bool CanTake(const int pos, const msk_t cur_cluster,
                          const msk_t cur_bad) const
      {
-          msk_t gate_all = unite(gate_ctrl[pos], gate[pos]);
+          msk_t gate_all = unite(gate_ctrl_[pos], gate_[pos]);
           if (inter(gate_all, cur_bad) ||
-              !submask(inter(gate_all, locals), cur_cluster)) {
+              !submask(inter(gate_all, locals_), cur_cluster)) {
                return false;
           }
 
           if (GateType(pos) == 0) {
-               return submask(gate[pos], locals);
+               return submask(gate_[pos], locals_);
           }
           else {
                return true;

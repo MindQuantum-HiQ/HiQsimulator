@@ -28,11 +28,13 @@ namespace py = pybind11;
 PYBIND11_MODULE(_sched_cpp, m)
 {
      py::class_<SwapScheduler>(m, "SwapScheduler")
-         .def(py::init<vector<vector<id_num_t>>, vector<vector<id_num_t>>,
-                       vector<bool>, int, int, bool>())
+         .def(py::init<std::vector<std::vector<id_num_t>>,
+                       std::vector<std::vector<id_num_t>>, std::vector<bool>,
+                       int, int, bool>())
          .def("ScheduleSwap", &SwapScheduler::ScheduleSwap);
      py::class_<ClusterScheduler>(m, "ClusterScheduler")
-         .def(py::init<vector<vector<id_num_t>>, vector<vector<id_num_t>>,
-                       vector<bool>, vector<id_num_t>, vector<id_num_t>, int>())
+         .def(py::init<std::vector<std::vector<id_num_t>>,
+                       std::vector<std::vector<id_num_t>>, std::vector<bool>,
+                       std::vector<id_num_t>, std::vector<id_num_t>, int>())
          .def("ScheduleCluster", &ClusterScheduler::ScheduleCluster);
 }
