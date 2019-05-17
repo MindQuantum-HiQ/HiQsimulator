@@ -23,7 +23,7 @@ std::vector<id_num_t> MskToIds(const msk_t msk,
                                const std::vector<id_num_t> &pos_to_id)
 {
      std::vector<id_num_t> ans;
-     for (int i = 0; (static_cast<msk_t>(1) << i) <= msk; ++i) {
+     for (msk_t i = 0; (static_cast<msk_t>(1) << i) <= msk; ++i) {
           if (test_bit(msk, i)) {
                ans.push_back(pos_to_id[i]);
           }
@@ -57,8 +57,8 @@ std::tuple<std::vector<id_num_t>, std::map<id_num_t, int>> CalcPos(
      std::copy(locals.begin(), locals.end(), std::back_inserter(pos_to_id));
      std::copy(globals.begin(), globals.end(), std::back_inserter(pos_to_id));
 
-     sort(pos_to_id.begin(), pos_to_id.end());
-     pos_to_id.erase(unique(pos_to_id.begin(), pos_to_id.end()),
+     std::sort(pos_to_id.begin(), pos_to_id.end());
+     pos_to_id.erase(std::unique(pos_to_id.begin(), pos_to_id.end()),
                      pos_to_id.end());
 
      CHECK(pos_to_id.size() < 64)

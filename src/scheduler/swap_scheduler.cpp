@@ -25,14 +25,16 @@
 SwapScheduler::SwapScheduler(
     const std::vector<std::vector<id_num_t>>& gate,
     const std::vector<std::vector<id_num_t>>& gate_ctrl,
-    const std::vector<bool>& gate_diag, const int num_splits,
-    const int num_locals, bool fuse)
+    std::vector<bool> gate_diag, const int num_splits, const int num_locals,
+    bool fuse)
     : num_splits_(num_splits),
       num_locals_(num_locals),
-      gate_diag_(gate_diag),
-      gate_weight_(gate.size(), 1)
+      gate_diag_(std::move(gate_diag)),
+      gate_weight_(gate.size(), 1),
+      best_ans_(0),
+      best_locals_(0)
 {
-     CHECK(gate.size() == gate_ctrl.size() && gate.size() == gate_diag.size())
+     CHECK(gate.size() == gate_ctrl.size() && gate.size() == gate_diag_.size())
          << "ctor():";
      tie(pos_to_id_, id_to_pos_) = CalcPos(gate, gate_ctrl, {}, {});
      tie(gate_, gate_ctrl_) = CalcGates(gate, gate_ctrl, id_to_pos_);
