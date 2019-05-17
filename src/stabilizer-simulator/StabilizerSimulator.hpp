@@ -37,16 +37,16 @@
 #ifdef PYBIND11_THROW_RUNTIME_ERROR
 #     define THROW_RUNTIME_ERROR(msg) throw std::runtime_error(msg)
 #else
-#     define THROW_RUNTIME_ERROR(msg)               \
-          PyErr_SetString(PyExc_RuntimeError, msg); \
+#     define THROW_RUNTIME_ERROR(msg)                                          \
+          PyErr_SetString(PyExc_RuntimeError, msg);                            \
           throw pybind11::error_already_set()
 #endif /* PYBIND11_THROW_RUNTIME_ERROR */
 
-#define QUBIT_ALLOCATE_CHECK(qubit_id, gate_name)                \
-     if (allocated_qubits_.count(qubit_id) == 0) {               \
-          THROW_RUNTIME_ERROR("Error (" gate_name                \
-                              "): Qubit ID is not "              \
-                              "valid! (ie. unallocated Qubit)"); \
+#define QUBIT_ALLOCATE_CHECK(qubit_id, gate_name)                              \
+     if (allocated_qubits_.count(qubit_id) == 0) {                             \
+          THROW_RUNTIME_ERROR("Error (" gate_name                              \
+                              "): Qubit ID is not "                            \
+                              "valid! (ie. unallocated Qubit)");               \
      }
 
 constexpr auto max_storage_depth = 10U;
@@ -55,11 +55,8 @@ using AlignedIntVec = std::vector<uint32_t, aligned_allocator<uint32_t, 256>>;
 using VecOfMasks = std::vector<AlignedIntVec>;
 using VecOfCNOT = std::vector<std::vector<std::pair<unsigned, unsigned>>>;
 
-using std::begin;
-using std::end;
-
 struct Gates {
-    public:
+public:
      Gates(unsigned n = 1, unsigned max_d_a = 1)
          : num_gates(0),
            max_d(max_d_a),
@@ -99,7 +96,7 @@ class StabilizerSimulator
      using Vec = std::vector<unsigned>;
      using Map = std::map<unsigned, unsigned>;
 
-    public:
+public:
      StabilizerSimulator(unsigned num_qubits, unsigned seed)
          : num_qubits_(num_qubits)
            // number of 32-bit integers for one row/stabilizer generator
@@ -375,7 +372,7 @@ class StabilizerSimulator
      friend std::ostream& operator<<(std::ostream& out,
                                      StabilizerSimulator const& sim);
 
-    private:
+private:
      // index for x, z
      unsigned get_index_(unsigned stab, unsigned qubit) const
      {

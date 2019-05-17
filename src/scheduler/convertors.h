@@ -15,26 +15,26 @@
 #ifndef SCHEDULER_FUNCS_H
 #define SCHEDULER_FUNCS_H
 
-#include <vector>
 #include <map>
 #include <tuple>
+#include <vector>
 
 #include "definitions.h"
 
-using std::vector;
-using std::map;
-using std::tuple;
+std::vector<id_num_t> MskToIds(msk_t msk,
+                               const std::vector<id_num_t> &pos_to_id);
 
-vector<id_num_t> MskToIds(msk_t msk, const vector<id_num_t> &pos_to_id);
+msk_t IdsToMsk(const std::vector<id_num_t> &vec,
+               const std::map<id_num_t, int> &id_to_pos);
 
-msk_t IdsToMsk(const vector<id_num_t> &vec, const map<id_num_t, int> &id_to_pos);
+std::tuple<std::vector<id_num_t>, std::map<id_num_t, int>> CalcPos(
+    const std::vector<std::vector<id_num_t>> &gate,
+    const std::vector<std::vector<id_num_t>> &gate_ctrl,
+    const std::vector<id_num_t> &locals, const std::vector<id_num_t> &globals);
 
-tuple<vector<id_num_t>, map<id_num_t, int>>
-CalcPos(const vector<vector<id_num_t>> &_gate, const vector<vector<id_num_t>> &_gate_ctrl,
-        const vector<id_num_t> &_locals, const vector<id_num_t> &_globals);
+std::tuple<std::vector<msk_t>, std::vector<msk_t>> CalcGates(
+    const std::vector<std::vector<id_num_t>> &gate,
+    const std::vector<std::vector<id_num_t>> &gate_ctrl,
+    const std::map<id_num_t, int> &id_to_pos);
 
-tuple<vector<msk_t>, vector<msk_t>>
-CalcGates(const vector<vector<id_num_t>> &_gate, const vector<vector<id_num_t>> &_gate_ctrl,
-          const map<id_num_t, int> &id_to_pos);
-
-#endif // SCHEDULER_FUNCS_H
+#endif  // SCHEDULER_FUNCS_H

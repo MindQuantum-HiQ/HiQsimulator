@@ -21,8 +21,6 @@
 #include <list>
 #include <vector>
 
-using boost::sync_bounded_queue;
-
 template <class T>
 struct SwapArrays {
      typedef T value_type;
@@ -67,9 +65,9 @@ struct SwapBuffers {
 
      const size_t maxQueueSize;
 
-     sync_bounded_queue<swap_arrays_type*> fresh_arrays;
-     sync_bounded_queue<swap_arrays_type*> fresh_arrays2;
-     sync_bounded_queue<swap_arrays_type*> old_arrays;
+     boost::sync_bounded_queue<swap_arrays_type*> fresh_arrays;
+     boost::sync_bounded_queue<swap_arrays_type*> fresh_arrays2;
+     boost::sync_bounded_queue<swap_arrays_type*> old_arrays;
 
      explicit SwapBuffers(size_t aMaxQueueSize)
          : maxQueueSize(aMaxQueueSize),
@@ -95,7 +93,7 @@ struct SwapBuffers {
           }
      }
 
-    private:
+private:
      std::list<SwapArrays<T>> arrs;
 
      swap_arrays_type* allocateArrays()

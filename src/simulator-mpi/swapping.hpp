@@ -24,8 +24,6 @@
 #include "funcs.hpp"
 #include "simulator-mpi/SwapArrays.hpp"
 
-using boost::format;
-
 namespace swapping
 {
 template <size_t n_bits>

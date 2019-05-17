@@ -22,25 +22,20 @@
 #include "convertors.h"
 #include "definitions.h"
 
-using std::accumulate;
-using std::cout;
-using std::endl;
-
-SwapScheduler::SwapScheduler(const vector<vector<id_num_t>> _gate,
-                             const vector<vector<id_num_t>> _gate_ctrl,
-                             const vector<bool> _gate_diag,
-                             const int _num_splits, const int _num_locals,
-                             bool fuse)
-    : NumSplits(_num_splits),
-      NumLocals(_num_locals),
-      gate_diag(_gate_diag),
-      gate_weight(_gate.size(), 1)
+SwapScheduler::SwapScheduler(
+    const std::vector<std::vector<id_num_t>>& gate,
+    const std::vector<std::vector<id_num_t>>& gate_ctrl,
+    const std::vector<bool>& gate_diag, const int num_splits,
+    const int num_locals, bool fuse)
+    : num_splits_(num_splits),
+      num_locals_(num_locals),
+      gate_diag_(gate_diag),
+      gate_weight_(gate.size(), 1)
 {
-     CHECK(_gate.size() == _gate_ctrl.size() &&
-           _gate.size() == _gate_diag.size())
+     CHECK(gate.size() == gate_ctrl.size() && gate.size() == gate_diag.size())
          << "ctor():";
-     tie(pos_to_id, id_to_pos) = CalcPos(_gate, _gate_ctrl, {}, {});
-     tie(gate, gate_ctrl) = CalcGates(_gate, _gate_ctrl, id_to_pos);
+     tie(pos_to_id_, id_to_pos_) = CalcPos(gate, gate_ctrl, {}, {});
+     tie(gate_, gate_ctrl_) = CalcGates(gate, gate_ctrl, id_to_pos_);
 
      if (fuse) {
           FuseSingleQubitGates();
@@ -49,9 +44,9 @@ SwapScheduler::SwapScheduler(const vector<vector<id_num_t>> _gate,
 
 void SwapScheduler::FuseSingleQubitGates()
 {
-     for (int i = static_cast<int>(gate.size()) - 1; i >= 0; --i) {
+     for (int i = static_cast<int>(gate_.size()) - 1; i >= 0; --i) {
           bool remove = false;
-          if (count_bits(unite(gate[i], gate_ctrl[i])) == 1) {
+          if (count_bits(unite(gate_[i], gate_ctrl_[i])) == 1) {
                if (GateType(i) == 0) {
                     remove = (FuseSingleQubitToNextInterGate(i) ||
                               FuseSingleQubitToPrevInterGate(i));
@@ -62,43 +57,43 @@ void SwapScheduler::FuseSingleQubitGates()
                }
           }
           if (remove) {
-               gate.erase(gate.begin() + i);
-               gate_ctrl.erase(gate_ctrl.begin() + i);
-               gate_diag.erase(gate_diag.begin() + i);
-               gate_weight.erase(gate_weight.begin() + i);
+               gate_.erase(gate_.begin() + i);
+               gate_ctrl_.erase(gate_ctrl_.begin() + i);
+               gate_diag_.erase(gate_diag_.begin() + i);
+               gate_weight_.erase(gate_weight_.begin() + i);
           }
      }
 }
 
-vector<id_num_t> SwapScheduler::ScheduleSwap()
+std::vector<id_num_t> SwapScheduler::ScheduleSwap()
 {
      VLOG(1) << "ScheduleSwap(): started scheduling swap: gates_no = "
-             << gate.size() << " real gates_no = "
-             << accumulate(gate_weight.begin(), gate_weight.end(), 0);
+             << gate_.size() << " real gates_no = "
+             << std::accumulate(gate_weight_.begin(), gate_weight_.end(), 0);
 
-     if (gate.empty()) {
+     if (gate_.empty()) {
           VLOG(1) << "ScheduleSwap(): empty gates list, exiting";
           return {};
      }
 
-     best_ans = 0;
-     best_locals = 0;
-     int splits_left = Rec(0, 0, 0, 0, NumSplits);
+     best_ans_ = 0;
+     best_locals_ = 0;
+     int splits_left = Rec(0, 0, 0, 0, num_splits_);
      VLOG(1) << "ScheduleSwap(): finished scheduling swap: expected gates_no = "
-             << best_ans << "; used " << NumSplits - splits_left << "/"
-             << NumSplits << " splits";
-     return MskToIds(best_locals, pos_to_id);
+             << best_ans_ << "; used " << num_splits_ - splits_left << "/"
+             << num_splits_ << " splits";
+     return MskToIds(best_locals_, pos_to_id_);
 }
 
 int SwapScheduler::Rec(const int pos, const msk_t cur_locals,
                        const msk_t cur_bad, const int cur_ans, int splits_left)
 {
-     if (cur_ans > best_ans) {
-          best_ans = cur_ans;
-          best_locals = cur_locals;
+     if (cur_ans > best_ans_) {
+          best_ans_ = cur_ans;
+          best_locals_ = cur_locals;
      }
 
-     if (pos == static_cast<int>(gate.size())) {
+     if (pos == static_cast<int>(gate_.size())) {
           return splits_left;
      }
 
@@ -108,7 +103,7 @@ int SwapScheduler::Rec(const int pos, const msk_t cur_locals,
      bool can_take = CanTake(pos, cur_locals, cur_bad);
      if (can_take) {
           if (GateType(pos) == 0) {
-               if (submask(gate[pos], cur_locals)) {
+               if (submask(gate_[pos], cur_locals)) {
                     can_skip = false;
                     --cnt_take;
                }
@@ -121,7 +116,7 @@ int SwapScheduler::Rec(const int pos, const msk_t cur_locals,
 
      CHECK(0 < cnt_take && cnt_take <= 2)
          << "Rec(): Internal error: can't do anything with command: ctrl = "
-         << gate_ctrl[pos] << "; qubits = " << gate[pos]
+         << gate_ctrl_[pos] << "; qubits = " << gate_[pos]
          << "; locals = " << cur_locals << "; bad = " << cur_bad;
 
      if (splits_left == 0) {
@@ -148,7 +143,7 @@ int SwapScheduler::Rec(const int pos, const msk_t cur_locals,
      if (can_skip) {
           int give_splits = splits_left / cnt_take;
           splits_left += Rec(pos + 1, cur_locals,
-                             unite(cur_bad, unite(gate[pos], gate_ctrl[pos])),
+                             unite(cur_bad, unite(gate_[pos], gate_ctrl_[pos])),
                              cur_ans, give_splits) -
                          give_splits;
           --cnt_take;
@@ -156,13 +151,14 @@ int SwapScheduler::Rec(const int pos, const msk_t cur_locals,
 
      if (can_take) {
           if (GateType(pos) == 0) {
-               splits_left = Rec(pos + 1, unite(cur_locals, gate[pos]), cur_bad,
-                                 cur_ans + gate_weight[pos], splits_left);
+               splits_left =
+                   Rec(pos + 1, unite(cur_locals, gate_[pos]), cur_bad,
+                       cur_ans + gate_weight_[pos], splits_left);
                --cnt_take;
           }
           else {
                splits_left = Rec(pos + 1, cur_locals, cur_bad,
-                                 cur_ans + gate_weight[pos], splits_left);
+                                 cur_ans + gate_weight_[pos], splits_left);
                --cnt_take;
           }
      }

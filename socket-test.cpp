@@ -22,10 +22,6 @@
 #endif  // _OPENMP
 #include <chrono>
 
-using boost::format;
-using std::cout;
-using std::endl;
-using std::vector;
 namespace po = boost::program_options;
 
 int main(int argc, char** argv)
@@ -43,12 +39,12 @@ int main(int argc, char** argv)
      po::notify(vm);
 
      if (vm.count("help")) {
-          cout << desc << "\n";
+          std::cout << desc << "\n";
           return 0;
      }
 
      uint64_t sz = 1ul << M;
-     vector<double> v(sz);
+     std::vector<double> v(sz);
 
      size_t count = 0;
      while (true) {
@@ -61,8 +57,9 @@ int main(int argc, char** argv)
 
           auto t1 = std::chrono::high_resolution_clock::now();
           std::chrono::duration<double, std::milli> dt_ms = t1 - t0;
-          cout << format("count: %d, dt: %.f ms") % count % dt_ms.count()
-               << std::endl;
+          std::cout << boost::format("count: %d, dt: %.f ms") % count %
+                           dt_ms.count()
+                    << std::endl;
           ++count;
      };
 

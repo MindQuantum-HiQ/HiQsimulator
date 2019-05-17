@@ -28,14 +28,14 @@ constexpr size_t SimulatorMPI::kNotFound_;
 
 class GlogSingleton
 {
-    public:
+public:
      static GlogSingleton &instance()
      {
           static GlogSingleton qqq;
           return qqq;
      }
 
-    private:
+private:
      GlogSingleton()
      {
           google::InitGoogleLogging("SimulatorMPI");
@@ -71,7 +71,7 @@ SimulatorMPI::SimulatorMPI(mpi::communicator aWorld, uint64_t seed,
      mpi::broadcast(world_, seed, 0);
      rnd_eng_ = RndEngine(seed);
 
-     VLOG(0) << format(
+     VLOG(0) << boost::format(
                     "ctor(): rank = %d; seed = %u; max_local = %d; "
                     "max_cluster_size = %d") %
                     rank_ % seed % max_local % max_cluster_size;
@@ -92,25 +92,28 @@ SimulatorMPI::~SimulatorMPI()
      EndStage();
 
      auto total_duration = Duration(Clock::now() - start_time).count();
-     VLOG(0) << format("     *** TOTAL STATS ***     ");
-     VLOG(0) << format(" Time                   %.3lf") % total_duration;
-     VLOG(0) << format("   -- Runs              %.3lf") % total_runs_duration;
-     VLOG(0) << format("   -- Swaps             %.3lf") % total_swap_duration;
-     VLOG(0) << format("   -- Measures          %.3lf") %
+     VLOG(0) << boost::format("     *** TOTAL STATS ***     ");
+     VLOG(0) << boost::format(" Time                   %.3lf") % total_duration;
+     VLOG(0) << boost::format("   -- Runs              %.3lf") %
+                    total_runs_duration;
+     VLOG(0) << boost::format("   -- Swaps             %.3lf") %
+                    total_swap_duration;
+     VLOG(0) << boost::format("   -- Measures          %.3lf") %
                     total_measure_duration;
-     VLOG(0) << format("   -- Allocations       %.3lf") % total_alloc_duration;
-     VLOG(0) << format("   -- Deallocations     %.3lf") %
+     VLOG(0) << boost::format("   -- Allocations       %.3lf") %
+                    total_alloc_duration;
+     VLOG(0) << boost::format("   -- Deallocations     %.3lf") %
                     total_dealloc_duration;
-     VLOG(0) << format(" Gates                  %d") % total_gates;
-     VLOG(0) << format(" Runs                   %d") % total_runs;
-     VLOG(0) << format(" Stages                 %d") % total_stages;
-     VLOG(0) << format(" Gates/run              %.3lf") %
+     VLOG(0) << boost::format(" Gates                  %d") % total_gates;
+     VLOG(0) << boost::format(" Runs                   %d") % total_runs;
+     VLOG(0) << boost::format(" Stages                 %d") % total_stages;
+     VLOG(0) << boost::format(" Gates/run              %.3lf") %
                     (static_cast<Float>(total_gates) / total_runs);
-     VLOG(0) << format(" Time/run               %.3lf") %
+     VLOG(0) << boost::format(" Time/run               %.3lf") %
                     (total_runs_duration / total_runs);
-     VLOG(0) << format(" Gates/stage            %.3lf") %
+     VLOG(0) << boost::format(" Gates/stage            %.3lf") %
                     (static_cast<Float>(total_gates) / total_stages);
-     VLOG(0) << format(" Runs/stage             %.3lf") %
+     VLOG(0) << boost::format(" Runs/stage             %.3lf") %
                     (static_cast<Float>(total_runs) / total_stages);
 }
 
@@ -133,9 +136,10 @@ inline void SimulatorMPI::CheckNorm()
      Float norm = 0.0;
      mpi::all_reduce(world_, local_norm, norm, std::plus<Float>());
 
-     VLOG(4) << format("CheckNorm(): norm = %.3lf; local_norm = %.3lf") % norm %
-                    local_norm;
-     VLOG(4) << format("CheckNorm(): local state vector: ") << print(vec_);
+     VLOG(4) << boost::format("CheckNorm(): norm = %.3lf; local_norm = %.3lf") %
+                    norm % local_norm;
+     VLOG(4) << boost::format("CheckNorm(): local state vector: ")
+             << print(vec_);
 
      if (std::abs(norm - 1) > kMaxFloatError_) {
           auto message = "CheckNorm(): state vector norm is invalid";
@@ -147,7 +151,7 @@ inline void SimulatorMPI::CheckNorm()
 
 void SimulatorMPI::AllocateLocalQubit(Index id)
 {
-     VLOG(1) << format("AllocateLocalQubit(): id = %u; bit = %u") % id %
+     VLOG(1) << boost::format("AllocateLocalQubit(): id = %u; bit = %u") % id %
                     locals_.size();
      locals_.push_back(id);
      vec_.resize(vec_.size() * 2);
@@ -156,14 +160,15 @@ void SimulatorMPI::AllocateLocalQubit(Index id)
 void SimulatorMPI::AllocateGlobalQubit(Index id)
 {
      auto pos = ArrayFindSure(globals_, kNotFound_);
-     VLOG(1) << format("AllocateGlobalQubit(): id = %u; bit = %u") % id % pos;
+     VLOG(1) << boost::format("AllocateGlobalQubit(): id = %u; bit = %u") % id %
+                    pos;
      globals_[pos] = id;
 }
 
 void SimulatorMPI::AllocateQubit(Index id)
 {
      auto start_alloc_time = Clock::now();
-     VLOG(1) << format("AllocateQubit(): id = %u") % id;
+     VLOG(1) << boost::format("AllocateQubit(): id = %u") % id;
 
      auto local_size = locals_.size();
 
@@ -181,7 +186,8 @@ void SimulatorMPI::AllocateQubit(Index id)
      }
      else {
           auto message =
-              (format("AllocateQubit(): can't allocate more than %u qubits") %
+              (boost::format(
+                   "AllocateQubit(): can't allocate more than %u qubits") %
                (globals_.size() + locals_.size()))
                   .str();
           LOG(ERROR) << message;
@@ -195,8 +201,8 @@ void SimulatorMPI::AllocateQubit(Index id)
 
 void SimulatorMPI::AllocateQureg(const std::vector<Index> &ids, Complex init)
 {
-     VLOG(1) << format("AllocateQureg(): ids = ") << print(ids);
-     VLOG(1) << format("AllocateQureg(): init = %f") % init;
+     VLOG(1) << boost::format("AllocateQureg(): ids = ") << print(ids);
+     VLOG(1) << boost::format("AllocateQureg(): init = %f") % init;
 
      if (init != 0.0 && !locals_.empty()) {
           auto message =
@@ -244,7 +250,7 @@ size_t SimulatorMPI::ArrayFindSure(const std::vector<Index> &v, Index val) const
      auto pos = ArrayFind(v, val);
      if (pos == kNotFound_) {
           std::ostringstream message;
-          message << format("ArrayFindSure(): Can't find %u in ") % val
+          message << boost::format("ArrayFindSure(): Can't find %u in ") % val
                   << print(v);
           LOG(ERROR) << message.str();
           world_.barrier();
@@ -255,7 +261,7 @@ size_t SimulatorMPI::ArrayFindSure(const std::vector<Index> &v, Index val) const
 
 void SimulatorMPI::DeallocateLocalQubit(Index id)
 {  // TODO make parallel
-     VLOG(1) << format("DeallocateLocalQubit(): id = %u") % id;
+     VLOG(1) << boost::format("DeallocateLocalQubit(): id = %u") % id;
 
      Float sum[] = {0.0, 0.0};
      auto pos = ArrayFindSure(locals_, id);
@@ -267,11 +273,13 @@ void SimulatorMPI::DeallocateLocalQubit(Index id)
      mpi::all_reduce(world_, sum, 2, all, std::plus<Float>());
 
      VLOG(1)
-         << format("DeallocateLocalQubit(): norm(0) = %.3lf; norm(1) = %.3lf") %
+         << boost::format(
+                "DeallocateLocalQubit(): norm(0) = %.3lf; norm(1) = %.3lf") %
                 all[0] % all[1];
      if (!((all[0] > kMaxFloatError_) ^ (all[1] > kMaxFloatError_))) {
           auto message =
-              (format("DeallocateLocalQubit(): qubit %u is entangled") % id)
+              (boost::format("DeallocateLocalQubit(): qubit %u is entangled") %
+               id)
                   .str();
           LOG(ERROR) << message;
           world_.barrier();
@@ -300,7 +308,7 @@ void SimulatorMPI::DeallocateLocalQubit(Index id)
 
 void SimulatorMPI::DeallocateGlobalQubit(Index id)
 {  // TODO make parallel
-     VLOG(1) << format("DeallocateGlobalQubit(): id = %u") % id;
+     VLOG(1) << boost::format("DeallocateGlobalQubit(): id = %u") % id;
 
      Float sum[] = {0.0, 0.0};
      auto pos = ArrayFindSure(globals_, id);
@@ -312,12 +320,13 @@ void SimulatorMPI::DeallocateGlobalQubit(Index id)
      mpi::all_reduce(world_, sum, 2, all, std::plus<Float>());
 
      VLOG(1)
-         << format(
+         << boost::format(
                 "DeallocateGlobalQubit(): norm(0) = %.3lf; norm(1) = %.3lf") %
                 all[0] % all[1];
      if (!((all[0] > kMaxFloatError_) ^ (all[1] > kMaxFloatError_))) {
           auto message =
-              (format("DeallocateGlobalQubit(): qubit %u is entangled") % id)
+              (boost::format("DeallocateGlobalQubit(): qubit %u is entangled") %
+               id)
                   .str();
           LOG(ERROR) << message;
           world_.barrier();
@@ -325,7 +334,7 @@ void SimulatorMPI::DeallocateGlobalQubit(Index id)
      }
 
      if (all[1] > kMaxFloatError_) {
-          VLOG(1) << format(
+          VLOG(1) << boost::format(
                          "DeallocateGlobalQubit(): deallocating qubit %u in "
                          "|1> state") %
                          id;
@@ -339,20 +348,22 @@ void SimulatorMPI::DeallocateGlobalQubit(Index id)
 
      globals_[pos] = static_cast<Index>(-1);
 
-     VLOG(2) << format("DeallocateGlobalQubit(): qubit %u deallocated") % id;
+     VLOG(2) << boost::format("DeallocateGlobalQubit(): qubit %u deallocated") %
+                    id;
 }
 
 void SimulatorMPI::DeallocateQubit(Index id)
 {
      auto start_dealloc_time = Clock::now();
-     VLOG(1) << format("DeallocateQubit(): id = %u") % id;
+     VLOG(1) << boost::format("DeallocateQubit(): id = %u") % id;
 
      auto local_size = locals_.size();
      auto global_size =
          globals_.size() - std::count(globals_.begin(), globals_.end(), -1);
 
      if (ArrayFind(locals_, id) != kNotFound_) {
-          VLOG(1) << format("DeallocateQubit(): qubit %u is local now") % id;
+          VLOG(1) << boost::format("DeallocateQubit(): qubit %u is local now") %
+                         id;
 
           if (local_size > kMinLocal_ || global_size == 0) {
                VLOG(1) << "DeallocateQubit(): just deallocate this local qubit";
@@ -365,7 +376,7 @@ void SimulatorMPI::DeallocateQubit(Index id)
                                        }) -
                           globals_.begin();
                VLOG(1)
-                   << format(
+                   << boost::format(
                           "DeallocateQubit(): swapping with global qubit %u") %
                           globals_[i];
                SwapQubits({globals_[i], id});
@@ -373,12 +384,13 @@ void SimulatorMPI::DeallocateQubit(Index id)
           }
      }
      else {
-          VLOG(1) << format("DeallocateQubit(): qubit %u is global qubit now") %
+          VLOG(1) << boost::format(
+                         "DeallocateQubit(): qubit %u is global qubit now") %
                          id;
 
           if (local_size > kMinLocal_ || global_size == 0) {
                VLOG(1)
-                   << format(
+                   << boost::format(
                           "DeallocateQubit(): swapping with local qubit %u") %
                           locals_.back();
                SwapQubits({id, locals_.back()});
@@ -492,7 +504,8 @@ void SimulatorMPI::Run()
                break;
           default:
                auto message =
-                   (format("Run(): cannot apply %u qubits gate") % ids.size())
+                   (boost::format("Run(): cannot apply %u qubits gate") %
+                    ids.size())
                        .str();
                LOG(ERROR) << message;
                world_.barrier();
@@ -507,7 +520,7 @@ void SimulatorMPI::Run()
 
      auto end_run_time = Clock::now();
      auto run_duration = Duration(end_run_time - start_run_time).count();
-     VLOG(2) << format("Run(): duration = %.3lf") % run_duration;
+     VLOG(2) << boost::format("Run(): duration = %.3lf") % run_duration;
 
      ++stage_runs;
      ++total_runs;
@@ -819,11 +832,11 @@ SimulatorMPI::Float SimulatorMPI::getProbability_internal(uint64_t local_msk,
                                                           uint64_t global_msk,
                                                           uint64_t global_val)
 {
-     VLOG(4) << format(
+     VLOG(4) << boost::format(
                     "getProbability_internal(): local_msk: %d, local_val: %d, "
                     "global_msk: %d, global_val: %d") %
                     local_msk % local_val % global_msk % global_val;
-     VLOG(4) << format("getProbability_internal(): local state vector: ")
+     VLOG(4) << boost::format("getProbability_internal(): local state vector: ")
              << print(vec_);
      Float local_probability = 0.;
      if ((rank_ & global_msk) == global_val) {
@@ -837,7 +850,7 @@ SimulatorMPI::Float SimulatorMPI::getProbability_internal(uint64_t local_msk,
 
      Float probability =
          mpi::all_reduce(world_, local_probability, std::plus<Float>());
-     VLOG(1) << format(
+     VLOG(1) << boost::format(
                     "getProbability_internal(): local_probability = %.3lf; "
                     "probability = %.3lf") %
                     local_probability % probability;
@@ -904,16 +917,17 @@ std::vector<bool> SimulatorMPI::MeasureQubits(std::vector<Index> const &ids)
      uint64_t src_index = i % n;
 
      VLOG(1)
-         << format(
+         << boost::format(
                 "MeasureQubits(): rnd = %.3lf; src_rank: %u, src_index: %u") %
                 rnd % src_rank % src_index;
 
      auto res = std::vector<bool>(ids.size());
      if (static_cast<int>(src_rank) == world_.size()) {
-          auto message = (format("MeasureQubits(): Random number %.3lf > norm "
-                                 "partial sum %.3lf") %
-                          rnd % total_block_distribution.back())
-                             .str();
+          auto message =
+              (boost::format("MeasureQubits(): Random number %.3lf > norm "
+                             "partial sum %.3lf") %
+               rnd % total_block_distribution.back())
+                  .str();
           LOG(ERROR) << message;
           world_.barrier();
           throw std::runtime_error(message);
@@ -939,7 +953,7 @@ std::vector<bool> SimulatorMPI::MeasureQubits(std::vector<Index> const &ids)
      uint64_t res_index = (src_rank << locals_.size()) + k;
      mpi::broadcast(world_, res_index, static_cast<int>(src_rank));
 
-     VLOG(1) << format("MeasureQubits(): res_index: %u") % res_index;
+     VLOG(1) << boost::format("MeasureQubits(): res_index: %u") % res_index;
 
      // determine result vector (boolean values for each qubit)
      // and create local_msk to detect bad entries (i.e., entries that don't
@@ -977,7 +991,8 @@ std::vector<bool> SimulatorMPI::MeasureQubits(std::vector<Index> const &ids)
      auto measure_duration =
          Duration(Clock::now() - start_measure_time).count();
      total_measure_duration += measure_duration;
-     VLOG(1) << format("MeasureQubits(): duration = %.3lf") % measure_duration;
+     VLOG(1) << boost::format("MeasureQubits(): duration = %.3lf") %
+                    measure_duration;
 
      return res;
 }
@@ -985,8 +1000,9 @@ std::vector<bool> SimulatorMPI::MeasureQubits(std::vector<Index> const &ids)
 void SimulatorMPI::collapseWaveFunction(const std::vector<Index> &ids,
                                         const std::vector<bool> &values)
 {
-     VLOG(1) << format("collapseWaveFunction(): ids: ") << print(ids);
-     VLOG(1) << format("collapseWaveFunction(): values: ") << print(values);
+     VLOG(1) << boost::format("collapseWaveFunction(): ids: ") << print(ids);
+     VLOG(1) << boost::format("collapseWaveFunction(): values: ")
+             << print(values);
 
      uint64_t local_msk = 0;
      uint64_t local_val = 0;
@@ -1048,7 +1064,7 @@ void SimulatorMPI::SwapQubitsWrapper(const std::vector<Index> &swap_pairs)
      Float swapped_bytes = 16 * frac * (1ul << locals_.size());
      auto bandwidth =
          (Float{1} / (1ul << 30)) * swapped_bytes * 8 / swap_duration;
-     VLOG(1) << format(
+     VLOG(1) << boost::format(
                     "SwapQubitsWrapper(): duration = %.3lf; qubits = %d; "
                     "bandwidth = %.3lf Gb/s") %
                     swap_duration % (swap_pairs.size() / 2) % bandwidth;
@@ -1083,8 +1099,8 @@ void SimulatorMPI::SwapQubits(const std::vector<Index> &swap_pairs)
 
      q2bits_ng<uint64_t>(swapBits, swap_pairs, pos);
      auto comm = world_.split(static_cast<int>(color));
-     VLOG(3) << format("SwapQubits(): color = %d; comm.size() = %d") % color %
-                    comm.size();
+     VLOG(3) << boost::format("SwapQubits(): color = %d; comm.size() = %d") %
+                    color % comm.size();
 
      // this check is made to satisfy automated code inspection
      uint64_t comm_size = comm.size();
@@ -1122,7 +1138,7 @@ void SimulatorMPI::StartStage()
 void SimulatorMPI::EndStage()
 {
      auto stage_duration = Duration(Clock::now() - start_stage_time).count();
-     VLOG(1) << format(
+     VLOG(1) << boost::format(
                     "EndStage(): duration = %.3lf; gates = %d; runs = %d; "
                     "gates/run = %.3lf; time/run = %.3lf") %
                     stage_duration % stage_gates % stage_runs %

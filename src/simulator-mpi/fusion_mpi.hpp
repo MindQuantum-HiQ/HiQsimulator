@@ -27,11 +27,9 @@
 #include "alignedallocator.hpp"
 #include "funcs.hpp"
 
-using boost::format;
-
 class Item
 {
-    public:
+public:
      using Index = int64_t;
      using IndexVector = std::vector<Index>;
      using Complex = std::complex<double>;
@@ -65,7 +63,7 @@ class Item
 
 class Fusion
 {
-    public:
+public:
      using Index = int64_t;
      using IndexSet = std::set<Index>;
      using IndexVector = std::vector<Index>;
@@ -115,7 +113,8 @@ class Fusion
                M[i][i] = factor;
 
           DLOG(INFO)
-              << format("perform_fusion(): items_.size(): %d, num qubits: %d") %
+              << boost::format(
+                     "perform_fusion(): items_.size(): %d, num qubits: %d") %
                      items_.size() % N;
           out_flags |= MatProps::IS_DIAG;
           for (auto& item: items_) {
@@ -187,7 +186,7 @@ class Fusion
           matrix = std::move(newmatrix);
      }
 
-    private:
+private:
      void handle_controls(Matrix& matrix, IndexVector& indexList,
                           IndexVector const& ctrlList)
      {
@@ -225,7 +224,7 @@ class Fusion
           }
      }
 
-    public:
+public:
      IndexSet set_;
      ItemVector items_;
      IndexSet ctrl_set_;

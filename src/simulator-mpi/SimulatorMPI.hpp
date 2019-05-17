@@ -65,7 +65,7 @@ namespace bc = boost::container;
 
 class EXPORT_API SimulatorMPI
 {
-    public:
+public:
      using Index = int64_t;
      using Float = double;
      using Complex = std::complex<Float>;
@@ -131,7 +131,7 @@ class EXPORT_API SimulatorMPI
      mpi::communicator world_;
      StateVector vec_;
 
-    private:
+private:
      const Float kMaxFloatError_;
      const size_t kMinLocal_;
      const size_t kMaxLocal_;

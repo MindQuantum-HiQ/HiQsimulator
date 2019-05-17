@@ -17,13 +17,12 @@
 #include <glog/logging.h>
 
 #include <algorithm>
+#include <iterator>
 
-using std::sort;
-using std::unique;
-
-vector<id_num_t> MskToIds(const msk_t msk, const vector<id_num_t> &pos_to_id)
+std::vector<id_num_t> MskToIds(const msk_t msk,
+                               const std::vector<id_num_t> &pos_to_id)
 {
-     vector<id_num_t> ans;
+     std::vector<id_num_t> ans;
      for (int i = 0; (static_cast<msk_t>(1) << i) <= msk; ++i) {
           if (test_bit(msk, i)) {
                ans.push_back(pos_to_id[i]);
@@ -33,7 +32,8 @@ vector<id_num_t> MskToIds(const msk_t msk, const vector<id_num_t> &pos_to_id)
      return ans;
 }
 
-msk_t IdsToMsk(const vector<id_num_t> &vec, const map<id_num_t, int> &id_to_pos)
+msk_t IdsToMsk(const std::vector<id_num_t> &vec,
+               const std::map<id_num_t, int> &id_to_pos)
 {
      msk_t msk = 0;
      for (id_num_t i: vec) {
@@ -42,20 +42,20 @@ msk_t IdsToMsk(const vector<id_num_t> &vec, const map<id_num_t, int> &id_to_pos)
      return msk;
 }
 
-tuple<vector<id_num_t>, map<id_num_t, int>> CalcPos(
-    const vector<vector<id_num_t>> &_gate,
-    const vector<vector<id_num_t>> &_gate_ctrl, const vector<id_num_t> &_locals,
-    const vector<id_num_t> &_globals)
+std::tuple<std::vector<id_num_t>, std::map<id_num_t, int>> CalcPos(
+    const std::vector<std::vector<id_num_t>> &gate,
+    const std::vector<std::vector<id_num_t>> &gate_ctrl,
+    const std::vector<id_num_t> &locals, const std::vector<id_num_t> &globals)
 {
-     vector<id_num_t> pos_to_id;
-     for (auto &i: _gate) {
-          pos_to_id.insert(pos_to_id.end(), i.begin(), i.end());
+     std::vector<id_num_t> pos_to_id;
+     for (auto &i: gate) {
+          std::copy(i.begin(), i.end(), std::back_inserter(pos_to_id));
      }
-     for (auto &i: _gate_ctrl) {
-          pos_to_id.insert(pos_to_id.end(), i.begin(), i.end());
+     for (auto &i: gate_ctrl) {
+          std::copy(i.begin(), i.end(), std::back_inserter(pos_to_id));
      }
-     pos_to_id.insert(pos_to_id.end(), _locals.begin(), _locals.end());
-     pos_to_id.insert(pos_to_id.end(), _globals.begin(), _globals.end());
+     std::copy(locals.begin(), locals.end(), std::back_inserter(pos_to_id));
+     std::copy(globals.begin(), globals.end(), std::back_inserter(pos_to_id));
 
      sort(pos_to_id.begin(), pos_to_id.end());
      pos_to_id.erase(unique(pos_to_id.begin(), pos_to_id.end()),
@@ -64,26 +64,26 @@ tuple<vector<id_num_t>, map<id_num_t, int>> CalcPos(
      CHECK(pos_to_id.size() < 64)
          << "CalcPos(): scheduling with 64 or more qubits is not yet supported";
 
-     map<id_num_t, int> id_to_pos;
+     std::map<id_num_t, int> id_to_pos;
      for (size_t i = 0; i < pos_to_id.size(); ++i) {
           id_to_pos[pos_to_id[i]] = static_cast<int>(i);
      }
 
-     return make_tuple(pos_to_id, id_to_pos);
+     return std::make_tuple(pos_to_id, id_to_pos);
 }
 
-tuple<vector<msk_t>, vector<msk_t>> CalcGates(
-    const vector<vector<id_num_t>> &_gate,
-    const vector<vector<id_num_t>> &_gate_ctrl,
-    const map<id_num_t, int> &id_to_pos)
+std::tuple<std::vector<msk_t>, std::vector<msk_t>> CalcGates(
+    const std::vector<std::vector<id_num_t>> &gate,
+    const std::vector<std::vector<id_num_t>> &gate_ctrl,
+    const std::map<id_num_t, int> &id_to_pos)
 {
-     vector<msk_t> gate(_gate.size());
-     vector<msk_t> gate_ctrl(_gate.size());
+     std::vector<msk_t> gate_new(gate.size());
+     std::vector<msk_t> gate_ctrl_new(gate.size());
 
-     for (size_t i = 0; i < _gate.size(); ++i) {
-          gate[i] = IdsToMsk(_gate[i], id_to_pos);
-          gate_ctrl[i] = IdsToMsk(_gate_ctrl[i], id_to_pos);
+     for (size_t i = 0; i < gate.size(); ++i) {
+          gate_new[i] = IdsToMsk(gate[i], id_to_pos);
+          gate_ctrl_new[i] = IdsToMsk(gate_ctrl[i], id_to_pos);
      }
 
-     return make_tuple(gate, gate_ctrl);
+     return std::make_tuple(gate_new, gate_ctrl_new);
 }

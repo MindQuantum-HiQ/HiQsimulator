@@ -29,11 +29,6 @@
 
 #include <glog/logging.h>
 
-using std::cerr;
-using std::cout;
-using std::endl;
-using namespace boost;
-
 namespace bc = boost::container;
 namespace po = boost::program_options;
 
@@ -61,7 +56,7 @@ void printMeasuredQureg(std::vector<int> const& v)
      std::transform(v.begin(), v.end(), s.rbegin(), [](int a) -> char {
           return a == 0 ? '0' : a == 1 ? '1' : 'x';
      });
-     cout << "Measured qureg: " << s << endl;
+     std::cout << "Measured qureg: " << s << std::endl;
 }
 
 SimulatorMPI::StateVector allocateData1(int rank, uint64_t M)
@@ -94,7 +89,7 @@ bool checkAmplitudePlacement(uint64_t M, uint64_t rank, uint64_t index,
      uint64_t aIndex = uint64_t(a.real()) * (1ul << M) + uint64_t(a.imag());
 
      if (naturalIndex != aIndex) {
-          LOG(ERROR) << format(
+          LOG(ERROR) << boost::format(
                             "checkAmplitudePlacement(): amp: %f, index: %s, "
                             "naturalIndex != aIndex: %s != %s") %
                             a % bitstring(index, L) %
@@ -143,13 +138,13 @@ int main(int argc, const char** argv)
      po::notify(vm);
 
      if (vm.count("help")) {
-          cout << desc << "\n";
+          std::cout << desc << "\n";
           return 0;
      }
 
      SimulatorMPI sim(1, 33, 4);
 
-     DLOG(WARNING) << "simulator created" << endl;
+     DLOG(WARNING) << "simulator created" << std::endl;
 
      uint64_t n = 0;
 
@@ -158,37 +153,39 @@ int main(int argc, const char** argv)
           ids[id] = n++;
      }
 
-     DLOG(WARNING) << "allocating qureg" << endl;
+     DLOG(WARNING) << "allocating qureg" << std::endl;
      sim.AllocateQureg(ids);
-     DLOG(WARNING) << "qureg allocated" << endl;
+     DLOG(WARNING) << "qureg allocated" << std::endl;
 
-     //     DLOG(INFO) << endl << endl;
+     //     DLOG(INFO) << std::endl << std::endl;
      //     DLOG(INFO) << "allocated new state vector";
      //     auto sv = allocateData1(sim.world.rank(), sim.M);
      //     std::swap(sim.vec_, sv);
      //     checkStateVectorPlacement(sim);
 
-     //     DLOG(INFO) << endl << endl;
+     //     DLOG(INFO) << std::endl << std::endl;
      //     DLOG(INFO) << "apply_controlled_gate(I, {0}, {})";
      //     sim.apply_controlled_gate(I, {0}, {});
      //     sim.run();
      //     checkStateVectorPlacement(sim);
 
-     //     DLOG(INFO) << endl << endl;
+     //     DLOG(INFO) << std::endl << std::endl;
      //     DLOG(INFO) << "apply_controlled_gate(I, {0}, {L-1, L-2})";
      //     sim.apply_controlled_gate(I, {0}, {L-1, L-2});
      //     sim.run();
      //     checkStateVectorPlacement(sim);
      hiq::printAmplitudes(sim);
 
-     LOG(INFO) << endl << endl << format("initialize state vector by H^%d") % L;
+     LOG(INFO) << std::endl
+               << std::endl
+               << boost::format("initialize state vector by H^%d") % L;
      std::fill(sim.vec_.begin(), sim.vec_.end(), std::pow(1.0 / sqrt2, L));
      hiq::printAmplitudes(sim);
 
      for (auto id: {L - 2}) {
-          LOG(INFO) << endl << endl;
-          //         DLOG(INFO) << format("apply_controlled_gate(I, {%d}, {%d,
-          //         %d})") % id % (L-1) % (L-2);
+          LOG(INFO) << std::endl << std::endl;
+          //         DLOG(INFO) << boost::format("apply_controlled_gate(I, {%d},
+          //         {%d, %d})") % id % (L-1) % (L-2);
           sim.ApplyGate(RZpi, {int64_t(id)},
                         {int64_t(sim.LocalQubitsCount() - 1), int64_t(L - 1)});
           sim.Run();
@@ -196,6 +193,6 @@ int main(int argc, const char** argv)
           hiq::printAmplitudes(sim);
      }
 
-     DLOG(WARNING) << "final barrier" << endl;
+     DLOG(WARNING) << "final barrier" << std::endl;
      sim.world_.barrier();
 }

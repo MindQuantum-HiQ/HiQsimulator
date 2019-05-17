@@ -35,10 +35,6 @@
 #include <tuple>
 #include <vector>
 
-using boost::format;
-using std::cout;
-using std::endl;
-
 namespace bc = boost::container;
 
 enum MatProps
@@ -64,11 +60,11 @@ void printAmplitude(const Simulator& sim, std::vector<bool>&& bits_string,
      else {
           bits_string[bit] = 0;
           auto a = sim.GetAmplitude(bits_string, sim.GetQubitsPermutation());
-          std::cerr << bits_string << ": " << a << endl;
+          std::cerr << bits_string << ": " << a << std::endl;
 
           bits_string[bit] = 1;
           a = sim.GetAmplitude(bits_string, sim.GetQubitsPermutation());
-          std::cerr << bits_string << ": " << a << endl;
+          std::cerr << bits_string << ": " << a << std::endl;
      }
 }
 
@@ -93,7 +89,7 @@ struct PrintVector : public Printer<PrintVector<V>> {
      void do_out(Stream& out) const
      {
           for (size_t i = 0; i < v.size(); ++i) {
-               out << format("%d:%.7g ") % i % v[i];
+               out << boost::format("%d:%.7g ") % i % v[i];
           }
      }
 };
@@ -109,7 +105,7 @@ struct PrintVector<std::vector<bool>>
      void do_out(Stream& out) const
      {
           for (size_t i = 0; i < v.size(); ++i) {
-               out << format("%d:%.7g ") % i % double(v[i]);
+               out << boost::format("%d:%.7g ") % i % double(v[i]);
           }
      }
 };
@@ -124,7 +120,7 @@ struct PrintMap : public Printer<PrintMap<V>> {
      void do_out(Stream& out) const
      {
           for (auto& p: v) {
-               out << format("%d->%s ") % p.first % p.second;
+               out << boost::format("%d->%s ") % p.first % p.second;
           }
      }
 };
@@ -139,7 +135,7 @@ struct PrintPairs : public Printer<PrintPairs<V>> {
      void do_out(Stream& out) const
      {
           for (size_t i = 0; i < v.size(); i += 2) {
-               out << format("%d->%s ") % v[i] % v[i + 1];
+               out << boost::format("%d->%s ") % v[i] % v[i + 1];
           }
      }
 };
@@ -348,9 +344,9 @@ uint64_t get_matrix_props(const M& m, size_t rows, size_t cols)
 template <class Stream, class T>
 void printVector(Stream& out, const char* name, const std::vector<T>& aSV)
 {
-     out << name << endl;
+     out << name << std::endl;
      for (size_t i = 0; i < aSV.size(); ++i) {
-          out << format("%5d: %s") % i % aSV[i] << endl;
+          out << boost::format("%5d: %s") % i % aSV[i] << std::endl;
      }
 }
 
@@ -366,7 +362,8 @@ void printStateVector(Stream& out, const char* name, uint64_t L,
                       const std::vector<T>& aSV)
 {
      for (size_t i = 0; i < aSV.size(); ++i) {
-          out << format("%5d: %s") % i % bitstring(aSV[i], L) << endl;
+          out << boost::format("%5d: %s") % i % bitstring(aSV[i], L)
+              << std::endl;
      }
 }
 
@@ -374,25 +371,26 @@ template <class V>
 void printStateVector1(const V& aSV)
 {
      for (size_t i = 0; i < aSV.size(); ++i) {
-          cout << format("%5d: %f") % i % aSV[i] << endl;
+          std::cout << boost::format("%5d: %f") % i % aSV[i] << std::endl;
      }
 }
 
 template <class Stream, class T>
 void printPairs(Stream& out, const char* name, const std::vector<T>& aPairs)
 {
-     out << name << endl;
+     out << name << std::endl;
      for (size_t i = 0; i < aPairs.size(); i += 2) {
-          out << format("%d->%d") % aPairs[i] % aPairs[i + 1] << endl;
+          out << boost::format("%d->%d") % aPairs[i] % aPairs[i + 1]
+              << std::endl;
      }
 }
 
 template <class Stream, class K, class V>
 void printMap(Stream& out, const char* name, const std::map<K, V>& aPairs)
 {
-     out << name << endl;
+     out << name << std::endl;
      for (auto& p: aPairs) {
-          out << format("[%d: %d]") % p.first % p.second << endl;
+          out << boost::format("[%d: %d]") % p.first % p.second << std::endl;
      }
 }
 

@@ -27,13 +27,6 @@
 #include "simulator-mpi/kernels/intrin/kernels.hpp"
 #include "simulator-mpi/kernels/nointrin/kernels.hpp"
 
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::size_t;
-using namespace boost;
-using boost::format;
-
 namespace bc = boost::container;
 namespace po = boost::program_options;
 
@@ -50,8 +43,8 @@ inline void kernel_core_print_idx(V& psi, std::size_t I, std::size_t d0,
      //     psi[I] = (add(mul(v[0], m[0][0]), mul(v[1], m[0][1])));
      //     psi[I + d0] = (add(mul(v[0], m[1][0]), mul(v[1], m[1][1])));
      uint64_t M = log2(psi.size());
-     cout << format("i0: %d") << bitstring(I, M) << endl;
-     cout << format("i1: %d") << bitstring(I + d0, M) << endl;
+     std::cout << boost::format("i0: %d") << bitstring(I, M) << std::endl;
+     std::cout << boost::format("i1: %d") << bitstring(I + d0, M) << std::endl;
 }
 
 template <class V, class Mat>
@@ -74,10 +67,11 @@ inline void kernel_core_print_idx(V& psi, std::size_t I, std::size_t d0,
      //     m[3][3])))));
 
      uint64_t M = log2(psi.size());
-     cout << format("i0: %d") % bitstring(I, M) << endl;
-     cout << format("i1: %d") % bitstring(I + d0, M) << endl;
-     cout << format("i2: %d") % bitstring(I + d1, M) << endl;
-     cout << format("i3: %d") % bitstring(I + d0 + d1, M) << endl;
+     std::cout << boost::format("i0: %d") % bitstring(I, M) << std::endl;
+     std::cout << boost::format("i1: %d") % bitstring(I + d0, M) << std::endl;
+     std::cout << boost::format("i2: %d") % bitstring(I + d1, M) << std::endl;
+     std::cout << boost::format("i3: %d") % bitstring(I + d0 + d1, M)
+               << std::endl;
 }
 
 template <class V, class Mat>
@@ -106,40 +100,42 @@ uint64_t get_control_mask(const std::vector<uint64_t>& ctrls)
      return res;
 }
 
-template <size_t n_bits, class V, class Mat,
+template <std::size_t n_bits, class V, class Mat,
           void K(V&, std::size_t, std::size_t, std::size_t, Mat const&)>
 void iterate_state_vector(uint64_t M, V& vec, const Mat& m,
                           const std::vector<uint64_t>& trgts,
                           const std::vector<std::pair<uint64_t, bool>>& bits)
 {
-     for (size_t free_idx = 0; free_idx < (1ul << (M - n_bits)); ++free_idx) {
-          size_t res_start_idx = free_idx;
-          for (size_t bit_idx = 0; bit_idx < n_bits; ++bit_idx) {
+     for (std::size_t free_idx = 0; free_idx < (1ul << (M - n_bits));
+          ++free_idx) {
+          std::size_t res_start_idx = free_idx;
+          for (std::size_t bit_idx = 0; bit_idx < n_bits; ++bit_idx) {
                uint64_t b = (1ul << bits[bit_idx].first);
                uint64_t l = res_start_idx & (b - 1);
                uint64_t r = res_start_idx - l;
 
                res_start_idx = 2 * r + l;
-               //             cout << format("bit: %2d, res_start_idx: %s") %
-               //             bits[bit_idx].first % bitstring(res_start_idx, M)
-               //             << endl;
+               //             std::cout << boost::format("bit: %2d,
+               //             res_start_idx: %s") % bits[bit_idx].first %
+               //             bitstring(res_start_idx, M)
+               //             << std::endl;
                res_start_idx |= bits[bit_idx].second * b;
-               //             cout << format("         res_start_idx: %s") %
-               //             bitstring(res_start_idx, M) << endl;
+               //             std::cout << boost::format(" res_start_idx: %s") %
+               //             bitstring(res_start_idx, M) << std::endl;
           }
 
-          //         cout << format("res_start_idx: %s") % bitstring(
-          //         res_start_idx, M) << endl;
+          //         std::cout << boost::format("res_start_idx: %s") %
+          //         bitstring( res_start_idx, M) << std::endl;
 
           K(vec, res_start_idx, 1ul << trgts[0], 1ul << trgts[1], m);
      }
 }
 
-Fusion::Matrix construct_gate(size_t n)
+Fusion::Matrix construct_gate(std::size_t n)
 {
      Fusion::Matrix m;
 
-     size_t N = 1ul << n;
+     std::size_t N = 1ul << n;
 
      m.resize(N);
      for (auto& r: m) {
@@ -190,8 +186,9 @@ void apply_gate(StateVector& vec_, const Fusion::Matrix& m,
 
      auto t1 = std::chrono::high_resolution_clock::now();
      std::chrono::duration<double, std::milli> dt = t1 - t0;
-     cout << format("trgts: %d dt: %.3f ms") % trgts.size() % dt.count()
-          << endl;
+     std::cout << boost::format("trgts: %d dt: %.3f ms") % trgts.size() %
+                      dt.count()
+               << std::endl;
 }
 
 void hiqubit(uint64_t M)
@@ -203,11 +200,11 @@ void hiqubit(uint64_t M)
           Fusion::Matrix m = construct_gate(trgts.size());
 
           for (uint64_t q = 0; q < M - n + 1; ++q) {
-               for (size_t i = 0; i < n; ++i) {
+               for (std::size_t i = 0; i < n; ++i) {
                     trgts[i] = q + i;
                }
-               //              std::cout << std::endl << "trgs: " <<
-               //              print(trgts) << std::endl;
+               //              std::std::cout << std::std::endl << "trgs: " <<
+               //              print(trgts) << std::std::endl;
 
                apply_gate(vec_, m, trgts, 0ul);
           }
@@ -225,7 +222,8 @@ void orig_algo(uint64_t L, uint64_t M, std::vector<uint64_t>& trgts,
 
      uint64_t ctrlmask = get_control_mask(ctrls);
 
-     //     cout << format("ctrlmask: %s") % bitstring(ctrlmask, M) << endl;
+     //     std::cout << boost::format("ctrlmask: %s") % bitstring(ctrlmask, M)
+     //     << std::endl;
 
      apply_gate(vec_, m, trgts, ctrlmask);
 }
@@ -237,11 +235,11 @@ int new_algo(uint64_t L, uint64_t M, std::vector<uint64_t>& trgts,
      Fusion::Matrix m;
 
      std::vector<std::pair<uint64_t, bool>> bits(ctrls.size() + trgts.size());
-     for (size_t i = 0; i < ctrls.size(); ++i) {
+     for (std::size_t i = 0; i < ctrls.size(); ++i) {
           bits[i] = std::make_pair(ctrls[i], true);
      }
 
-     for (size_t i = ctrls.size(); i < bits.size(); ++i) {
+     for (std::size_t i = ctrls.size(); i < bits.size(); ++i) {
           bits[i] = std::make_pair(trgts[i - ctrls.size()], false);
      }
 
@@ -250,7 +248,8 @@ int new_algo(uint64_t L, uint64_t M, std::vector<uint64_t>& trgts,
                    -> bool { return a.first < b.first; });
 
      //     for(auto& p: bits) {
-     //         cout << format("%d: %d") % p.first % p.second << endl;
+     //         std::cout << boost::format("%d: %d") % p.first % p.second <<
+     //         std::endl;
      //     }
      auto t0 = std::chrono::high_resolution_clock::now();
 
@@ -264,47 +263,47 @@ int new_algo(uint64_t L, uint64_t M, std::vector<uint64_t>& trgts,
 
      auto t1 = std::chrono::high_resolution_clock::now();
      std::chrono::duration<double, std::milli> dt = t1 - t0;
-     cout << format("dt: %.3f ms") % dt.count() << endl;
+     std::cout << boost::format("dt: %.3f ms") % dt.count() << std::endl;
 
-     //     size_t n_bits = bits.size();
-     //     for(size_t free_idx = 0; free_idx < (1ul << (M - n_bits));
+     //     std::size_t n_bits = bits.size();
+     //     for(std::size_t free_idx = 0; free_idx < (1ul << (M - n_bits));
      //     ++free_idx) {
-     //         size_t res_start_idx = free_idx;
-     //         for(size_t bit_idx = 0; bit_idx < n_bits; ++bit_idx ) {
+     //         std::size_t res_start_idx = free_idx;
+     //         for(std::size_t bit_idx = 0; bit_idx < n_bits; ++bit_idx ) {
      //             uint64_t b = (1ul << bits[bit_idx].first);
      //             uint64_t l = res_start_idx & (b - 1);
      //             uint64_t r = res_start_idx - l;
      //
      //             res_start_idx = 2*r + l;
-     // //             cout << format("bit: %2d, res_start_idx: %s") %
-     // bits[bit_idx].first % bitstring(res_start_idx, M) << endl;
+     // //             std::cout << boost::format("bit: %2d, res_start_idx: %s")
+     // % bits[bit_idx].first % bitstring(res_start_idx, M) << std::endl;
      //             res_start_idx |= bits[bit_idx].second*b;
-     // //             cout << format("         res_start_idx: %s") %
-     // bitstring(res_start_idx, M) << endl;
+     // //             std::cout << boost::format("         res_start_idx: %s")
+     // % bitstring(res_start_idx, M) << std::endl;
      //         }
      //
-     // //         cout << format("res_start_idx: %s") % bitstring(
-     // res_start_idx, M) << endl;
+     // //         std::cout << boost::format("res_start_idx: %s") % bitstring(
+     // res_start_idx, M) << std::endl;
      //
      //         switch(trgts.size()) {
      //             case 1:
-     // //                 cout << format("i0: %s") % bitstring( res_start_idx,
-     // M) << endl;
-     // //                 cout << format("i1: %s") % bitstring( res_start_idx +
-     // (1ul << trgts[0]), M) << endl;
+     // //                 std::cout << boost::format("i0: %s") % bitstring(
+     // res_start_idx, M) << std::endl;
+     // //                 std::cout << boost::format("i1: %s") % bitstring(
+     // res_start_idx + (1ul << trgts[0]), M) << std::endl;
      //                 kernel_core_print_idx(vec, res_start_idx, 1ul <<
      //                 trgts[0], m); break;
      //             case 2:
      //                 kernel_core_print_idx(vec, res_start_idx, 1ul <<
      //                 trgts[0], 1ul << trgts[1], m);
-     // //                 cout << format("i0: %s") % bitstring( res_start_idx,
-     // M) << endl;
-     // //                 cout << format("i1: %s") % bitstring( res_start_idx +
-     // (1ul << trgts[0]), M) << endl;
-     // //                 cout << format("i2: %s") % bitstring( res_start_idx +
-     // (1ul << trgts[1]), M) << endl;
-     // //                 cout << format("i3: %s") % bitstring( res_start_idx +
-     // (1ul << trgts[0]) + (1ul << trgts[1]), M) << endl;
+     // //                 std::cout << boost::format("i0: %s") % bitstring(
+     // res_start_idx, M) << std::endl;
+     // //                 std::cout << boost::format("i1: %s") % bitstring(
+     // res_start_idx + (1ul << trgts[0]), M) << std::endl;
+     // //                 std::cout << boost::format("i2: %s") % bitstring(
+     // res_start_idx + (1ul << trgts[1]), M) << std::endl;
+     // //                 std::cout << boost::format("i3: %s") % bitstring(
+     // res_start_idx + (1ul << trgts[0]) + (1ul << trgts[1]), M) << std::endl;
      //                 break;
      //         }
      //     }
@@ -346,13 +345,14 @@ int main(int argc, char** argv)
      po::notify(vm);
 
      if (vm.count("help")) {
-          cout << desc << "\n";
+          std::cout << desc << "\n";
           return 0;
      }
 
-     cout << format("algo: %s, L: %d, M: %d, trgts: %s, ctrls: %s") % algo % L %
-                 M % print(trgts) % print(ctrls)
-          << endl;
+     std::cout << boost::format(
+                      "algo: %s, L: %d, M: %d, trgts: %s, ctrls: %s") %
+                      algo % L % M % print(trgts) % print(ctrls)
+               << std::endl;
 #ifdef _OPENMP
      omp_set_num_threads(nthreads);
 #endif  // _OPENMP
@@ -367,7 +367,7 @@ int main(int argc, char** argv)
           hiqubit(M);
      }
      else {
-          cout << "ERROR: unknown --algo " << algo << endl;
+          std::cout << "ERROR: unknown --algo " << algo << std::endl;
      }
 
      return 0;
