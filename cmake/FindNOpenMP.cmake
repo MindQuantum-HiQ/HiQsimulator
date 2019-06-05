@@ -85,8 +85,9 @@ function(_NOPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_HP "+Oopenmp")
     if(WIN32)
       set(OMP_FLAG_Intel "-Qopenmp")
-    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "Intel" AND
-           "${CMAKE_${LANG}_COMPILER_VERSION}" VERSION_LESS "15.0.0.20140528")
+    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "Intel"
+           AND "${CMAKE_${LANG}_COMPILER_VERSION}" VERSION_LESS
+               "15.0.0.20140528")
       set(OMP_FLAG_Intel "-openmp")
     else()
       set(OMP_FLAG_Intel "-qopenmp")
@@ -106,18 +107,18 @@ function(_NOPENMP_FLAG_CANDIDATES LANG)
     # If we know the correct flags, use those
     if(DEFINED OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID})
       set(NOpenMP_FLAG_CANDIDATES "${OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID}}")
-    # Fall back to reasonable default tries otherwise
+      # Fall back to reasonable default tries otherwise
     else()
       set(NOpenMP_FLAG_CANDIDATES "-openmp" "-fopenmp" "-mp" " ")
     endif()
-    set(NOpenMP_${LANG}_FLAG_CANDIDATES "${NOpenMP_FLAG_CANDIDATES}" PARENT_SCOPE)
+    set(NOpenMP_${LANG}_FLAG_CANDIDATES "${NOpenMP_FLAG_CANDIDATES}"
+        PARENT_SCOPE)
   else()
     set(NOpenMP_${LANG}_FLAG_CANDIDATES "${NOpenMP_${LANG}_FLAG}" PARENT_SCOPE)
   endif()
 endfunction()
 
-set(NOpenMP_C_CXX_TEST_SOURCE
-"
+set(NOpenMP_C_CXX_TEST_SOURCE "
 #include <omp.h>
 int main() {
 #ifdef _OPENMP
@@ -129,17 +130,19 @@ int main() {
 }
 ")
 
-set(NOpenMP_Fortran_TEST_SOURCE
-  "
+set(NOpenMP_Fortran_TEST_SOURCE "
       program test
       @NOpenMP_Fortran_INCLUDE_LINE@
   !$  integer :: n
       n = omp_get_num_threads()
       end program test
-  "
-)
+  ")
 
-function(_NOPENMP_WRITE_SOURCE_FILE LANG SRC_FILE_CONTENT_VAR SRC_FILE_NAME SRC_FILE_FULLPATH)
+function(_NOPENMP_WRITE_SOURCE_FILE
+         LANG
+         SRC_FILE_CONTENT_VAR
+         SRC_FILE_NAME
+         SRC_FILE_FULLPATH)
   set(WORK_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindNOpenMP)
   if("${LANG}" STREQUAL "C")
     set(SRC_FILE "${WORK_DIR}/${SRC_FILE_NAME}.c")
@@ -157,15 +160,24 @@ endfunction()
 
 include(CMakeParseImplicitLinkInfo)
 
-function(_NOPENMP_GET_FLAGS LANG FLAG_MODE NOPENMP_FLAG_VAR NOPENMP_LIB_NAMES_VAR)
-  _NOPENMP_FLAG_CANDIDATES("${LANG}")
-  _NOPENMP_WRITE_SOURCE_FILE("${LANG}" "TEST_SOURCE" NOpenMPTryFlag _NOPENMP_TEST_SRC)
+function(_NOPENMP_GET_FLAGS
+         LANG
+         FLAG_MODE
+         NOPENMP_FLAG_VAR
+         NOPENMP_LIB_NAMES_VAR)
+  _nopenmp_flag_candidates("${LANG}")
+  _nopenmp_write_source_file("${LANG}"
+                             "TEST_SOURCE"
+                             NOpenMPTryFlag
+                             _NOPENMP_TEST_SRC)
 
   unset(NOpenMP_VERBOSE_COMPILE_OPTIONS)
   if(WIN32)
-    separate_arguments(NOpenMP_VERBOSE_OPTIONS WINDOWS_COMMAND "${CMAKE_${LANG}_VERBOSE_FLAG}")
+    separate_arguments(NOpenMP_VERBOSE_OPTIONS WINDOWS_COMMAND
+                       "${CMAKE_${LANG}_VERBOSE_FLAG}")
   else()
-    separate_arguments(NOpenMP_VERBOSE_OPTIONS UNIX_COMMAND "${CMAKE_${LANG}_VERBOSE_FLAG}")
+    separate_arguments(NOpenMP_VERBOSE_OPTIONS UNIX_COMMAND
+                       "${CMAKE_${LANG}_VERBOSE_FLAG}")
   endif()
   foreach(_VERBOSE_OPTION IN LISTS NOpenMP_VERBOSE_OPTIONS)
     if(NOT _VERBOSE_OPTION MATCHES "^-Wl,")
@@ -176,16 +188,21 @@ function(_NOPENMP_GET_FLAGS LANG FLAG_MODE NOPENMP_FLAG_VAR NOPENMP_LIB_NAMES_VA
   foreach(NOPENMP_FLAG IN LISTS NOpenMP_${LANG}_FLAG_CANDIDATES)
     set(NOPENMP_FLAGS_TEST "${NOPENMP_FLAG}")
     if(NOpenMP_VERBOSE_COMPILE_OPTIONS)
-      set(NOPENMP_FLAGS_TEST "${NOPENMP_FLAGS_TEST} ${NOpenMP_VERBOSE_COMPILE_OPTIONS}")
+      set(NOPENMP_FLAGS_TEST
+          "${NOPENMP_FLAGS_TEST} ${NOpenMP_VERBOSE_COMPILE_OPTIONS}")
       # string(APPEND NOPENMP_FLAGS_TEST " ${NOpenMP_VERBOSE_COMPILE_OPTIONS}")
     endif()
-    string(REGEX REPLACE "[-/=+]" "" NOPENMP_PLAIN_FLAG "${NOPENMP_FLAG}")
-    try_compile( NOpenMP_COMPILE_RESULT_${FLAG_MODE}_${NOPENMP_PLAIN_FLAG} ${CMAKE_BINARY_DIR} ${_NOPENMP_TEST_SRC}
-      CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${NOPENMP_FLAGS_TEST}"
-      "${APPLE_HOMEBREW_LIBOMP}"
-      LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG}
-      OUTPUT_VARIABLE NOpenMP_TRY_COMPILE_OUTPUT
-      )
+    string(REGEX
+           REPLACE "[-/=+]"
+                   ""
+                   NOPENMP_PLAIN_FLAG
+                   "${NOPENMP_FLAG}")
+    try_compile(NOpenMP_COMPILE_RESULT_${FLAG_MODE}_${NOPENMP_PLAIN_FLAG}
+                ${CMAKE_BINARY_DIR} ${_NOPENMP_TEST_SRC}
+                CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${NOPENMP_FLAGS_TEST}"
+                            "${APPLE_HOMEBREW_LIBOMP}"
+                LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG}
+                OUTPUT_VARIABLE NOpenMP_TRY_COMPILE_OUTPUT)
 
     if(NOpenMP_COMPILE_RESULT_${FLAG_MODE}_${NOPENMP_PLAIN_FLAG})
       set("${NOPENMP_FLAG_VAR}" "${NOPENMP_FLAG}" PARENT_SCOPE)
@@ -196,43 +213,76 @@ function(_NOPENMP_GET_FLAGS LANG FLAG_MODE NOPENMP_FLAG_VAR NOPENMP_LIB_NAMES_VA
         unset(NOpenMP_${LANG}_IMPLICIT_FWK_DIRS)
         unset(NOpenMP_${LANG}_LOG_VAR)
 
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Detecting ${LANG} OpenMP compiler ABI info compiled with the following output:\n${NOpenMP_TRY_COMPILE_OUTPUT}\n\n")
+        file(
+          APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "Detecting ${LANG} OpenMP compiler ABI info compiled with the following output:\n${NOpenMP_TRY_COMPILE_OUTPUT}\n\n"
+          )
 
         cmake_parse_implicit_link_info("${NOpenMP_TRY_COMPILE_OUTPUT}"
-          NOpenMP_${LANG}_IMPLICIT_LIBRARIES
-          NOpenMP_${LANG}_IMPLICIT_LINK_DIRS
-          NOpenMP_${LANG}_IMPLICIT_FWK_DIRS
-          NOpenMP_${LANG}_LOG_VAR
-          "${CMAKE_${LANG}_IMPLICIT_OBJECT_REGEX}"
-        )
+                                       NOpenMP_${LANG}_IMPLICIT_LIBRARIES
+                                       NOpenMP_${LANG}_IMPLICIT_LINK_DIRS
+                                       NOpenMP_${LANG}_IMPLICIT_FWK_DIRS
+                                       NOpenMP_${LANG}_LOG_VAR
+                                       "${CMAKE_${LANG}_IMPLICIT_OBJECT_REGEX}")
 
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Parsed ${LANG} OpenMP implicit link information from above output:\n${NOpenMP_${LANG}_LOG_VAR}\n\n")
+        file(
+          APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "Parsed ${LANG} OpenMP implicit link information from above output:\n${NOpenMP_${LANG}_LOG_VAR}\n\n"
+          )
 
         unset(_NOPENMP_LIB_NAMES)
-        foreach(_NOPENMP_IMPLICIT_LIB IN LISTS NOpenMP_${LANG}_IMPLICIT_LIBRARIES)
-          get_filename_component(_NOPENMP_IMPLICIT_LIB_DIR "${_NOPENMP_IMPLICIT_LIB}" DIRECTORY)
-          get_filename_component(_NOPENMP_IMPLICIT_LIB_NAME "${_NOPENMP_IMPLICIT_LIB}" NAME)
-          get_filename_component(_NOPENMP_IMPLICIT_LIB_PLAIN "${_NOPENMP_IMPLICIT_LIB}" NAME_WE)
-          string(REGEX REPLACE "([][+.*?()^$])" "\\\\\\1" _NOPENMP_IMPLICIT_LIB_PLAIN_ESC "${_NOPENMP_IMPLICIT_LIB_PLAIN}")
-          string(REGEX REPLACE "([][+.*?()^$])" "\\\\\\1" _NOPENMP_IMPLICIT_LIB_PATH_ESC "${_NOPENMP_IMPLICIT_LIB}")
+        foreach(_NOPENMP_IMPLICIT_LIB
+                IN
+                LISTS
+                NOpenMP_${LANG}_IMPLICIT_LIBRARIES)
+          get_filename_component(_NOPENMP_IMPLICIT_LIB_DIR
+                                 "${_NOPENMP_IMPLICIT_LIB}" DIRECTORY)
+          get_filename_component(_NOPENMP_IMPLICIT_LIB_NAME
+                                 "${_NOPENMP_IMPLICIT_LIB}" NAME)
+          get_filename_component(_NOPENMP_IMPLICIT_LIB_PLAIN
+                                 "${_NOPENMP_IMPLICIT_LIB}" NAME_WE)
+          string(REGEX
+                 REPLACE "([][+.*?()^$])"
+                         "\\\\\\1"
+                         _NOPENMP_IMPLICIT_LIB_PLAIN_ESC
+                         "${_NOPENMP_IMPLICIT_LIB_PLAIN}")
+          string(REGEX
+                 REPLACE "([][+.*?()^$])"
+                         "\\\\\\1"
+                         _NOPENMP_IMPLICIT_LIB_PATH_ESC
+                         "${_NOPENMP_IMPLICIT_LIB}")
 
-	  list (FIND CMAKE_${LANG}_IMPLICIT_LINK_LIBRARIES "${_NOPENMP_IMPLICIT_LIB}" _index)
-          if(NOT ( _index GREATER -1
-            OR "${CMAKE_${LANG}_STANDARD_LIBRARIES}" MATCHES "(^| )(-Wl,)?(-l)?(${_NOPENMP_IMPLICIT_LIB_PLAIN_ESC}|${_NOPENMP_IMPLICIT_LIB_PATH_ESC})( |$)"
-            OR "${CMAKE_${LANG}_LINK_EXECUTABLE}" MATCHES "(^| )(-Wl,)?(-l)?(${_NOPENMP_IMPLICIT_LIB_PLAIN_ESC}|${_NOPENMP_IMPLICIT_LIB_PATH_ESC})( |$)" ) )
+          list(FIND CMAKE_${LANG}_IMPLICIT_LINK_LIBRARIES
+                    "${_NOPENMP_IMPLICIT_LIB}" _index)
+          if(
+            NOT
+            (
+              _index GREATER -1
+              OR
+                "${CMAKE_${LANG}_STANDARD_LIBRARIES}" MATCHES
+                "(^| )(-Wl,)?(-l)?(${_NOPENMP_IMPLICIT_LIB_PLAIN_ESC}|${_NOPENMP_IMPLICIT_LIB_PATH_ESC})( |$)"
+              OR
+                "${CMAKE_${LANG}_LINK_EXECUTABLE}" MATCHES
+                "(^| )(-Wl,)?(-l)?(${_NOPENMP_IMPLICIT_LIB_PLAIN_ESC}|${_NOPENMP_IMPLICIT_LIB_PATH_ESC})( |$)"
+              ))
             if(_NOPENMP_IMPLICIT_LIB_DIR)
-              set(NOpenMP_${_NOPENMP_IMPLICIT_LIB_PLAIN}_LIBRARY "${_NOPENMP_IMPLICIT_LIB}" CACHE FILEPATH
-                "Path to the ${_NOPENMP_IMPLICIT_LIB_PLAIN} library for OpenMP")
+              set(
+                NOpenMP_${_NOPENMP_IMPLICIT_LIB_PLAIN}_LIBRARY
+                "${_NOPENMP_IMPLICIT_LIB}"
+                CACHE
+                  FILEPATH
+                  "Path to the ${_NOPENMP_IMPLICIT_LIB_PLAIN} library for OpenMP"
+                )
             else()
-              find_library(NOpenMP_${_NOPENMP_IMPLICIT_LIB_PLAIN}_LIBRARY
+              find_library(
+                NOpenMP_${_NOPENMP_IMPLICIT_LIB_PLAIN}_LIBRARY
                 NAMES "${_NOPENMP_IMPLICIT_LIB_NAME}"
-                DOC "Path to the ${_NOPENMP_IMPLICIT_LIB_PLAIN} library for OpenMP"
+                DOC
+                  "Path to the ${_NOPENMP_IMPLICIT_LIB_PLAIN} library for OpenMP"
                 HINTS ${NOpenMP_${LANG}_IMPLICIT_LINK_DIRS}
-                CMAKE_FIND_ROOT_PATH_BOTH
-                NO_DEFAULT_PATH
-              )
+                CMAKE_FIND_ROOT_PATH_BOTH NO_DEFAULT_PATH)
             endif()
             mark_as_advanced(NOpenMP_${_NOPENMP_IMPLICIT_LIB_PLAIN}_LIBRARY)
             list(APPEND _NOPENMP_LIB_NAMES ${_NOPENMP_IMPLICIT_LIB_PLAIN})
@@ -246,16 +296,16 @@ function(_NOPENMP_GET_FLAGS LANG FLAG_MODE NOPENMP_FLAG_VAR NOPENMP_LIB_NAMES_VA
     elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "AppleClang"
            AND CMAKE_${LANG}_COMPILER_VERSION VERSION_GREATER "6.99")
       find_library(NOpenMP_libomp_LIBRARY
-        NAMES omp gomp iomp5
-        HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
-      )
+                   NAMES omp gomp iomp5
+                   HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES})
       mark_as_advanced(NOpenMP_libomp_LIBRARY)
       if(NOpenMP_libomp_LIBRARY)
-        try_compile( NOpenMP_COMPILE_RESULT_${FLAG_MODE}_${NOPENMP_PLAIN_FLAG} ${CMAKE_BINARY_DIR} ${_NOPENMP_TEST_SRC}
+        try_compile(
+          NOpenMP_COMPILE_RESULT_${FLAG_MODE}_${NOPENMP_PLAIN_FLAG}
+          ${CMAKE_BINARY_DIR} ${_NOPENMP_TEST_SRC}
           CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${NOPENMP_FLAGS_TEST}"
           LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${NOpenMP_libomp_LIBRARY}
-          OUTPUT_VARIABLE NOpenMP_TRY_COMPILE_OUTPUT
-        )
+          OUTPUT_VARIABLE NOpenMP_TRY_COMPILE_OUTPUT)
         if(NOpenMP_COMPILE_RESULT_${FLAG_MODE}_${NOPENMP_PLAIN_FLAG})
           set("${NOPENMP_FLAG_VAR}" "${NOPENMP_FLAG}" PARENT_SCOPE)
           set("${NOPENMP_LIB_NAMES_VAR}" "libomp" PARENT_SCOPE)
@@ -269,8 +319,7 @@ function(_NOPENMP_GET_FLAGS LANG FLAG_MODE NOPENMP_FLAG_VAR NOPENMP_LIB_NAMES_VA
   unset(NOpenMP_VERBOSE_COMPILE_OPTIONS)
 endfunction()
 
-set(NOpenMP_C_CXX_CHECK_VERSION_SOURCE
-"
+set(NOpenMP_C_CXX_CHECK_VERSION_SOURCE "
 #include <stdio.h>
 #include <omp.h>
 const char ompver_str[] = { 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'M',
@@ -289,8 +338,7 @@ int main()
 }
 ")
 
-set(NOpenMP_Fortran_CHECK_VERSION_SOURCE
-"
+set(NOpenMP_Fortran_CHECK_VERSION_SOURCE "
       program omp_ver
       @NOpenMP_Fortran_INCLUDE_LINE@
       integer, parameter :: zero = ichar('0')
@@ -309,12 +357,24 @@ set(NOpenMP_Fortran_CHECK_VERSION_SOURCE
 ")
 
 function(_NOPENMP_GET_SPEC_DATE LANG SPEC_DATE)
-  _NOPENMP_WRITE_SOURCE_FILE("${LANG}" "CHECK_VERSION_SOURCE" NOpenMPCheckVersion _NOPENMP_TEST_SRC)
-  set(BIN_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindNOpenMP/ompver_${LANG}.bin")
-  string(REGEX REPLACE "[-/=+]" "" NOPENMP_PLAIN_FLAG "${NOPENMP_FLAG}")
-  try_compile(NOpenMP_SPECTEST_${LANG}_${NOPENMP_PLAIN_FLAG} "${CMAKE_BINARY_DIR}" "${_NOPENMP_TEST_SRC}"
-              CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${NOpenMP_${LANG}_FLAGS}"
-              COPY_FILE ${BIN_FILE})
+  _nopenmp_write_source_file("${LANG}"
+                             "CHECK_VERSION_SOURCE"
+                             NOpenMPCheckVersion
+                             _NOPENMP_TEST_SRC)
+  set(
+    BIN_FILE
+    "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindNOpenMP/ompver_${LANG}.bin"
+    )
+  string(REGEX
+         REPLACE "[-/=+]"
+                 ""
+                 NOPENMP_PLAIN_FLAG
+                 "${NOPENMP_FLAG}")
+  try_compile(
+    NOpenMP_SPECTEST_${LANG}_${NOPENMP_PLAIN_FLAG} "${CMAKE_BINARY_DIR}"
+    "${_NOPENMP_TEST_SRC}"
+    CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${NOpenMP_${LANG}_FLAGS}"
+    COPY_FILE ${BIN_FILE})
   if(${NOpenMP_SPECTEST_${LANG}_${NOPENMP_PLAIN_FLAG}})
     file(STRINGS ${BIN_FILE} specstr LIMIT_COUNT 1 REGEX "INFO:OpenMP-date")
     set(regex_spec_date ".*INFO:OpenMP-date\\[0*([^]]*)\\].*")
@@ -326,35 +386,38 @@ endfunction()
 
 macro(_NOPENMP_SET_VERSION_BY_SPEC_DATE LANG)
   set(NOpenMP_SPEC_DATE_MAP
-    # Preview versions
-    "201611=5.0" # OpenMP 5.0 preview 1
-    # Combined versions, 2.5 onwards
-    "201511=4.5"
-    "201307=4.0"
-    "201107=3.1"
-    "200805=3.0"
-    "200505=2.5"
-    # C/C++ version 2.0
-    "200203=2.0"
-    # Fortran version 2.0
-    "200011=2.0"
-    # Fortran version 1.1
-    "199911=1.1"
-    # C/C++ version 1.0 (there's no 1.1 for C/C++)
-    "199810=1.0"
-    # Fortran version 1.0
-    "199710=1.0"
-  )
+      # Preview versions
+      "201611=5.0" # OpenMP 5.0 preview 1
+                   # Combined versions, 2.5 onwards
+      "201511=4.5"
+      "201307=4.0"
+      "201107=3.1"
+      "200805=3.0"
+      "200505=2.5"
+      # C/C++ version 2.0
+      "200203=2.0"
+      # Fortran version 2.0
+      "200011=2.0"
+      # Fortran version 1.1
+      "199911=1.1"
+      # C/C++ version 1.0 (there's no 1.1 for C/C++)
+      "199810=1.0"
+      # Fortran version 1.0
+      "199710=1.0")
 
   if(NOpenMP_${LANG}_SPEC_DATE)
-    string(REGEX MATCHALL "${NOpenMP_${LANG}_SPEC_DATE}=([0-9]+)\\.([0-9]+)" _version_match "${NOpenMP_SPEC_DATE_MAP}")
+    string(REGEX MATCHALL
+                 "${NOpenMP_${LANG}_SPEC_DATE}=([0-9]+)\\.([0-9]+)"
+                 _version_match
+                 "${NOpenMP_SPEC_DATE_MAP}")
   else()
     set(_version_match "")
   endif()
   if(NOT _version_match STREQUAL "")
     set(NOpenMP_${LANG}_VERSION_MAJOR ${CMAKE_MATCH_1})
     set(NOpenMP_${LANG}_VERSION_MINOR ${CMAKE_MATCH_2})
-    set(NOpenMP_${LANG}_VERSION "${NOpenMP_${LANG}_VERSION_MAJOR}.${NOpenMP_${LANG}_VERSION_MINOR}")
+    set(NOpenMP_${LANG}_VERSION
+        "${NOpenMP_${LANG}_VERSION_MAJOR}.${NOpenMP_${LANG}_VERSION_MINOR}")
   else()
     unset(NOpenMP_${LANG}_VERSION_MAJOR)
     unset(NOpenMP_${LANG}_VERSION_MINOR)
@@ -366,47 +429,62 @@ endmacro()
 
 foreach(LANG IN ITEMS C CXX)
   if(CMAKE_${LANG}_COMPILER_LOADED)
-    if(NOT DEFINED NOpenMP_${LANG}_FLAGS OR "${NOpenMP_${LANG}_FLAGS}" STREQUAL "NOTFOUND"
-      OR NOT DEFINED NOpenMP_${LANG}_LIB_NAMES OR "${NOpenMP_${LANG}_LIB_NAMES}" STREQUAL "NOTFOUND")
-      _NOPENMP_GET_FLAGS("${LANG}" "${LANG}" NOpenMP_${LANG}_FLAGS_WORK NOpenMP_${LANG}_LIB_NAMES_WORK)
+    if(NOT DEFINED NOpenMP_${LANG}_FLAGS
+       OR "${NOpenMP_${LANG}_FLAGS}" STREQUAL "NOTFOUND"
+       OR NOT DEFINED NOpenMP_${LANG}_LIB_NAMES
+       OR "${NOpenMP_${LANG}_LIB_NAMES}" STREQUAL "NOTFOUND")
+      _nopenmp_get_flags("${LANG}"
+                         "${LANG}"
+                         NOpenMP_${LANG}_FLAGS_WORK
+                         NOpenMP_${LANG}_LIB_NAMES_WORK)
     endif()
     set(NOpenMP_${LANG}_FLAGS "${NOpenMP_${LANG}_FLAGS_WORK}"
-      CACHE STRING "${LANG} compiler flags for OpenMP parallelization")
+        CACHE STRING "${LANG} compiler flags for OpenMP parallelization")
     set(NOpenMP_${LANG}_LIB_NAMES "${NOpenMP_${LANG}_LIB_NAMES_WORK}"
-      CACHE STRING "${LANG} compiler libraries for OpenMP parallelization")
+        CACHE STRING "${LANG} compiler libraries for OpenMP parallelization")
     mark_as_advanced(NOpenMP_${LANG}_FLAGS NOpenMP_${LANG}_LIB_NAMES)
   endif()
 endforeach()
 
 if(CMAKE_Fortran_COMPILER_LOADED)
-  if(NOT DEFINED NOpenMP_Fortran_FLAGS OR "${NOpenMP_Fortran_FLAGS}" STREQUAL "NOTFOUND"
-    OR NOT DEFINED NOpenMP_Fortran_LIB_NAMES OR "${NOpenMP_Fortran_LIB_NAMES}" STREQUAL "NOTFOUND"
-    OR NOT DEFINED NOpenMP_Fortran_HAVE_OMPLIB_MODULE)
+  if(NOT DEFINED NOpenMP_Fortran_FLAGS
+     OR "${NOpenMP_Fortran_FLAGS}" STREQUAL "NOTFOUND"
+     OR NOT DEFINED NOpenMP_Fortran_LIB_NAMES
+     OR "${NOpenMP_Fortran_LIB_NAMES}" STREQUAL "NOTFOUND"
+     OR NOT DEFINED NOpenMP_Fortran_HAVE_OMPLIB_MODULE)
     set(NOpenMP_Fortran_INCLUDE_LINE "use omp_lib\n      implicit none")
-    _NOPENMP_GET_FLAGS("Fortran" "FortranHeader" NOpenMP_Fortran_FLAGS_WORK NOpenMP_Fortran_LIB_NAMES_WORK)
+    _nopenmp_get_flags("Fortran"
+                       "FortranHeader"
+                       NOpenMP_Fortran_FLAGS_WORK
+                       NOpenMP_Fortran_LIB_NAMES_WORK)
     if(NOpenMP_Fortran_FLAGS_WORK)
       set(NOpenMP_Fortran_HAVE_OMPLIB_MODULE TRUE CACHE BOOL INTERNAL "")
     endif()
     set(NOpenMP_Fortran_FLAGS "${NOpenMP_Fortran_FLAGS_WORK}"
-      CACHE STRING "Fortran compiler flags for OpenMP parallelization")
+        CACHE STRING "Fortran compiler flags for OpenMP parallelization")
     set(NOpenMP_Fortran_LIB_NAMES "${NOpenMP_Fortran_LIB_NAMES_WORK}"
-      CACHE STRING "Fortran compiler libraries for OpenMP parallelization")
+        CACHE STRING "Fortran compiler libraries for OpenMP parallelization")
     mark_as_advanced(NOpenMP_Fortran_FLAGS NOpenMP_Fortran_LIB_NAMES)
   endif()
 
-  if(NOT DEFINED NOpenMP_Fortran_FLAGS OR "${NOpenMP_Fortran_FLAGS}" STREQUAL "NOTFOUND"
-    OR NOT DEFINED NOpenMP_Fortran_LIB_NAMES OR "${NOpenMP_Fortran_LIB_NAMES}" STREQUAL "NOTFOUND"
-    OR NOT DEFINED NOpenMP_Fortran_HAVE_OMPLIB_HEADER)
+  if(NOT DEFINED NOpenMP_Fortran_FLAGS
+     OR "${NOpenMP_Fortran_FLAGS}" STREQUAL "NOTFOUND"
+     OR NOT DEFINED NOpenMP_Fortran_LIB_NAMES
+     OR "${NOpenMP_Fortran_LIB_NAMES}" STREQUAL "NOTFOUND"
+     OR NOT DEFINED NOpenMP_Fortran_HAVE_OMPLIB_HEADER)
     set(NOpenMP_Fortran_INCLUDE_LINE "implicit none\n      include 'omp_lib.h'")
-    _NOPENMP_GET_FLAGS("Fortran" "FortranModule" NOpenMP_Fortran_FLAGS_WORK NOpenMP_Fortran_LIB_NAMES_WORK)
+    _nopenmp_get_flags("Fortran"
+                       "FortranModule"
+                       NOpenMP_Fortran_FLAGS_WORK
+                       NOpenMP_Fortran_LIB_NAMES_WORK)
     if(NOpenMP_Fortran_FLAGS_WORK)
       set(NOpenMP_Fortran_HAVE_OMPLIB_HEADER TRUE CACHE BOOL INTERNAL "")
     endif()
     set(NOpenMP_Fortran_FLAGS "${NOpenMP_Fortran_FLAGS_WORK}"
-      CACHE STRING "Fortran compiler flags for OpenMP parallelization")
+        CACHE STRING "Fortran compiler flags for OpenMP parallelization")
 
     set(NOpenMP_Fortran_LIB_NAMES "${NOpenMP_Fortran_LIB_NAMES}"
-      CACHE STRING "Fortran compiler libraries for OpenMP parallelization")
+        CACHE STRING "Fortran compiler libraries for OpenMP parallelization")
   endif()
   if(NOpenMP_Fortran_HAVE_OMPLIB_MODULE)
     set(NOpenMP_Fortran_INCLUDE_LINE "use omp_lib\n      implicit none")
@@ -427,11 +505,11 @@ include(FindPackageHandleStandardArgs)
 
 foreach(LANG IN LISTS NOpenMP_FINDLIST)
   if(CMAKE_${LANG}_COMPILER_LOADED)
-    if (NOT NOpenMP_${LANG}_SPEC_DATE AND NOpenMP_${LANG}_FLAGS)
-      _NOPENMP_GET_SPEC_DATE("${LANG}" NOpenMP_${LANG}_SPEC_DATE_INTERNAL)
-      set(NOpenMP_${LANG}_SPEC_DATE "${NOpenMP_${LANG}_SPEC_DATE_INTERNAL}" CACHE
-        INTERNAL "${LANG} compiler's OpenMP specification date")
-      _NOPENMP_SET_VERSION_BY_SPEC_DATE("${LANG}")
+    if(NOT NOpenMP_${LANG}_SPEC_DATE AND NOpenMP_${LANG}_FLAGS)
+      _nopenmp_get_spec_date("${LANG}" NOpenMP_${LANG}_SPEC_DATE_INTERNAL)
+      set(NOpenMP_${LANG}_SPEC_DATE "${NOpenMP_${LANG}_SPEC_DATE_INTERNAL}"
+          CACHE INTERNAL "${LANG} compiler's OpenMP specification date")
+      _nopenmp_set_version_by_spec_date("${LANG}")
     endif()
 
     set(NOpenMP_${LANG}_FIND_QUIETLY ${NOpenMP_FIND_QUIETLY})
@@ -444,55 +522,69 @@ foreach(LANG IN LISTS NOpenMP_FINDLIST)
       set(_NOPENMP_${LANG}_REQUIRED_LIB_VARS NOpenMP_${LANG}_LIB_NAMES)
     else()
       foreach(_NOPENMP_IMPLICIT_LIB IN LISTS NOpenMP_${LANG}_LIB_NAMES)
-        list(APPEND _NOPENMP_${LANG}_REQUIRED_LIB_VARS NOpenMP_${_NOPENMP_IMPLICIT_LIB}_LIBRARY)
+        list(APPEND _NOPENMP_${LANG}_REQUIRED_LIB_VARS
+                    NOpenMP_${_NOPENMP_IMPLICIT_LIB}_LIBRARY)
       endforeach()
     endif()
 
-    find_package_handle_standard_args(NOpenMP_${LANG} FOUND_VAR NOpenMP_${LANG}_FOUND
-      REQUIRED_VARS NOpenMP_${LANG}_FLAGS ${_NOPENMP_${LANG}_REQUIRED_LIB_VARS}
-      VERSION_VAR NOpenMP_${LANG}_VERSION
-      )
+    find_package_handle_standard_args(NOpenMP_${LANG}
+                                      FOUND_VAR
+                                      NOpenMP_${LANG}_FOUND
+                                      REQUIRED_VARS
+                                      NOpenMP_${LANG}_FLAGS
+                                      ${_NOPENMP_${LANG}_REQUIRED_LIB_VARS}
+                                      VERSION_VAR
+                                      NOpenMP_${LANG}_VERSION)
 
     if(NOpenMP_${LANG}_FOUND)
       if(DEFINED NOpenMP_${LANG}_VERSION)
-        if(NOT _NOpenMP_MIN_VERSION OR _NOpenMP_MIN_VERSION VERSION_GREATER NOpenMP_${LANG}_VERSION)
+        if(NOT _NOpenMP_MIN_VERSION
+           OR _NOpenMP_MIN_VERSION VERSION_GREATER NOpenMP_${LANG}_VERSION)
           set(_NOpenMP_MIN_VERSION NOpenMP_${LANG}_VERSION)
         endif()
       endif()
       set(NOpenMP_${LANG}_LIBRARIES "")
       foreach(_NOPENMP_IMPLICIT_LIB IN LISTS NOpenMP_${LANG}_LIB_NAMES)
-        list(APPEND NOpenMP_${LANG}_LIBRARIES "${NOpenMP_${_NOPENMP_IMPLICIT_LIB}_LIBRARY}")
+        list(APPEND NOpenMP_${LANG}_LIBRARIES
+                    "${NOpenMP_${_NOPENMP_IMPLICIT_LIB}_LIBRARY}")
       endforeach()
 
       if(NOT TARGET OpenMP::OpenMP_${LANG})
-	if(CMAKE_VERSION VERSION_LESS 3.0)
+        if(CMAKE_VERSION VERSION_LESS 3.0)
           add_library(OpenMP::OpenMP_${LANG} UNKNOWN IMPORTED)
-	  list(GET NOpenMP_${LANG}_LIB_NAMES 0 _name)
-	  set_target_properties(OpenMP::OpenMP_${LANG}
-	    PROPERTIES
-	    IMPORTED_LOCATION "${NOpenMP_${_name}_LIBRARY}")
-	else()
+          list(GET NOpenMP_${LANG}_LIB_NAMES 0 _name)
+          set_target_properties(OpenMP::OpenMP_${LANG}
+                                PROPERTIES IMPORTED_LOCATION
+                                           "${NOpenMP_${_name}_LIBRARY}")
+        else()
           add_library(OpenMP::OpenMP_${LANG} INTERFACE IMPORTED)
-	endif()
+        endif()
       endif()
       if(NOpenMP_${LANG}_FLAGS)
-	if(WIN32)
-          separate_arguments(_NOpenMP_${LANG}_OPTIONS WINDOWS_COMMAND "${NOpenMP_${LANG}_FLAGS}")
-	else()
-          separate_arguments(_NOpenMP_${LANG}_OPTIONS UNIX_COMMAND "${NOpenMP_${LANG}_FLAGS}")
-	endif()
-	if(CMAKE_VERSION VERSION_LESS 3.3)
-          set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
-            INTERFACE_COMPILE_OPTIONS "${_NOpenMP_${LANG}_OPTIONS}")
-      else()
-          set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
-            INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:${_NOpenMP_${LANG}_OPTIONS}>")
-	endif()
+        if(WIN32)
+          separate_arguments(_NOpenMP_${LANG}_OPTIONS WINDOWS_COMMAND
+                             "${NOpenMP_${LANG}_FLAGS}")
+        else()
+          separate_arguments(_NOpenMP_${LANG}_OPTIONS UNIX_COMMAND
+                             "${NOpenMP_${LANG}_FLAGS}")
+        endif()
+        if(CMAKE_VERSION VERSION_LESS 3.3)
+          set_property(TARGET OpenMP::OpenMP_${LANG}
+                       PROPERTY INTERFACE_COMPILE_OPTIONS
+                                "${_NOpenMP_${LANG}_OPTIONS}")
+        else()
+          set_property(
+            TARGET OpenMP::OpenMP_${LANG}
+            PROPERTY
+              INTERFACE_COMPILE_OPTIONS
+              "$<$<COMPILE_LANGUAGE:${LANG}>:${_NOpenMP_${LANG}_OPTIONS}>")
+        endif()
         unset(_NOpenMP_${LANG}_OPTIONS)
       endif()
       if(NOpenMP_${LANG}_LIBRARIES)
-        set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
-          INTERFACE_LINK_LIBRARIES "${NOpenMP_${LANG}_LIBRARIES}")
+        set_property(TARGET OpenMP::OpenMP_${LANG}
+                     PROPERTY INTERFACE_LINK_LIBRARIES
+                              "${NOpenMP_${LANG}_LIBRARIES}")
       endif()
     endif()
   endif()
@@ -500,17 +592,22 @@ endforeach()
 
 unset(_NOpenMP_REQ_VARS)
 foreach(LANG IN ITEMS C CXX Fortran)
-  list (FIND NOpenMP_FIND_COMPONENTS "${LANG}" _index)
+  list(FIND NOpenMP_FIND_COMPONENTS "${LANG}" _index)
 
-  if((NOT NOpenMP_FIND_COMPONENTS AND CMAKE_${LANG}_COMPILER_LOADED) OR _index GREATER -1)
+  if((NOT NOpenMP_FIND_COMPONENTS AND CMAKE_${LANG}_COMPILER_LOADED)
+     OR _index GREATER -1)
     list(APPEND _NOpenMP_REQ_VARS "NOpenMP_${LANG}_FOUND")
   endif()
 endforeach()
 
-find_package_handle_standard_args(NOpenMP FOUND_VAR NOpenMP_FOUND
-    REQUIRED_VARS ${_NOpenMP_REQ_VARS}
-    VERSION_VAR ${_NOpenMP_MIN_VERSION}
-    HANDLE_COMPONENTS)
+find_package_handle_standard_args(NOpenMP
+                                  FOUND_VAR
+                                  NOpenMP_FOUND
+                                  REQUIRED_VARS
+                                  ${_NOpenMP_REQ_VARS}
+                                  VERSION_VAR
+                                  ${_NOpenMP_MIN_VERSION}
+                                  HANDLE_COMPONENTS)
 
 set(NOPENMP_FOUND ${NOpenMP_FOUND})
 
@@ -523,8 +620,13 @@ if(CMAKE_Fortran_COMPILER_LOADED AND NOpenMP_Fortran_FOUND)
   endif()
 endif()
 
-if(NOT ( CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED ))
-  message(SEND_ERROR "FindNOpenMP requires the C, CXX or Fortran languages to be enabled")
+if(NOT
+   (CMAKE_C_COMPILER_LOADED
+    OR CMAKE_CXX_COMPILER_LOADED
+    OR CMAKE_Fortran_COMPILER_LOADED))
+  message(
+    SEND_ERROR
+      "FindNOpenMP requires the C, CXX or Fortran languages to be enabled")
 endif()
 
 unset(NOpenMP_C_CXX_TEST_SOURCE)
