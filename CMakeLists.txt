@@ -103,21 +103,23 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
 # ==============================================================================
 
 add_executable(qswap $<TARGET_OBJECTS:permutations> qswap.cpp)
-target_link_libraries(qswap Boost::program_options)
+target_link_libraries(qswap Boost::boost Boost::program_options glog::glog)
 
 # --------------------------------------
 
-add_executable(qswap-mpi $<TARGET_OBJECTS:permutations> qswap-mpi.cpp
-                         src/simulator-mpi/SwapperMT.cpp)
+add_executable(qswap-mpi
+               $<TARGET_OBJECTS:permutations>
+               qswap-mpi.cpp
+               src/simulator-mpi/SwapperMT.cpp)
 target_compile_definitions(qswap-mpi PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 target_link_libraries(qswap-mpi
-                      permutations
                       ${MPI_LIBRARIES}
                       Boost::program_options
                       Boost::mpi
                       Boost::serialization
                       Boost::thread
-                      ${OpenMP_tgt})
+                      ${OpenMP_tgt}
+                      glog::glog)
 
 # ------------------------------------------------------------------------------
 
@@ -168,31 +170,33 @@ target_link_libraries(_sched_cpp PUBLIC glog::glog)
 
 # ------------------------------------------------------------------------------
 
-add_library(SimulatorMPI_o OBJECT src/simulator-mpi/SimulatorMPI.cpp
-                           src/simulator-mpi/SwapperMT.cpp)
-target_link_libraries(SimulatorMPI_o
-                      permutations
-                      Boost::mpi
-                      ${OpenMP_tgt})
+add_library(SimulatorMPI_o
+            OBJECT
+            src/simulator-mpi/SimulatorMPI.cpp
+            src/simulator-mpi/SwapperMT.cpp)
 add_avx2_to_target(SimulatorMPI_o)
 if(WIN32)
   target_compile_definitions(SimulatorMPI_o PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 endif()
 
-add_library(SimulatorMPI SHARED $<TARGET_OBJECTS:SimulatorMPI_o>
-                                $<TARGET_OBJECTS:permutations>)
+add_library(SimulatorMPI
+            SHARED
+            $<TARGET_OBJECTS:SimulatorMPI_o>
+            $<TARGET_OBJECTS:permutations>)
+add_avx2_to_target(SimulatorMPI)
 target_link_libraries(SimulatorMPI
-                      permutations
                       ${MPI_LIBRARIES}
                       Boost::program_options
                       Boost::mpi
                       Boost::serialization
                       Boost::thread
-                      ${OpenMP_tgt})
+                      ${OpenMP_tgt}
+                      glog::glog)
 
 # ------------------------------------------------------------------------------
 
 add_executable(cppsim-mpi cppsim-mpi.cpp)
+add_avx2_to_target(cppsim-mpi)
 target_link_libraries(cppsim-mpi
                       SimulatorMPI
                       ${MPI_LIBRARIES}
@@ -207,6 +211,7 @@ target_link_libraries(cppsim-mpi
 
 pybind11_add_module(_cppsim_mpi _cppsim_mpi.cpp
                     $<TARGET_OBJECTS:SimulatorMPI_o>)
+add_avx2_to_target(_cppsim_mpi)
 target_link_libraries(_cppsim_mpi
                       PUBLIC ${MPI_LIBRARIES}
                              Boost::mpi
@@ -218,7 +223,7 @@ target_link_libraries(_cppsim_mpi
 # ------------------------------------------------------------------------------
 
 pybind11_add_module(_cppstabsim _cppstabsim.cpp)
-target_link_libraries(_cppstabsim PRIVATE Boost::boost)
 add_avx2_to_target(_cppstabsim)
+target_link_libraries(_cppstabsim PRIVATE Boost::boost)
 
 # ==============================================================================
