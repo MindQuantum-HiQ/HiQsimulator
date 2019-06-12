@@ -42,6 +42,43 @@ find_package(Boost REQUIRED
                         serialization
                         thread)
 
+# ------------------------------------------------------------------------------
+# In some cases where the Boost version is too recent compared to what the
+# CMake version supports, the imported target are not properly defined.
+# In this case, try our best to define the target properly and warn the user
+
+set(_BOOST_HAS_IMPORTED_TGT TRUE)
+
+set(Boost_ATOMIC_DEPENDENCIES thread chrono system date_time)
+set(Boost_CHRONO_DEPENDENCIES system)
+set(Boost_MPI_DEPENDENCIES serialization)
+if(NOT Boost_VERSION VERSION_LESS 105300)
+  set(Boost_THREAD_DEPENDENCIES chrono system date_time atomic)
+elseif(NOT Boost_VERSION VERSION_LESS 105000)
+  set(Boost_THREAD_DEPENDENCIES chrono system date_time)
+else()
+  set(Boost_THREAD_DEPENDENCIES date_time)
+endif()
+
+foreach(comp ${_Boost_COMPONENTS_SEARCHED})
+  if(NOT TARGET Boost::${comp})
+    set(_BOOST_HAS_IMPORTED_TGT FALSE)
+    define_target(Boost ${comp} "${Boost_INCLUDE_DIR}")
+  endif()
+endforeach()
+
+if(NOT _BOOST_HAS_IMPORTED_TGT)
+  message(
+    WARNING
+      "Your version of Boost (${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}."
+      "${Boost_SUBMINOR_VERSION}) is too recent for this version"
+      " of CMake."
+      "\nThe imported target have been defined manually, but the dependencies "
+      " might not be correct. If compilation fails, please try updating your"
+      " CMake installation to a newer version (for your information, your "
+      "CMake version is ${CMAKE_VERSION}).")
+endif()
+
 # ==============================================================================
 
 find_package(glog REQUIRED)

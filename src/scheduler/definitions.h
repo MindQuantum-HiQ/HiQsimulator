@@ -25,7 +25,7 @@ typedef uint64_t msk_t;
 typedef int64_t id_num_t;
 
 #define set_bit(x, y) (x |= static_cast<msk_t>(1) << static_cast<msk_t>(y))
-#define test_bit(x, y) ((x >> y) & 1)
+#define test_bit(x, y) ((x >> y) & 1UL)
 #define count_bits(x) (__builtin_popcountll(static_cast<uint64_t>(x)))
 #define inter(x, y) (x & y)
 #define unite(x, y) (x | y)

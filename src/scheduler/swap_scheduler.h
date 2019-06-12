@@ -31,8 +31,8 @@ public:
 
      SwapScheduler(const std::vector<std::vector<id_num_t>>& gate,
                    const std::vector<std::vector<id_num_t>>& gate_ctrl,
-                   const std::vector<bool>& gate_diag, int num_splits,
-                   int num_locals, bool fuse);
+                   std::vector<bool> gate_diag, int num_splits, int num_locals,
+                   bool fuse);
 
      ~SwapScheduler()
      {}

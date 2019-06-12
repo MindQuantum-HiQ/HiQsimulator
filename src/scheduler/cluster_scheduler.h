@@ -32,10 +32,11 @@ public:
      // O(C(num_qubits, _cluster_size)) memory
      std::vector<int> ScheduleCluster();
 
-     ClusterScheduler(std::vector<std::vector<id_num_t>> gate,
-                      std::vector<std::vector<id_num_t>> gate_ctrl,
-                      std::vector<bool> gate_diag, std::vector<id_num_t> locals,
-                      std::vector<id_num_t> globals, int cluster_size);
+     ClusterScheduler(const std::vector<std::vector<id_num_t>>& gate,
+                      const std::vector<std::vector<id_num_t>>& gate_ctrl,
+                      std::vector<bool> gate_diag,
+                      const std::vector<id_num_t>& locals,
+                      const std::vector<id_num_t>& globals, int cluster_size);
 
      ~ClusterScheduler()
      {}

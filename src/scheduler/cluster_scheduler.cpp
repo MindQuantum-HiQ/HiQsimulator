@@ -22,13 +22,16 @@
 #include "definitions.h"
 
 ClusterScheduler::ClusterScheduler(
-    const std::vector<std::vector<id_num_t>> gate,
-    const std::vector<std::vector<id_num_t>> gate_ctrl,
-    const std::vector<bool> gate_diag, const std::vector<id_num_t> locals,
-    const std::vector<id_num_t> globals, const int cluster_size)
-    : cluster_size_(cluster_size), gate_diag_(gate_diag)
+    const std::vector<std::vector<id_num_t>>& gate,
+    const std::vector<std::vector<id_num_t>>& gate_ctrl,
+    std::vector<bool> gate_diag, const std::vector<id_num_t>& locals,
+    const std::vector<id_num_t>& globals, const int cluster_size)
+    : cluster_size_(cluster_size),
+      best_ans_(0),
+      best_cluster_(0),
+      gate_diag_(std::move(gate_diag))
 {
-     CHECK(gate.size() == gate_ctrl.size() && gate.size() == gate_diag.size())
+     CHECK(gate.size() == gate_ctrl.size() && gate.size() == gate_diag_.size())
          << "ctor():";
      tie(pos_to_id_, id_to_pos_) = CalcPos(gate, gate_ctrl, locals, globals);
      tie(gate_, gate_ctrl_) = CalcGates(gate, gate_ctrl, id_to_pos_);
@@ -89,8 +92,8 @@ void ClusterScheduler::Rec(msk_t cur_cluster, msk_t bit)
 
      if (submask(bit, locals_) && !inter(bit, cur_cluster) &&
          count_bits(cur_cluster) < cluster_size_) {
-          Rec(unite(cur_cluster, bit), bit << 1);
+          Rec(unite(cur_cluster, bit), bit << 1UL);
      }
 
-     Rec(cur_cluster, bit << 1);
+     Rec(cur_cluster, bit << 1UL);
 }
