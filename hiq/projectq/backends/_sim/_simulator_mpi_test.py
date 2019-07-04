@@ -41,8 +41,8 @@ from mpi4py import MPI
 
 
 def test_is_cpp_simulator_mpi_present():
-    import hiq.projectq.backends._sim._simulator_mpi
-    assert hiq.projectq.backends._sim._simulator_mpi
+    import hiq.projectq.backends._sim._cppsim_mpi
+    assert hiq.projectq.backends._sim._cppsim_mpi
 
 
 def get_available_simulators():
