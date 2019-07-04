@@ -167,7 +167,9 @@ The basic procedure is as follows:
 .. code-block:: python
    :linenos:
 
+    from projectq.ops import CNOT, H, Measure
     from hiq.projectq.backends import StabilizerSimulator
+    from hiq.projectq.cengines import HiQMainEngine
 
 
 2. Initialize the simulator.
@@ -175,7 +177,8 @@ The basic procedure is as follows:
 .. code-block:: python
    :linenos:
 
-    simulator = StabilizerSimulator()
+    simulator = StabilizerSimulator(9)
+    eng = HiQMainEngine(simulator, [])
 
 
 3. Program the algorithm logic.
@@ -184,38 +187,47 @@ The basic procedure is as follows:
    :linenos:
 
     #allocate
-    simulator.allocate_qureg(9)
+    qubits = eng.allocate_qureg(9)
     
     #prepares a uniform superposition over 5-bit strings in qubits 0 to 4
-    simulator.h(0)
-    simulator.h(1)
-    simulator.h(2)
-    simulator.h(3)
-    simulator.h(4)
+    H | qubits[0]
+    H | qubits[1]
+    H | qubits[2]
+    H | qubits[3]
+    H | qubits[4]
 
     #computes f in qubits 5 to 8
-    simulator.cnot(0, 5)
-    simulator.cnot(1, 5)
-    simulator.cnot(1, 6)
-    simulator.cnot(2, 6)
-    simulator.cnot(2, 7)
-    simulator.cnot(3, 7)
-    simulator.cnot(3, 8)
-    simulator.cnot(4, 8)
+    CNOT | (qubits[0], qubits[5])
+    CNOT | (qubits[1], qubits[5])
+    CNOT | (qubits[1], qubits[6])
+    CNOT | (qubits[2], qubits[6])
+    CNOT | (qubits[2], qubits[7])
+    CNOT | (qubits[3], qubits[7])
+    CNOT | (qubits[3], qubits[8])
+    CNOT | (qubits[4], qubits[8])
 
     #measures those qubits "for pedagogical purposes."
-    print("= The qubits5-8 state:{}{}{}{} ".format(simulator.measure(5),
-    simulator.measure(6), simulator.measure(7), simulator.measure(8)))
+    Measure | qubits[5]
+    Measure | qubits[6]
+    Measure | qubits[7]
+    Measure | qubits[8]
+    eng.flush()
+    print("= The qubits5-8 state:{}{}{}{} ".format(int(qubits[5]),
+           int(qubits[6]), int(qubits[7]), int(qubits[8])))
 
     #performs a Fourier transform on qubits 0 to 4
-    simulator.h(0)
-    simulator.h(1)
-    simulator.h(2)
-    simulator.h(3)
-    simulator.h(4)
+    H | qubits[0]
+    H | qubits[1]
+    H | qubits[2]
+    H | qubits[3]
+    H | qubits[4]
 
     #measure
-    print("= The qubits0-4 state: {}{}{}{}{}".format(simulator.measure(0),simulator.measure(1), simulator.measure(2), simulator.measure(3),simulator.measure(4)))
-
-    #sync
-    simulator.sync()
+    Measure | qubits[0]
+    Measure | qubits[1]
+    Measure | qubits[2]
+    Measure | qubits[3]
+    Measure | qubits[4]
+    eng.flush()
+    print("= The qubits0-4 state: {}{}{}{}{}".format(int(qubits[0]),
+           int(qubits[1]), int(qubits[2]), int(qubits[3]), int(qubits[4])))
