@@ -1,83 +1,91 @@
+from projectq.ops import CNOT, H, Measure
 from hiq.projectq.backends import StabilizerSimulator
+from hiq.projectq.cengines import HiQMainEngine
 
 def run_qecc9():
 	
     #init simulator
-    simulator = StabilizerSimulator()
+    simulator = StabilizerSimulator(12)
+    eng = HiQMainEngine(simulator, [])
     
     #allocate
-    simulator.allocate_qureg(12)
+    qubits = eng.allocate_qureg(12)
     
     #start
     print("= Encoded the qubit, state is: |0>")
     #circuit
-    simulator.cnot(0, 3)
-    simulator.cnot(3, 0)
+    CNOT | (qubits[0], qubits[3])
+    CNOT | (qubits[3], qubits[0])
 
-    simulator.cnot(3, 6)
-    simulator.cnot(3, 9)
-    simulator.h(3)
-    simulator.cnot(3, 4)
-    simulator.cnot(3, 5)
-    simulator.h(6)
-    simulator.cnot(6, 7)
-    simulator.cnot(6, 8)
-    simulator.h(9)
-    simulator.cnot(9, 10)
-    simulator.cnot(9, 11)
+    CNOT | (qubits[3], qubits[6])
+    CNOT | (qubits[3], qubits[9])
+    H | qubits[3]
+    CNOT | (qubits[3], qubits[4])
+    CNOT | (qubits[3], qubits[5])
+    H | qubits[6]
+    CNOT | (qubits[6], qubits[7])
+    CNOT | (qubits[6], qubits[8])
+    H | qubits[9]
+    CNOT | (qubits[9], qubits[10])
+    CNOT | (qubits[9], qubits[11])
 
-    simulator.h(3)
-    simulator.h(4)
-    simulator.h(5)
-    simulator.h(6)
-    simulator.h(7)
-    simulator.h(8)
-    simulator.h(9)
-    simulator.h(10)
-    simulator.h(11)
-    simulator.cnot(1, 3)
-    simulator.cnot(1, 4)
-    simulator.cnot(1, 5)
-    simulator.cnot(1, 6)
-    simulator.cnot(1, 7)
-    simulator.cnot(1, 8)
-    simulator.cnot(1, 9)
-    simulator.cnot(1, 10)
-    simulator.cnot(1, 11)
-    simulator.h(3)
-    simulator.h(4)
-    simulator.h(5)
-    simulator.h(6)
-    simulator.h(7)
-    simulator.h(8)
-    simulator.h(9)
-    simulator.h(10)
-    simulator.h(11)
+    H | qubits[3]
+    H | qubits[4]
+    H | qubits[5]
+    H | qubits[6]
+    H | qubits[7]
+    H | qubits[8]
+    H | qubits[9]
+    H | qubits[10]
+    H | qubits[11]
+    CNOT | (qubits[1], qubits[3])
+    CNOT | (qubits[1], qubits[4])
+    CNOT | (qubits[1], qubits[5])
+    CNOT | (qubits[1], qubits[6])
+    CNOT | (qubits[1], qubits[7])
+    CNOT | (qubits[1], qubits[8])
+    CNOT | (qubits[1], qubits[9])
+    CNOT | (qubits[1], qubits[10])
+    CNOT | (qubits[1], qubits[11])
+    H | qubits[3]
+    H | qubits[4]
+    H | qubits[5]
+    H | qubits[6]
+    H | qubits[7]
+    H | qubits[8]
+    H | qubits[9]
+    H | qubits[10]
+    H | qubits[11]
 
-    simulator.cnot(2, 3)
-    simulator.cnot(2, 4)
-    simulator.cnot(2, 5)
-    simulator.cnot(2, 6)
-    simulator.cnot(2, 7)
-    simulator.cnot(2, 8)
-    simulator.cnot(2, 9)
-    simulator.cnot(2, 10)
-    simulator.cnot(2, 11)
+    CNOT | (qubits[2], qubits[3])
+    CNOT | (qubits[2], qubits[4])
+    CNOT | (qubits[2], qubits[5])
+    CNOT | (qubits[2], qubits[6])
+    CNOT | (qubits[2], qubits[7])
+    CNOT | (qubits[2], qubits[8])
+    CNOT | (qubits[2], qubits[9])
+    CNOT | (qubits[2], qubits[10])
+    CNOT | (qubits[2], qubits[11])
 
-    simulator.cnot(9, 11)
-    simulator.cnot(9, 10)
-    simulator.h(9)
-    simulator.cnot(6, 8)
-    simulator.cnot(6, 7)
-    simulator.h(6)
-    simulator.cnot(3, 5)
-    simulator.cnot(3, 4)
-    simulator.h(3)
-    simulator.cnot(3, 9)
-    simulator.cnot(3, 6)
-    print("= Decoded the qubit, state is: |{}>".format(simulator.measure(3)))
-    #sync
-    simulator.sync()
+    CNOT | (qubits[9], qubits[11])
+    CNOT | (qubits[9], qubits[10])
+    H | qubits[9]
+    CNOT | (qubits[6], qubits[8])
+    CNOT | (qubits[6], qubits[7])
+    H | qubits[6]
+    CNOT | (qubits[3], qubits[5])
+    CNOT | (qubits[3], qubits[4])
+    H | qubits[3]
+    CNOT | (qubits[3], qubits[9])
+    CNOT | (qubits[3], qubits[6])
+    
+    Measure | qubits[3]
+    #flush      
+    eng.flush() 
+    
+    print("= Decoded the qubit, state is: |{}>".format(int(qubits[3])))
+
+
 	
 if __name__ == "__main__":
 
