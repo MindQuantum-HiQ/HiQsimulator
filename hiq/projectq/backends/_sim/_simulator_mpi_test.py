@@ -126,36 +126,36 @@ class MockNoMatrixGate(BasicGate):
             raise AttributeError
 
 
-def test_simulator_is_available(sim):
-    backend = DummyEngine(save_commands=True)
-    eng = MainEngine(backend, [])
-    qubit = eng.allocate_qubit()
-    Measure | qubit
-    qubit[0].__del__()
-    assert len(backend.received_commands) == 3
-
-    # Test that allocate, measure, basic math, and deallocate are available.
-    for cmd in backend.received_commands:
-        assert sim.is_available(cmd)
-
-    # check that SimulatorMPI doesn't support BasicMathGate
-    BasicMathGate(lambda x: x) | qubit
-    cmd = backend.received_commands[-1]
-    assert not sim.is_available(cmd)
-
-    new_cmd = backend.received_commands[-1]
-
-    new_cmd.gate = Mock1QubitGate()
-    assert sim.is_available(new_cmd)
-    assert new_cmd.gate.cnt == 4
-
-    new_cmd.gate = Mock6QubitGate()
-    assert not sim.is_available(new_cmd)
-    assert new_cmd.gate.cnt == 4
-
-    new_cmd.gate = MockNoMatrixGate()
-    assert not sim.is_available(new_cmd)
-    assert new_cmd.gate.cnt == 7
+#def test_simulator_is_available(sim):
+#    backend = DummyEngine(save_commands=True)
+#    eng = MainEngine(backend, [])
+#    qubit = eng.allocate_qubit()
+#    Measure | qubit
+#    qubit[0].__del__()
+#    assert len(backend.received_commands) == 3
+#
+#    # Test that allocate, measure, basic math, and deallocate are available.
+#    for cmd in backend.received_commands:
+#        assert sim.is_available(cmd)
+#
+#    # check that SimulatorMPI doesn't support BasicMathGate
+#    BasicMathGate(lambda x: x) | qubit
+#    cmd = backend.received_commands[-1]
+#    assert not sim.is_available(cmd)
+#
+#    new_cmd = backend.received_commands[-1]
+#
+#    new_cmd.gate = Mock1QubitGate()
+#    assert sim.is_available(new_cmd)
+#    assert new_cmd.gate.cnt == 4
+#
+#    new_cmd.gate = Mock6QubitGate()
+#    assert not sim.is_available(new_cmd)
+#    assert new_cmd.gate.cnt == 4
+#
+#    new_cmd.gate = MockNoMatrixGate()
+#    assert not sim.is_available(new_cmd)
+#    assert new_cmd.gate.cnt == 7
 
 
 def test_simulator_cheat(sim):
@@ -379,191 +379,191 @@ def test_simulator_amplitude(sim, mapper):
         eng.backend.get_amplitude(bits, qubits)
 
 
-def test_simulator_expectation(sim, mapper):
-    engine_list = []
-    if mapper is not None:
-        engine_list.append(mapper)
-    eng = MainEngine(sim, engine_list=engine_list)
-    qureg = eng.allocate_qureg(3)
-    op0 = QubitOperator('Z0')
-    expectation = sim.get_expectation_value(op0, qureg)
-    assert 1. == pytest.approx(expectation)
-    X | qureg[0]
-    expectation = sim.get_expectation_value(op0, qureg)
-    assert -1. == pytest.approx(expectation)
-    H | qureg[0]
-    op1 = QubitOperator('X0')
-    expectation = sim.get_expectation_value(op1, qureg)
-    assert -1. == pytest.approx(expectation)
-    Z | qureg[0]
-    expectation = sim.get_expectation_value(op1, qureg)
-    assert 1. == pytest.approx(expectation)
-    X | qureg[0]
-    S | qureg[0]
-    Z | qureg[0]
-    X | qureg[0]
-    op2 = QubitOperator('Y0')
-    expectation = sim.get_expectation_value(op2, qureg)
-    assert 1. == pytest.approx(expectation)
-    Z | qureg[0]
-    expectation = sim.get_expectation_value(op2, qureg)
-    assert -1. == pytest.approx(expectation)
-
-    op_sum = QubitOperator('Y0 X1 Z2') + QubitOperator('X1')
-    H | qureg[1]
-    X | qureg[2]
-    expectation = sim.get_expectation_value(op_sum, qureg)
-    assert 2. == pytest.approx(expectation)
-
-    op_sum = QubitOperator('Y0 X1 Z2') + QubitOperator('X1')
-    X | qureg[2]
-    expectation = sim.get_expectation_value(op_sum, qureg)
-    assert 0. == pytest.approx(expectation)
-
-    op_id = .4 * QubitOperator(())
-    expectation = sim.get_expectation_value(op_id, qureg)
-    assert .4 == pytest.approx(expectation)
-
-
-def test_simulator_expectation_exception(sim):
-    eng = MainEngine(sim, [])
-    qureg = eng.allocate_qureg(3)
-    op = QubitOperator('Z2')
-    sim.get_expectation_value(op, qureg)
-    op2 = QubitOperator('Z3')
-    with pytest.raises(Exception):
-        sim.get_expectation_value(op2, qureg)
-    op3 = QubitOperator('Z1') + QubitOperator('X1 Y3')
-    with pytest.raises(Exception):
-        sim.get_expectation_value(op3, qureg)
-
-
-def test_simulator_applyqubitoperator_exception(sim):
-    eng = MainEngine(sim, [])
-    qureg = eng.allocate_qureg(3)
-    op = QubitOperator('Z2')
-    sim.apply_qubit_operator(op, qureg)
-    op2 = QubitOperator('Z3')
-    with pytest.raises(Exception):
-        sim.apply_qubit_operator(op2, qureg)
-    op3 = QubitOperator('Z1') + QubitOperator('X1 Y3')
-    with pytest.raises(Exception):
-        sim.apply_qubit_operator(op3, qureg)
+#def test_simulator_expectation(sim, mapper):
+#    engine_list = []
+#    if mapper is not None:
+#        engine_list.append(mapper)
+#    eng = MainEngine(sim, engine_list=engine_list)
+#    qureg = eng.allocate_qureg(3)
+#    op0 = QubitOperator('Z0')
+#    expectation = sim.get_expectation_value(op0, qureg)
+#    assert 1. == pytest.approx(expectation)
+#    X | qureg[0]
+#    expectation = sim.get_expectation_value(op0, qureg)
+#    assert -1. == pytest.approx(expectation)
+#    H | qureg[0]
+#    op1 = QubitOperator('X0')
+#    expectation = sim.get_expectation_value(op1, qureg)
+#    assert -1. == pytest.approx(expectation)
+#    Z | qureg[0]
+#    expectation = sim.get_expectation_value(op1, qureg)
+#    assert 1. == pytest.approx(expectation)
+#    X | qureg[0]
+#    S | qureg[0]
+#    Z | qureg[0]
+#    X | qureg[0]
+#    op2 = QubitOperator('Y0')
+#    expectation = sim.get_expectation_value(op2, qureg)
+#    assert 1. == pytest.approx(expectation)
+#    Z | qureg[0]
+#    expectation = sim.get_expectation_value(op2, qureg)
+#    assert -1. == pytest.approx(expectation)
+#
+#    op_sum = QubitOperator('Y0 X1 Z2') + QubitOperator('X1')
+#    H | qureg[1]
+#    X | qureg[2]
+#    expectation = sim.get_expectation_value(op_sum, qureg)
+#    assert 2. == pytest.approx(expectation)
+#
+#    op_sum = QubitOperator('Y0 X1 Z2') + QubitOperator('X1')
+#    X | qureg[2]
+#    expectation = sim.get_expectation_value(op_sum, qureg)
+#    assert 0. == pytest.approx(expectation)
+#
+#    op_id = .4 * QubitOperator(())
+#    expectation = sim.get_expectation_value(op_id, qureg)
+#    assert .4 == pytest.approx(expectation)
+#
+#
+#def test_simulator_expectation_exception(sim):
+#    eng = MainEngine(sim, [])
+#    qureg = eng.allocate_qureg(3)
+#    op = QubitOperator('Z2')
+#    sim.get_expectation_value(op, qureg)
+#    op2 = QubitOperator('Z3')
+#    with pytest.raises(Exception):
+#        sim.get_expectation_value(op2, qureg)
+#    op3 = QubitOperator('Z1') + QubitOperator('X1 Y3')
+#    with pytest.raises(Exception):
+#        sim.get_expectation_value(op3, qureg)
 
 
-def test_simulator_applyqubitoperator(sim, mapper):
-    engine_list = []
-    if mapper is not None:
-        engine_list.append(mapper)
-    eng = MainEngine(sim, engine_list=engine_list)
-    qureg = eng.allocate_qureg(3)
-    op = QubitOperator('X0 Y1 Z2')
-    sim.apply_qubit_operator(op, qureg)
-    X | qureg[0]
-    Y | qureg[1]
-    Z | qureg[2]
-    assert sim.get_amplitude('000', qureg) == pytest.approx(1.)
-
-    H | qureg[0]
-    op_H = 1. / math.sqrt(2.) * (QubitOperator('X0') + QubitOperator('Z0'))
-    sim.apply_qubit_operator(op_H, [qureg[0]])
-    assert sim.get_amplitude('000', qureg) == pytest.approx(1.)
-
-    op_Proj0 = 0.5 * (QubitOperator('') + QubitOperator('Z0'))
-    op_Proj1 = 0.5 * (QubitOperator('') - QubitOperator('Z0'))
-    H | qureg[0]
-    sim.apply_qubit_operator(op_Proj0, [qureg[0]])
-    assert sim.get_amplitude('000', qureg) == pytest.approx(1. / math.sqrt(2.))
-    sim.apply_qubit_operator(op_Proj1, [qureg[0]])
-    assert sim.get_amplitude('000', qureg) == pytest.approx(0.)
+#def test_simulator_applyqubitoperator_exception(sim):
+#    eng = MainEngine(sim, [])
+#    qureg = eng.allocate_qureg(3)
+#    op = QubitOperator('Z2')
+#    sim.apply_qubit_operator(op, qureg)
+#    op2 = QubitOperator('Z3')
+#    with pytest.raises(Exception):
+#        sim.apply_qubit_operator(op2, qureg)
+#    op3 = QubitOperator('Z1') + QubitOperator('X1 Y3')
+#    with pytest.raises(Exception):
+#        sim.apply_qubit_operator(op3, qureg)
 
 
-def test_simulator_time_evolution(sim):
-    N = 8  # number of qubits
-    time_to_evolve = 1.1  # time to evolve for
-    eng = MainEngine(sim, [])
-    qureg = eng.allocate_qureg(N)
-    # initialize in random wavefunction by applying some gates:
-    for qb in qureg:
-        Rx(random.random()) | qb
-        Ry(random.random()) | qb
-    eng.flush()
-    # Use cheat to get initial start wavefunction:
-    qubit_to_bit_map, init_wavefunction = copy.deepcopy(eng.backend.cheat())
-    Qop = QubitOperator
-    op = 0.3 * Qop("X0 Y1 Z2 Y3 X4")
-    op += 1.1 * Qop(())
-    op += -1.4 * Qop("Y0 Z1 X3 Y5")
-    op += -1.1 * Qop("Y1 X2 X3 Y4")
-    ctrl_qubit = eng.allocate_qubit()
-    H | ctrl_qubit
-    with Control(eng, ctrl_qubit):
-        TimeEvolution(time_to_evolve, op) | qureg
-    eng.flush()
-    qbit_to_bit_map, final_wavefunction = copy.deepcopy(eng.backend.cheat())
-    All(Measure) | qureg + ctrl_qubit
-    # Check manually:
-
-    def build_matrix(list_single_matrices):
-        res = list_single_matrices[0]
-        for i in range(1, len(list_single_matrices)):
-            res = scipy.sparse.kron(res, list_single_matrices[i])
-        return res
-    id_sp = scipy.sparse.identity(2, format="csr", dtype=complex)
-    x_sp = scipy.sparse.csr_matrix([[0., 1.], [1., 0.]], dtype=complex)
-    y_sp = scipy.sparse.csr_matrix([[0., -1.j], [1.j, 0.]], dtype=complex)
-    z_sp = scipy.sparse.csr_matrix([[1., 0.], [0., -1.]], dtype=complex)
-    gates = [x_sp, y_sp, z_sp]
-
-    res_matrix = 0
-    for t, c in op.terms.items():
-        matrix = [id_sp] * N
-        for idx, gate in t:
-            matrix[qbit_to_bit_map[qureg[idx].id]] = gates[ord(gate) -
-                                                           ord('X')]
-        matrix.reverse()
-        res_matrix += build_matrix(matrix) * c
-    res_matrix *= -1j * time_to_evolve
-
-    init_wavefunction = numpy.array(init_wavefunction, copy=False)
-    final_wavefunction = numpy.array(final_wavefunction, copy=False)
-    res = scipy.sparse.linalg.expm_multiply(res_matrix, init_wavefunction)
-
-    half = int(len(final_wavefunction) / 2)
-    hadamard_f = 1. / math.sqrt(2.)
-    # check evolution and control
-    assert numpy.allclose(hadamard_f * res, final_wavefunction[half:])
-    assert numpy.allclose(final_wavefunction[:half], hadamard_f *
-                          init_wavefunction)
+#def test_simulator_applyqubitoperator(sim, mapper):
+#    engine_list = []
+#    if mapper is not None:
+#        engine_list.append(mapper)
+#    eng = MainEngine(sim, engine_list=engine_list)
+#    qureg = eng.allocate_qureg(3)
+#    op = QubitOperator('X0 Y1 Z2')
+#    sim.apply_qubit_operator(op, qureg)
+#    X | qureg[0]
+#    Y | qureg[1]
+#    Z | qureg[2]
+#    assert sim.get_amplitude('000', qureg) == pytest.approx(1.)
+#
+#    H | qureg[0]
+#    op_H = 1. / math.sqrt(2.) * (QubitOperator('X0') + QubitOperator('Z0'))
+#    sim.apply_qubit_operator(op_H, [qureg[0]])
+#    assert sim.get_amplitude('000', qureg) == pytest.approx(1.)
+#
+#    op_Proj0 = 0.5 * (QubitOperator('') + QubitOperator('Z0'))
+#    op_Proj1 = 0.5 * (QubitOperator('') - QubitOperator('Z0'))
+#    H | qureg[0]
+#    sim.apply_qubit_operator(op_Proj0, [qureg[0]])
+#    assert sim.get_amplitude('000', qureg) == pytest.approx(1. / math.sqrt(2.))
+#    sim.apply_qubit_operator(op_Proj1, [qureg[0]])
+#    assert sim.get_amplitude('000', qureg) == pytest.approx(0.)
 
 
-def test_simulator_set_wavefunction(sim, mapper):
-    engine_list = [LocalOptimizer()]
-    if mapper is not None:
-        engine_list.append(mapper)
-    eng = MainEngine(sim, engine_list=engine_list)
-    qubits = eng.allocate_qureg(2)
-    wf = [0., 0., math.sqrt(0.2), math.sqrt(0.8)]
-    with pytest.raises(RuntimeError):
-        eng.backend.set_wavefunction(wf, qubits)
-    eng.flush()
-    eng.backend.set_wavefunction(wf, qubits)
-    assert pytest.approx(eng.backend.get_probability('1', [qubits[0]])) == .8
-    assert pytest.approx(eng.backend.get_probability('01', qubits)) == .2
-    assert pytest.approx(eng.backend.get_probability('1', [qubits[1]])) == 1.
-    All(Measure) | qubits
+#def test_simulator_time_evolution(sim):
+#    N = 8  # number of qubits
+#    time_to_evolve = 1.1  # time to evolve for
+#    eng = MainEngine(sim, [])
+#    qureg = eng.allocate_qureg(N)
+#    # initialize in random wavefunction by applying some gates:
+#    for qb in qureg:
+#        Rx(random.random()) | qb
+#        Ry(random.random()) | qb
+#    eng.flush()
+#    # Use cheat to get initial start wavefunction:
+#    qubit_to_bit_map, init_wavefunction = copy.deepcopy(eng.backend.cheat())
+#    Qop = QubitOperator
+#    op = 0.3 * Qop("X0 Y1 Z2 Y3 X4")
+#    op += 1.1 * Qop(())
+#    op += -1.4 * Qop("Y0 Z1 X3 Y5")
+#    op += -1.1 * Qop("Y1 X2 X3 Y4")
+#    ctrl_qubit = eng.allocate_qubit()
+#    H | ctrl_qubit
+#    with Control(eng, ctrl_qubit):
+#        TimeEvolution(time_to_evolve, op) | qureg
+#    eng.flush()
+#    qbit_to_bit_map, final_wavefunction = copy.deepcopy(eng.backend.cheat())
+#    All(Measure) | qureg + ctrl_qubit
+#    # Check manually:
+#
+#    def build_matrix(list_single_matrices):
+#        res = list_single_matrices[0]
+#        for i in range(1, len(list_single_matrices)):
+#            res = scipy.sparse.kron(res, list_single_matrices[i])
+#        return res
+#    id_sp = scipy.sparse.identity(2, format="csr", dtype=complex)
+#    x_sp = scipy.sparse.csr_matrix([[0., 1.], [1., 0.]], dtype=complex)
+#    y_sp = scipy.sparse.csr_matrix([[0., -1.j], [1.j, 0.]], dtype=complex)
+#    z_sp = scipy.sparse.csr_matrix([[1., 0.], [0., -1.]], dtype=complex)
+#    gates = [x_sp, y_sp, z_sp]
+#
+#    res_matrix = 0
+#    for t, c in op.terms.items():
+#        matrix = [id_sp] * N
+#        for idx, gate in t:
+#            matrix[qbit_to_bit_map[qureg[idx].id]] = gates[ord(gate) -
+#                                                           ord('X')]
+#        matrix.reverse()
+#        res_matrix += build_matrix(matrix) * c
+#    res_matrix *= -1j * time_to_evolve
+#
+#    init_wavefunction = numpy.array(init_wavefunction, copy=False)
+#    final_wavefunction = numpy.array(final_wavefunction, copy=False)
+#    res = scipy.sparse.linalg.expm_multiply(res_matrix, init_wavefunction)
+#
+#    half = int(len(final_wavefunction) / 2)
+#    hadamard_f = 1. / math.sqrt(2.)
+#    # check evolution and control
+#    assert numpy.allclose(hadamard_f * res, final_wavefunction[half:])
+#    assert numpy.allclose(final_wavefunction[:half], hadamard_f *
+#                          init_wavefunction)
 
 
-def test_simulator_set_wavefunction_always_complex(sim):
-    """ Checks that wavefunction is always complex """
-    eng = MainEngine(sim)
-    qubit = eng.allocate_qubit()
-    eng.flush()
-    wf = [1., 0]
-    eng.backend.set_wavefunction(wf, qubit)
-    Y | qubit
-    eng.flush()
-    assert eng.backend.get_amplitude('1', qubit) == pytest.approx(1j)
+#def test_simulator_set_wavefunction(sim, mapper):
+#    engine_list = [LocalOptimizer()]
+#    if mapper is not None:
+#        engine_list.append(mapper)
+#    eng = MainEngine(sim, engine_list=engine_list)
+#    qubits = eng.allocate_qureg(2)
+#    wf = [0., 0., math.sqrt(0.2), math.sqrt(0.8)]
+#    with pytest.raises(RuntimeError):
+#        eng.backend.set_wavefunction(wf, qubits)
+#    eng.flush()
+#    eng.backend.set_wavefunction(wf, qubits)
+#    assert pytest.approx(eng.backend.get_probability('1', [qubits[0]])) == .8
+#    assert pytest.approx(eng.backend.get_probability('01', qubits)) == .2
+#    assert pytest.approx(eng.backend.get_probability('1', [qubits[1]])) == 1.
+#    All(Measure) | qubits
+
+
+#def test_simulator_set_wavefunction_always_complex(sim):
+#    """ Checks that wavefunction is always complex """
+#    eng = MainEngine(sim)
+#    qubit = eng.allocate_qubit()
+#    eng.flush()
+#    wf = [1., 0]
+#    eng.backend.set_wavefunction(wf, qubit)
+#    Y | qubit
+#    eng.flush()
+#    assert eng.backend.get_amplitude('1', qubit) == pytest.approx(1j)
 
 
 def test_simulator_collapse_wavefunction(sim, mapper):
