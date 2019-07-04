@@ -4,6 +4,7 @@ language: python
 
 before_install:
   - sudo apt-get install build-essential cmake
+  - sudo apt install g++
   - sudo apt-get install openmpi-bin openmpi-doc libopenmpi-dev
   - sudo apt-get install libboost-all-dev
   - sudo apt-get install libgoogle-glog-dev
