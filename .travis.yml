@@ -1,3 +1,4 @@
+themes/next/dist: xenial # Ubuntu 16.04
 sudo: true
 language: python
 
