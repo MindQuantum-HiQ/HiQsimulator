@@ -21,3 +21,4 @@ install:
 # command to run tests
 script:
   - python3 examples/grover_mpi.py
+ 
