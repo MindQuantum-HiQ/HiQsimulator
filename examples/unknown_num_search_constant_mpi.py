@@ -183,7 +183,7 @@ if __name__ == "__main__":
     # search for the index of the max element
     print("= The dataset is: {}".format(dataset))
     marked_index = run_unknown_number_grover(eng, dataset, oracle, dataset[0])
-    if marked_index == None:
+    if marked_index == 'no answer':
         print("= The algorithm fails to find a marked element")
     else:
         print("= The searched marked element is: {}".format(dataset[marked_index]))
