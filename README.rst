@@ -1,6 +1,14 @@
 Huawei HiQsimulator
 ==================================================================
 
+.. image:: https://travis-ci.org/Huawei-HiQ/HiQsimulator.svg?branch=master
+    :target: https://travis-ci.org/Huawei-HiQ/HiQsimulator
+    
+.. image:: https://readthedocs.org/projects/hiqsimulator/badge/?version=latest
+    :target: https://hiqsimulator.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+    
+
 Huawei HiQ is an open-source software framework for quantum computing. It is based on and compatible with `ProjectQ <http://www.projectq.ch>`__.
 It aims at providing tools which facilitate inventing, implementing, testing, debugging, and running quantum algorithms using either classical hardware or actual quantum devices.
 You can find more about Huawei HiQ at http://hiq.huaweicloud.com
