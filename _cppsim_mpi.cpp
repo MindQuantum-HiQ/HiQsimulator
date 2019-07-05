@@ -59,7 +59,7 @@ void emulate_math_wrapper(SimulatorMPI& sim, py::function const& pyfunc,
 
 PYBIND11_MODULE(_cppsim_mpi, m)
 {
-     py::class_<SimulatorMPI>(m, "SimulatorMPI")
+     py::class_<SimulatorMPI>(m, "Simulator")
          .def(py::init<uint64_t, int, int>())
          .def("get_qubits_ids", &SimulatorMPI::GetQubitsPermutation)
          .def("get_local_qubits_ids", &SimulatorMPI::GetLocalQubitsPermutation)
