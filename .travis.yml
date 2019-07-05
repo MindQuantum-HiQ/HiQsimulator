@@ -16,8 +16,6 @@ install:
 
 # command to run tests
 script:
-  - pytest ./hiq/projectq/backends/_sim/_simulator_mpi_test.py 
-  - pytest ./hiq/projectq/backends/_sim/_stabilizer_simulator_test.py
   - python3 examples/BV_algorithm_constant_mpi.py
   - python3 examples/exactgrover_mpi.py
   - python3 examples/grover_mpi.py
