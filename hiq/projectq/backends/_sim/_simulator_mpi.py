@@ -36,7 +36,7 @@ from projectq.ops import (NOT,
 from projectq.types import WeakQubitRef
 
 from hiq.projectq.ops import MetaSwap, AllocateQuregGate
-from ._cppsim_mpi import Simulator as SimulatorBackend
+from ._cppsim_mpi import SimulatorMPI as SimulatorBackend
 
 from mpi4py import rc
 rc.thread = True
