@@ -27,7 +27,8 @@
 namespace swapping
 {
 template <size_t n_bits>
-struct SwappingBase {
+struct SwappingBase
+{
      template <class T, class Iterator>
      static size_t doCalc(const Iterator state_vector, uint64_t n,
                           size_t start_free_idx, T* svalues, uint64_t* indices,
@@ -51,8 +52,8 @@ struct SwappingBase {
                     size_t res_swap_idx = 0;
                     for (size_t bi = 0; bi < n_bits; ++bi) {
                          bool bv = swap_idx & (1ul << bi);
-                         res_swap_idx |=
-                             bv * (swap_bits[swap_bits[n_bits + bi]]);
+                         res_swap_idx
+                             |= bv * (swap_bits[swap_bits[n_bits + bi]]);
                     }
 
                     res_idx += res_swap_idx;
@@ -67,7 +68,8 @@ struct SwappingBase {
 };
 
 template <size_t n_bits_max>
-struct Swapping {
+struct Swapping
+{
      template <class T, class Iterator>
      static size_t calcSwap(uint64_t n_bits, const Iterator state_vector,
                             uint64_t n, size_t start_free_idx, T* svalues,
@@ -88,7 +90,8 @@ struct Swapping {
 };
 
 template <>
-struct Swapping<0> {
+struct Swapping<0>
+{
      template <class T, class Iterator>
      static size_t calcSwap(uint64_t, const Iterator, uint64_t, size_t, T*,
                             uint64_t*, const std::vector<uint64_t>&)

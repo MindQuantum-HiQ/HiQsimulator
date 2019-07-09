@@ -50,12 +50,12 @@ void SwapScheduler::FuseSingleQubitGates()
           bool remove = false;
           if (count_bits(unite(gate_[i], gate_ctrl_[i])) == 1) {
                if (GateType(i) == 0) {
-                    remove = (FuseSingleQubitToNextInterGate(i) ||
-                              FuseSingleQubitToPrevInterGate(i));
+                    remove = (FuseSingleQubitToNextInterGate(i)
+                              || FuseSingleQubitToPrevInterGate(i));
                }
                else {
-                    remove = (FuseSingleQubitToPrevInterGate(i) ||
-                              FuseSingleQubitToNextInterGate(i));
+                    remove = (FuseSingleQubitToPrevInterGate(i)
+                              || FuseSingleQubitToNextInterGate(i));
                }
           }
           if (remove) {
@@ -146,16 +146,16 @@ int SwapScheduler::Rec(const int pos, const msk_t cur_locals,
           int give_splits = splits_left / cnt_take;
           splits_left += Rec(pos + 1, cur_locals,
                              unite(cur_bad, unite(gate_[pos], gate_ctrl_[pos])),
-                             cur_ans, give_splits) -
-                         give_splits;
+                             cur_ans, give_splits)
+                         - give_splits;
           --cnt_take;
      }
 
      if (can_take) {
           if (GateType(pos) == 0) {
-               splits_left =
-                   Rec(pos + 1, unite(cur_locals, gate_[pos]), cur_bad,
-                       cur_ans + gate_weight_[pos], splits_left);
+               splits_left
+                   = Rec(pos + 1, unite(cur_locals, gate_[pos]), cur_bad,
+                         cur_ans + gate_weight_[pos], splits_left);
                --cnt_take;
           }
           else {

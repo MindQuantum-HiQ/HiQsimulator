@@ -22,7 +22,8 @@
 #include <vector>
 
 template <class T>
-struct SwapArrays {
+struct SwapArrays
+{
      typedef T value_type;
 
      std::vector<T> svalues;
@@ -60,7 +61,8 @@ struct SwapArrays {
 };
 
 template <class T>
-struct SwapBuffers {
+struct SwapBuffers
+{
      typedef SwapArrays<T> swap_arrays_type;
 
      const size_t maxQueueSize;

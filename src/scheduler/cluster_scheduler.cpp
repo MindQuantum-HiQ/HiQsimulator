@@ -90,8 +90,8 @@ void ClusterScheduler::Rec(msk_t cur_cluster, msk_t bit)
      }
      used_[cur_cluster] = unite(used_[cur_cluster], bit);
 
-     if (submask(bit, locals_) && !inter(bit, cur_cluster) &&
-         count_bits(cur_cluster) < cluster_size_) {
+     if (submask(bit, locals_) && !inter(bit, cur_cluster)
+         && count_bits(cur_cluster) < cluster_size_) {
           Rec(unite(cur_cluster, bit), bit << 1UL);
      }
 

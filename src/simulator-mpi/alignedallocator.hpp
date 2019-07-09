@@ -40,7 +40,8 @@ public:
      typedef std::ptrdiff_t difference_type;
 
      template <typename U>
-     struct rebind {
+     struct rebind
+     {
           typedef aligned_allocator<U, Alignment> other;
      };
 

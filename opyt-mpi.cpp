@@ -94,11 +94,11 @@ int main(int argc, char** argv)
 
      std::cout << boost::format(
                       "rank: %d, elapsed time: %.3f sec, op time: %.5f ms, "
-                      "bandwidth: %.3f GB/s, error: %d") %
-                      world.rank() % dt % ((dt * 1000.0) / j) %
-                      ((world.size() - 1) * 16.0 * m * j / dt / 1024.0 /
-                       1024.0 / 1024.0) %
-                      error
+                      "bandwidth: %.3f GB/s, error: %d")
+                      % world.rank() % dt % ((dt * 1000.0) / j)
+                      % ((world.size() - 1) * 16.0 * m * j / dt / 1024.0
+                         / 1024.0 / 1024.0)
+                      % error
                << std::endl;
 
      return 0;

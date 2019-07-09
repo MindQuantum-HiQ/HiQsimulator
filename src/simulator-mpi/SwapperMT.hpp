@@ -62,8 +62,8 @@ public:
            buffs(aBuffs),
            n_bits(nBits)
      {
-          DLOG(INFO) << boost::format("SwapperMT(): n: %d, comm_size: %d") % n %
-                            comm_size;
+          DLOG(INFO) << boost::format("SwapperMT(): n: %d, comm_size: %d") % n
+                            % comm_size;
      }
 
      ~SwapperMT()

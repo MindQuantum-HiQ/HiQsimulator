@@ -87,8 +87,8 @@ inline void kernel_core_diag(V& v, unsigned id2, unsigned id1, unsigned id0,
 #pragma omp for collapse(1) schedule(static)
      for (size_t i = 0; i < n; ++i) {
           if ((i & cmask) == cmask) {
-               std::size_t d_id = ((i >> id0) & 1) ^ (((i >> id1) & 1) << 1) ^
-                                  (((i >> id2) & 1) << 2);
+               std::size_t d_id = ((i >> id0) & 1) ^ (((i >> id1) & 1) << 1)
+                                  ^ (((i >> id2) & 1) << 2);
                store(&v[i], &v[i],
                      mul(load(&v[i], &v[i]), dv[d_id], dvt[d_id]));
           }
@@ -109,9 +109,9 @@ inline void kernel_core_diag(V& v, unsigned id3, unsigned id2, unsigned id1,
 #pragma omp for collapse(1) schedule(static)
      for (size_t i = 0; i < n; ++i) {
           if ((i & cmask) == cmask) {
-               std::size_t d_id = ((i >> id0) & 1) ^ (((i >> id1) & 1) << 1) ^
-                                  (((i >> id2) & 1) << 2) ^
-                                  (((i >> id3) & 1) << 3);
+               std::size_t d_id = ((i >> id0) & 1) ^ (((i >> id1) & 1) << 1)
+                                  ^ (((i >> id2) & 1) << 2)
+                                  ^ (((i >> id3) & 1) << 3);
                store(&v[i], &v[i],
                      mul(load(&v[i], &v[i]), dv[d_id], dvt[d_id]));
           }
@@ -133,10 +133,10 @@ inline void kernel_core_diag(V& v, unsigned id4, unsigned id3, unsigned id2,
 #pragma omp for collapse(1) schedule(static)
      for (size_t i = 0; i < n; ++i) {
           if ((i & cmask) == cmask) {
-               std::size_t d_id = ((i >> id0) & 1) ^ (((i >> id1) & 1) << 1) ^
-                                  (((i >> id2) & 1) << 2) ^
-                                  (((i >> id3) & 1) << 3) ^
-                                  (((i >> id4) & 1) << 4);
+               std::size_t d_id = ((i >> id0) & 1) ^ (((i >> id1) & 1) << 1)
+                                  ^ (((i >> id2) & 1) << 2)
+                                  ^ (((i >> id3) & 1) << 3)
+                                  ^ (((i >> id4) & 1) << 4);
                store(&v[i], &v[i],
                      mul(load(&v[i], &v[i]), dv[d_id], dvt[d_id]));
           }

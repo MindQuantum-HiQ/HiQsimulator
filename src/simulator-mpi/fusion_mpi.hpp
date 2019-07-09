@@ -33,8 +33,8 @@ public:
      using Index = int64_t;
      using IndexVector = std::vector<Index>;
      using Complex = std::complex<double>;
-     using Matrix =
-         std::vector<std::vector<Complex, aligned_allocator<Complex, 64>>>;
+     using Matrix
+         = std::vector<std::vector<Complex, aligned_allocator<Complex, 64>>>;
 
      Item(Matrix mat, uint64_t aFlags, IndexVector idx)
          : mat_(mat), idx_(idx), m_flags(aFlags)
@@ -68,8 +68,8 @@ public:
      using IndexSet = std::set<Index>;
      using IndexVector = std::vector<Index>;
      using Complex = std::complex<double>;
-     using Matrix =
-         std::vector<std::vector<Complex, aligned_allocator<Complex, 64>>>;
+     using Matrix
+         = std::vector<std::vector<Complex, aligned_allocator<Complex, 64>>>;
      using ItemVector = std::vector<Item>;
 
      unsigned num_qubits()
@@ -114,8 +114,8 @@ public:
 
           DLOG(INFO)
               << boost::format(
-                     "perform_fusion(): items_.size(): %d, num qubits: %d") %
-                     items_.size() % N;
+                     "perform_fusion(): items_.size(): %d, num qubits: %d")
+                     % items_.size() % N;
           out_flags |= MatProps::IS_DIAG;
           for (auto& item: items_) {
                uint64_t flags = item.flags();
@@ -127,8 +127,8 @@ public:
                for (std::size_t i = 0; i < idx.size(); ++i)
                     idx2mat[i] = ((std::equal_range(index_list.begin(),
                                                     index_list.end(), idx[i]))
-                                      .first -
-                                  index_list.begin());
+                                      .first
+                                  - index_list.begin());
 
                for (std::size_t k = 0; k < (1UL << N);
                     ++k) {  // loop over big matrix columns
@@ -147,11 +147,11 @@ public:
                          for (std::size_t j = 0; j < (1UL << idx.size()); ++j) {
                               std::size_t locidx = i;
                               for (std::size_t l = 0; l < idx.size(); ++l)
-                                   if (((j >> l) & 1UL) !=
-                                       ((i >> idx2mat[l]) & 1UL))
+                                   if (((j >> l) & 1UL)
+                                       != ((i >> idx2mat[l]) & 1UL))
                                         locidx ^= (1UL << idx2mat[l]);
-                              res += oldcol[locidx] *
-                                     item.get_matrix()[local_i][j];
+                              res += oldcol[locidx]
+                                     * item.get_matrix()[local_i][j];
                          }
                          M[i][k] = res;
                     }
@@ -196,8 +196,9 @@ private:
           // incorporated into the old commands (the ones already in the list).
 
           for (auto ctrlIdx: ctrlList) {
-               if (ctrl_set_.count(ctrlIdx) ==
-                   0) {  // need to either add it to the list or to the command
+               if (ctrl_set_.count(ctrlIdx)
+                   == 0) {  // need to either add it to the list or to the
+                            // command
                     if (items_.size() > 0) {  // add it to the command
                          add_controls(matrix, indexList, {ctrlIdx});
                          set_.insert(ctrlIdx);

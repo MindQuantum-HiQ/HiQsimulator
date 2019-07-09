@@ -106,8 +106,8 @@ inline void kernel_core_diag(V& psi, std::size_t I, std::size_t d0,
      psi[I + d2 + d3 + d4] = mul(psi[I + d2 + d3 + d4], m[28][28]);
      psi[I + d0 + d2 + d3 + d4] = mul(psi[I + d0 + d2 + d3 + d4], m[29][29]);
      psi[I + d1 + d2 + d3 + d4] = mul(psi[I + d1 + d2 + d3 + d4], m[30][30]);
-     psi[I + d0 + d1 + d2 + d3 + d4] =
-         mul(psi[I + d0 + d1 + d2 + d3 + d4], m[31][31]);
+     psi[I + d0 + d1 + d2 + d3 + d4]
+         = mul(psi[I + d0 + d1 + d2 + d3 + d4], m[31][31]);
 }
 
 }  // namespace nointrin

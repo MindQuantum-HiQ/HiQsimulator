@@ -44,8 +44,8 @@ Fusion::Matrix I2 = {{1.0, 0.0, 0.0, 0.0},
                      {0.0, 0.0, 1.0, 0.0},
                      {0.0, 0.0, 0.0, 1.0}};
 
-Fusion::Matrix RZpi = {{{1.0 / sqrt2, 1.0 / sqrt2}, 0.0},
-                       {0.0, {-1.0 / sqrt2, -1.0 / sqrt2}}};
+Fusion::Matrix RZpi
+    = {{{1.0 / sqrt2, 1.0 / sqrt2}, 0.0}, {0.0, {-1.0 / sqrt2, -1.0 / sqrt2}}};
 
 Fusion::Matrix RZpi2 = {{1.0, 0.0}, {0.0, {0.0, -1.0}}};
 
@@ -91,9 +91,9 @@ bool checkAmplitudePlacement(uint64_t M, uint64_t rank, uint64_t index,
      if (naturalIndex != aIndex) {
           LOG(ERROR) << boost::format(
                             "checkAmplitudePlacement(): amp: %f, index: %s, "
-                            "naturalIndex != aIndex: %s != %s") %
-                            a % bitstring(index, L) %
-                            bitstring(naturalIndex, L) % bitstring(aIndex, L);
+                            "naturalIndex != aIndex: %s != %s")
+                            % a % bitstring(index, L)
+                            % bitstring(naturalIndex, L) % bitstring(aIndex, L);
      }
 
      return false;

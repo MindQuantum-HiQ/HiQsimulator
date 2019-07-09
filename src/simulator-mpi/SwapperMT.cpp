@@ -87,21 +87,21 @@ void f_consumer2(SwapperMT& s, const mpi::communicator& comm)
 
 void SwapperMT::runProducer(const std::vector<uint64_t>& aSwap_bits)
 {
-     this->producer =
-         std::thread(f_producer, std::ref(*this), std::ref(aSwap_bits));
+     this->producer
+         = std::thread(f_producer, std::ref(*this), std::ref(aSwap_bits));
 }
 
 void SwapperMT::runConsumer2(const mpi::communicator& comm)
 {
-     this->consumer2 =
-         std::thread(f_consumer2, std::ref(*this), std::ref(comm));
+     this->consumer2
+         = std::thread(f_consumer2, std::ref(*this), std::ref(comm));
 }
 
 void SwapperMT::doSwap(int rank, const mpi::communicator& comm, uint64_t color,
                        const std::vector<uint64_t>& aSwap_bits)
 {
-     DLOG(INFO) << boost::format("M: %d, rank: %d, color: %d, swap_bits: %s") %
-                       M % rank % color % print(aSwap_bits);
+     DLOG(INFO) << boost::format("M: %d, rank: %d, color: %d, swap_bits: %s")
+                       % M % rank % color % print(aSwap_bits);
 
      this->runConsumer2(comm);
      this->runProducer(aSwap_bits);

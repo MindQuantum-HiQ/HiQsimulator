@@ -186,8 +186,8 @@ void apply_gate(StateVector& vec_, const Fusion::Matrix& m,
 
      auto t1 = std::chrono::high_resolution_clock::now();
      std::chrono::duration<double, std::milli> dt = t1 - t0;
-     std::cout << boost::format("trgts: %d dt: %.3f ms") % trgts.size() %
-                      dt.count()
+     std::cout << boost::format("trgts: %d dt: %.3f ms") % trgts.size()
+                      % dt.count()
                << std::endl;
 }
 
@@ -349,9 +349,8 @@ int main(int argc, char** argv)
           return 0;
      }
 
-     std::cout << boost::format(
-                      "algo: %s, L: %d, M: %d, trgts: %s, ctrls: %s") %
-                      algo % L % M % print(trgts) % print(ctrls)
+     std::cout << boost::format("algo: %s, L: %d, M: %d, trgts: %s, ctrls: %s")
+                      % algo % L % M % print(trgts) % print(ctrls)
                << std::endl;
 #ifdef _OPENMP
      omp_set_num_threads(nthreads);

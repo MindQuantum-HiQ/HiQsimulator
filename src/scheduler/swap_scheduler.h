@@ -84,8 +84,8 @@ private:
           }
 
           if (inter(gate_ctrl_[j], gate_[i])) {
-               gate_ctrl_[j] ^=
-                   gate_[i];  // Remove bit gate[i] from gate_ctrl[j] mask
+               gate_ctrl_[j]
+                   ^= gate_[i];  // Remove bit gate[i] from gate_ctrl[j] mask
                gate_[j] = unite(gate_[j], gate_[i]);
           }
      }

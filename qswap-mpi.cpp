@@ -95,12 +95,12 @@ int main(int argc, const char** argv)
 
      LOG(INFO) << boost::format("L: %d, M: %d") % L % M << std::endl;
 
-     LOG(INFO) << boost::format("Current permutation: %s") %
-                      printPairs(perm_pairs);
+     LOG(INFO) << boost::format("Current permutation: %s")
+                      % printPairs(perm_pairs);
      LOG(INFO) << boost::format("Do swaps: %s") % printPairs(swap_pairs);
 
-     LOG(INFO) << boost::format("R: %d, Allocating %d local qubits...") % rank %
-                      M
+     LOG(INFO) << boost::format("R: %d, Allocating %d local qubits...") % rank
+                      % M
                << std::endl;
      auto t0 = std::chrono::high_resolution_clock::now();
      auto state_vector = allocateData1(rank, M);  // SimulatorMPI::StateVector

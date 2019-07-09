@@ -75,9 +75,9 @@ private:
                }
           }
 
-          if (cur_ans > best_ans_ ||
-              (cur_ans == best_ans_ &&
-               count_bits(cur_cluster) < count_bits(best_cluster_))) {
+          if (cur_ans > best_ans_
+              || (cur_ans == best_ans_
+                  && count_bits(cur_cluster) < count_bits(best_cluster_))) {
                best_ans_ = cur_ans;
                best_cluster_ = cur_cluster;
           }
@@ -133,8 +133,8 @@ private:
                          const msk_t cur_bad) const
      {
           msk_t gate_all = unite(gate_ctrl_[pos], gate_[pos]);
-          if (inter(gate_all, cur_bad) ||
-              !submask(inter(gate_all, locals_), cur_cluster)) {
+          if (inter(gate_all, cur_bad)
+              || !submask(inter(gate_all, locals_), cur_cluster)) {
                return false;
           }
 

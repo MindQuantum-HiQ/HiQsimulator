@@ -37,8 +37,8 @@ uint64_t calcSwaps(uint64_t aL, uint64_t aM, std::vector<uint64_t> anInvPerm,
                     uint64_t remote_qubit = aPairs[pi];
                     uint64_t local_qubit = aPairs[pi + 1];
 
-                    uint64_t remote_bit =
-                        (1ul << (anInvPerm[remote_qubit] - aM));
+                    uint64_t remote_bit
+                        = (1ul << (anInvPerm[remote_qubit] - aM));
                     uint64_t local_bit = (1ul << anInvPerm[local_qubit]);
                     bool rb = rank & remote_bit;
                     bool ib = index & local_bit;
@@ -56,8 +56,8 @@ uint64_t calcSwaps(uint64_t aL, uint64_t aM, std::vector<uint64_t> anInvPerm,
           auto end = std::chrono::high_resolution_clock::now();
           std::chrono::duration<double, std::milli> elapsed_us = end - start;
           std::cout << boost::format("rank: %d, ") % rank
-                    << boost::format("elapsed time: %.3f ms") %
-                           elapsed_us.count()
+                    << boost::format("elapsed time: %.3f ms")
+                           % elapsed_us.count()
                     << std::endl;
      }
 
@@ -94,8 +94,8 @@ uint64_t calcSwaps1(uint64_t aL, uint64_t aM, std::vector<uint64_t> aSwapBits)
 
                if (new_rank != rank) {
                     std::cout
-                        << boost::format("(%d: %d)->(%d: %d),  dst_idx: %d") %
-                               rank % index % new_rank % new_index % dst_idx
+                        << boost::format("(%d: %d)->(%d: %d),  dst_idx: %d")
+                               % rank % index % new_rank % new_index % dst_idx
                         << std::endl;
                }
           }
@@ -103,8 +103,8 @@ uint64_t calcSwaps1(uint64_t aL, uint64_t aM, std::vector<uint64_t> aSwapBits)
           auto end = std::chrono::high_resolution_clock::now();
           std::chrono::duration<double, std::milli> elapsed_us = end - start;
           std::cout << boost::format("rank: %d, ") % rank
-                    << boost::format("elapsed time: %.3f ms") %
-                           elapsed_us.count()
+                    << boost::format("elapsed time: %.3f ms")
+                           % elapsed_us.count()
                     << std::endl;
      }
 
@@ -118,7 +118,8 @@ uint64_t calcSwaps1<0>(uint64_t, uint64_t, std::vector<uint64_t>)
 }
 
 template <size_t NumPairs, class T = uint64_t>
-struct CalcSwaps {
+struct CalcSwaps
+{
      static T doCalc(uint64_t L, uint64_t M, const std::vector<T>& swap_bits)
      {
           if (NumPairs * 2 == swap_bits.size()) {
@@ -131,7 +132,8 @@ struct CalcSwaps {
 };
 
 template <class T>
-struct CalcSwaps<0, T> {
+struct CalcSwaps<0, T>
+{
      static T doCalc(uint64_t L, uint64_t M, const std::vector<T>& swap_bits)
      {
           return calcSwaps1<0>(L, M, swap_bits);
@@ -172,8 +174,8 @@ int main(int argc, const char** argv)
 
      //	auto res = calcSwaps(L, M, inversePermutation(perm), swap_pairs);
 
-     std::vector<uint64_t> swapBits =
-         q2bits<uint64_t>(M, swap_pairs, inversePermutation(perm));
+     std::vector<uint64_t> swapBits
+         = q2bits<uint64_t>(M, swap_pairs, inversePermutation(perm));
      auto res = CalcSwaps<5>::doCalc(L, M, swapBits);
 
      return res;
