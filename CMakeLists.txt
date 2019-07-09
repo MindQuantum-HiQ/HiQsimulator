@@ -230,6 +230,6 @@ target_link_libraries(_cppsim_mpi
 
 pybind11_add_module(_cppstabsim _cppstabsim.cpp)
 add_avx2_to_target(_cppstabsim)
-target_link_libraries(_cppstabsim PRIVATE Boost::boost)
+target_link_libraries(_cppstabsim PRIVATE Boost::boost ${xsimd_tgt})
 
 # ==============================================================================

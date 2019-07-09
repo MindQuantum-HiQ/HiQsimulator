@@ -55,7 +55,13 @@ unit testing (useful for CI)"
 
 # ==============================================================================
 
+set(xsimd_tgt)
 if(USE_INTRIN)
+  find_package(xsimd)
+  if(xsimd_FOUND)
+    set(xsimd_tgt xsimd::xsimd)
+    add_definitions(-DHAS_XSIMD)
+  endif()
   if(USE_INTRIN_BUFFER)
     add_definitions(-DINTRIN_CF)
   else()

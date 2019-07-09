@@ -15,7 +15,6 @@
 #pragma once
 
 #include <pybind11/pybind11.h>
-#include <x86intrin.h>
 
 #include <algorithm>
 #include <cassert>
@@ -28,18 +27,20 @@
 #include <tuple>
 #include <vector>
 
-#include "simulator-mpi/alignedallocator.hpp"
+#include "details/helper_functions.hpp"
+#include "details/popcnt32.hpp"
+#include "xsimd_include.hpp"
 
-/* For some weird reason, throwing std::runtime_error leads to segmentation
- * faults with pybind11 2.2.4 & clang 10.0
+/* If for some weird reason throwing std::runtime_error leads to segmentation
+ * faults (e.g. pybind11 2.2.4 & clang 10.0 on Mac OS X) use the corresponding
+ * CMake option to enable the workaround.
  */
-// #define PYBIND11_THROW_RUNTIME_ERROR
-#ifdef PYBIND11_THROW_RUNTIME_ERROR
-#     define THROW_RUNTIME_ERROR(msg) throw std::runtime_error(msg)
-#else
+#ifdef PYBIND11_NO_THROW_RUNTIME_ERROR
 #     define THROW_RUNTIME_ERROR(msg)                                          \
           PyErr_SetString(PyExc_RuntimeError, msg);                            \
           throw pybind11::error_already_set()
+#else
+#     define THROW_RUNTIME_ERROR(msg) throw std::runtime_error(msg)
 #endif /* PYBIND11_THROW_RUNTIME_ERROR */
 
 #define QUBIT_ALLOCATE_CHECK(qubit_id, gate_name)                              \
@@ -51,11 +52,12 @@
 
 constexpr auto max_storage_depth = 10U;
 
-using AlignedIntVec = std::vector<uint32_t, aligned_allocator<uint32_t, 256>>;
-using VecOfMasks = std::vector<AlignedIntVec>;
+using AlignedIntVec
+    = std::vector<uint32_t, xsimd::aligned_allocator<uint32_t, 256>>;
 using VecOfCNOT = std::vector<std::vector<std::pair<unsigned, unsigned>>>;
 
-struct Gates {
+struct Gates
+{
 public:
      Gates(unsigned n = 1, unsigned max_d_a = 1)
          : num_gates(0),
@@ -284,8 +286,8 @@ public:
                return 1.0;
           }
           assert(bitstring.size() == qubit_ids.size());
-          return get_probability_recursive_(begin(bitstring), end(bitstring),
-                                            begin(qubit_ids), end(qubit_ids));
+          return get_probability_recursive_(cbegin(bitstring), cend(bitstring),
+                                            cbegin(qubit_ids), cend(qubit_ids));
      }
 
      void collapse_wavefunction(const std::vector<unsigned>& qubit_ids,
@@ -296,9 +298,9 @@ public:
                return;
           }
           assert(qubit_ids.size() == bitstring.size());
-          auto qubit_it(begin(qubit_ids));
-          auto bitstring_it(begin(bitstring));
-          const auto qubit_end(end(qubit_ids));
+          auto qubit_it(cbegin(qubit_ids));
+          auto bitstring_it(cbegin(bitstring));
+          const auto qubit_end(cend(qubit_ids));
 
           const auto r_bak = r_;
           const auto x_bak = x_;
@@ -327,9 +329,9 @@ public:
                return;
           }
           assert(qubit_ids.size() == bitstring.size());
-          auto qubit_it(begin(qubit_ids));
-          auto bitstring_it(begin(bitstring));
-          const auto qubit_end(end(qubit_ids));
+          auto qubit_it(cbegin(qubit_ids));
+          auto bitstring_it(cbegin(bitstring));
+          const auto qubit_end(cend(qubit_ids));
           std::vector<unsigned> qubit_indices_to_invert;
 
           for (; qubit_it != qubit_end; ++qubit_it, ++bitstring_it) {
@@ -349,16 +351,19 @@ public:
 
      void sync()
      {
-          if (gates_.num_gates == 0)
+          if (gates_.num_gates == 0) {
                return;
+          }
+
 #pragma omp parallel for schedule(static, 32)
           for (auto stab = 0U; stab < 2 * num_qubits_; ++stab) {
                const auto& nmasks_8 = gates_.nmasks_8;
                for (auto d = 0U; d < gates_.max_d; ++d) {
-                    h_and_s_kernel_(begin(gates_.H) + d * nmasks_8,
-                                    begin(gates_.H) + (d + 1) * nmasks_8,
-                                    begin(gates_.S) + d * nmasks_8,
-                                    begin(gates_.S) + (d + 1) * nmasks_8, stab);
+                    h_and_s_kernel_(cbegin(gates_.H) + d * nmasks_8,
+                                    cbegin(gates_.H) + (d + 1) * nmasks_8,
+                                    cbegin(gates_.S) + d * nmasks_8,
+                                    cbegin(gates_.S) + (d + 1) * nmasks_8,
+                                    stab);
                     for (const auto& cnot_tuple: gates_.C[d]) {
                          cnot_kernel_(cnot_tuple.first, cnot_tuple.second,
                                       stab);
@@ -429,76 +434,95 @@ private:
                toggle_phase_bit_(stab);
      }
 
+     // Execute one iteration of the compute_phase function
+     template <typename T, typename U>
+     inline constexpr void compute_phase_iter_(const T& xh, const T& xi,
+                                               const T& zh, const T& zi,
+                                               U& exp_high, U& exp_low) const
+     {
+          /*
+                uint32_t q = (stab_i_x | stab_h_z) & (stab_i_z | ~stab_h_x) &
+                             (~stab_i_z | stab_h_x);
+                uint32_t r = (stab_i_x | stab_i_z) & (stab_h_x | stab_h_z);
+                uint32_t s = ~(~(stab_i_x ^ stab_h_x) & ~(stab_i_z ^ stab_h_z));
+                uint32_t r_and_s = r & s;
+                exp_high = (exp_low & r_and_s) ^ (exp_high ^ (q & r_and_s));
+                exp_low ^= r_and_s;
+          */
+          auto r_and_s = ((xi | zi) & (xh | zh)) & ((xi ^ xh) | (zi ^ zh));
+          exp_high = (exp_low & r_and_s)
+                     ^ (exp_high
+                        ^ (((xi | zh) & (~xh | zi) & (~zi | xh)) & r_and_s));
+          //               |<--------------- q --------------->|
+          exp_low = exp_low ^ r_and_s;
+     }
+
      unsigned compute_phase_(unsigned stabilizer_h, unsigned stabilizer_i) const
      {
-          // only inner loop: 22 int ops and 4 * 4byte rw
+          using value_type = std::decay_t<decltype(x_[0])>;
+          using traits = xsimd::simd_traits<value_type>;
+          using batch_type = typename traits::type;
+          using batch_const_type =
+              typename xsimd::const_simd_traits<value_type>::type;
+          constexpr auto simd_size = traits::size;
 
-          // phase is i^exponent, where exponent is saved as a 2 bit number
-          auto exp_low = _mm256_setzero_si256();
-          auto exp_high1 = _mm256_setzero_si256();
-          auto exp_high2 = _mm256_setzero_si256();
+          auto size = row_length_;
           const auto start_index_h = stabilizer_h * row_length_;
           const auto start_index_i = stabilizer_i * row_length_;
-          auto ones = _mm256_set1_epi32((1ULL << 32) - 1);
-          for (unsigned i = 0; i < row_length_; i += 8) {
-               auto xh = _mm256_load_si256((__m256i*) &x_[start_index_h + i]);
-               auto xi = _mm256_load_si256((__m256i*) &x_[start_index_i + i]);
-               auto zh = _mm256_load_si256((__m256i*) &z_[start_index_h + i]);
-               auto zi = _mm256_load_si256((__m256i*) &z_[start_index_i + i]);
-               auto not_xh = _mm256_xor_si256(ones, xh);
-               auto not_zi = _mm256_xor_si256(ones, zi);
-               auto q = _mm256_and_si256(
-                   _mm256_and_si256(_mm256_or_si256(xi, zh),
-                                    _mm256_or_si256(not_xh, zi)),
-                   _mm256_or_si256(not_zi, xh));
-               auto r = _mm256_and_si256(_mm256_or_si256(xi, zi),
-                                         _mm256_or_si256(xh, zh));
-               auto s = _mm256_or_si256(_mm256_xor_si256(xi, xh),
-                                        _mm256_xor_si256(zi, zh));
-               auto r_and_s = _mm256_and_si256(r, s);
-               exp_high1 = _mm256_xor_si256(_mm256_and_si256(exp_low, r_and_s),
-                                            exp_high1);
-               exp_high2 =
-                   _mm256_xor_si256(exp_high2, _mm256_and_si256(q, r_and_s));
-               exp_low = _mm256_xor_si256(exp_low, r_and_s);
-               /*
-                 uint32_t stab_h_x = x[start_index_h + i];
-                 uint32_t stab_h_z = z[start_index_h + i];
-                 uint32_t stab_i_x = x[start_index_i + i];
-                 uint32_t stab_i_z = z[start_index_i + i];
 
-                 uint32_t q = (stab_i_x | stab_h_z) & (stab_i_z | ~stab_h_x)
-                 & (~stab_i_z | stab_h_x);
-                 uint32_t r = (stab_i_x | stab_i_z) & (stab_h_x | stab_h_z);
-                 uint32_t s = ~(~(stab_i_x ^ stab_h_x)
-                 & ~(stab_i_z ^ stab_h_z));
-                 uint32_t r_and_s = r & s;
-                 exp_high = (exp_low & r_and_s) ^ (exp_high ^ (q & r_and_s));
-                 exp_low ^= r_and_s;
-               */
+          auto xh_it = cbegin(x_) + start_index_h;
+          auto xi_it = cbegin(x_) + start_index_i;
+          auto zh_it = cbegin(z_) + start_index_h;
+          auto zi_it = cbegin(z_) + start_index_i;
+
+          const auto align_begin_1
+              = xsimd::get_alignment_offset(&(*xh_it), size, simd_size);
+          const auto align_begin_2
+              = xsimd::get_alignment_offset(&(*zh_it), size, simd_size);
+          const auto align_end
+              = align_begin_1 + ((size - align_begin_1) & ~(simd_size - 1));
+
+          assert(align_begin_1 == align_begin_2);
+          assert(align_begin_1 == 0);
+
+          value_type exp_high(0), exp_low(0);
+
+          batch_const_type xh_batch, xi_batch, zh_batch, zi_batch;
+          batch_type exp_high_batch(value_type(0)),
+              exp_low_batch(value_type(0));
+          PRAGMA_LOOP_IVDEP
+          for (auto i = align_begin_1; i < align_end; i += simd_size) {
+               xsimd::load_aligned(&xh_it[i], xh_batch);
+               xsimd::load_aligned(&xi_it[i], xi_batch);
+               xsimd::load_aligned(&zh_it[i], zh_batch);
+               xsimd::load_aligned(&zi_it[i], zi_batch);
+
+               compute_phase_iter_(xh_batch, xi_batch, zh_batch, zi_batch,
+                                   exp_high_batch, exp_low_batch);
           }
-          const auto exp_high = _mm256_xor_si256(exp_high1, exp_high2);
-          alignas(32) uint64_t eh[4], el[4];
-          _mm256_store_si256((__m256i*) &eh, exp_high);
-          _mm256_store_si256((__m256i*) &el, exp_low);
 
-          eh[0] ^= eh[1];
-          eh[2] ^= eh[3];
-          el[0] ^= el[1];
-          el[2] ^= el[3];
+          // reduce exp_high and exp_low
+          alignas(32) std::array<uint32_t, 8> tmp;
+          xsimd::store_aligned(tmp.data(), exp_high_batch);
+          details::apply_array_func<std::bit_xor<value_type>>(tmp, exp_high);
 
-          eh[0] ^= eh[2];
-          el[0] ^= el[2];
-          uint32_t mask = (1ULL << 32) - 1;
-          uint32_t eh_sm = ((eh[0] >> 32) & mask) ^ (eh[0] & mask);
-          uint32_t el_sm = ((el[0] >> 32) & mask) ^ (el[0] & mask);
-          const auto exponent = 2 * _popcnt32(eh_sm) + _popcnt32(el_sm);
+          xsimd::store_aligned(tmp.data(), exp_low_batch);
+          details::apply_array_func<std::bit_xor<value_type>>(tmp, exp_low);
+
+          PRAGMA_LOOP_IVDEP
+          for (std::size_t i = align_end; i < size; ++i) {
+               compute_phase_iter_(xh_it[i], xi_it[i], zh_it[i], zi_it[i],
+                                   exp_high, exp_low);
+          }
+
+          const auto exponent = 2 * popcnt32(exp_high) + popcnt32(exp_low);
+
           // compute positive modulo.
-          return (((exponent + 2 * get_phase_bit_(stabilizer_h) +
-                    2 * get_phase_bit_(stabilizer_i)) %
-                   4) +
-                  4) %
-                 4;
+          return (((exponent + 2 * get_phase_bit_(stabilizer_h)
+                    + 2 * get_phase_bit_(stabilizer_i))
+                   % 4)
+                  + 4)
+                 % 4;
      }
 
      // Left-multiply stabilizer generator h by stabilizer generator i,
@@ -513,65 +537,105 @@ private:
           const auto start_h = stabilizer_h * row_length_;
           const auto start_i = stabilizer_i * row_length_;
 
-          for (auto i(0U); i < row_length_; i += 8) {
-               // x_hj ^= x_ij
-               // x[start_h + i] ^= x[start_i + i];
-               const auto xh = _mm256_load_si256((__m256i*) &x_[start_h + i]);
-               const auto xi = _mm256_load_si256((__m256i*) &x_[start_i + i]);
-               _mm256_store_si256((__m256i*) &x_[start_h + i],
-                                  _mm256_xor_si256(xh, xi));
-               // same for z_hj:
-               // z[start_h + i] ^= z[start_i + i];
-               const auto zh = _mm256_load_si256((__m256i*) &z_[start_h + i]);
-               const auto zi = _mm256_load_si256((__m256i*) &z_[start_i + i]);
-               _mm256_store_si256((__m256i*) &z_[start_h + i],
-                                  _mm256_xor_si256(zh, zi));
-          }
+          //      // x_hj ^= x_ij
+          //      // x[start_h + i] ^= x[start_i + i];
+          xsimd::self_transform(
+              begin(x_) + start_h, begin(x_) + start_h + row_length_,
+              begin(x_) + start_i,
+              [](const auto& xh, const auto& xi) { return xh ^ xi; });
+
+          //      // same for z_hj:
+          //      // z[start_h + i] ^= z[start_i + i];
+          xsimd::self_transform(
+              begin(z_) + start_h, begin(z_) + start_h + row_length_,
+              begin(z_) + start_i,
+              [](const auto& zh, const auto& zi) { return zh ^ zi; });
      }
 
+     // Execute one iteration of the H and S kernel
+     template <typename T, typename U, typename V, typename W, typename X>
+     inline constexpr void h_and_s_kernel_iter_(T& x, U& z, const V& H,
+                                                const W& S, X& phase_sum)
+     {
+          auto smasked_x = x & S;
+          phase_sum = phase_sum ^ (smasked_x & z);
+          z = z ^ smasked_x;
+
+          phase_sum = phase_sum ^ (H & x & z);
+          x = x ^ z;
+          z = z ^ (x & H);
+          x = x ^ z;
+     }
+
+     // Execute the H and S kernel
      inline void h_and_s_kernel_(AlignedIntVec::const_iterator Hmasks_begin,
                                  AlignedIntVec::const_iterator Hmasks_end,
                                  AlignedIntVec::const_iterator Smasks_begin,
                                  AlignedIntVec::const_iterator Smasks_end,
                                  unsigned stab)
      {
-          auto phase_sum = _mm256_setzero_si256();
-          auto i(row_length_ * stab);
-          for (auto h_it(Hmasks_begin), s_it(Smasks_begin); h_it < Hmasks_end;
-               h_it += 8, s_it += 8, i += 8) {
-               const auto hmask = _mm256_load_si256((__m256i*) &(*h_it));
-               const auto smask = _mm256_load_si256((__m256i*) &(*s_it));
-               auto xstab = _mm256_load_si256((__m256i*) &x_[i]);
-               auto zstab = _mm256_load_si256((__m256i*) &z_[i]);
-               const auto smasked_x = _mm256_and_si256(xstab, smask);
-               const auto smasked_x_and_z = _mm256_and_si256(zstab, smasked_x);
-               // keep track of phase for s-gate
-               phase_sum = _mm256_xor_si256(smasked_x_and_z, phase_sum);
-               // update zstab for s-gate
-               zstab = _mm256_xor_si256(smasked_x, zstab);
+          using value_type = std::decay_t<decltype(x_[0])>;
+          using traits = xsimd::simd_traits<value_type>;
+          using batch_type = typename traits::type;
+          using batch_const_type =
+              typename xsimd::const_simd_traits<value_type>::type;
+          constexpr auto simd_size = traits::size;
 
-               auto hmasked_z = _mm256_and_si256(zstab, hmask);
-               auto hmasked_x_and_z = _mm256_and_si256(hmasked_z, xstab);
-               // update phase sum for H-gate
-               phase_sum = _mm256_xor_si256(phase_sum, hmasked_x_and_z);
-               // apply H-gate
-               xstab = _mm256_xor_si256(zstab, xstab);
-               auto hmasked_x = _mm256_and_si256(xstab, hmask);
-               zstab = _mm256_xor_si256(hmasked_x, zstab);
-               xstab = _mm256_xor_si256(zstab, xstab);
+          auto size = static_cast<std::size_t>(
+              std::distance(Hmasks_begin, Hmasks_end));
 
-               _mm256_store_si256((__m256i*) &x_[i], xstab);
-               _mm256_store_si256((__m256i*) &z_[i], zstab);
+          auto x_it = begin(x_) + row_length_ * stab;
+          auto z_it = begin(z_) + row_length_ * stab;
+          auto H_it(Hmasks_begin);
+          auto S_it(Smasks_begin);
+
+          const auto align_begin_1
+              = xsimd::get_alignment_offset(&(*x_it), size, simd_size);
+          const auto align_begin_2
+              = xsimd::get_alignment_offset(&(*z_it), size, simd_size);
+          const auto align_begin_3
+              = xsimd::get_alignment_offset(&(*H_it), size, simd_size);
+          const auto align_begin_4
+              = xsimd::get_alignment_offset(&(*S_it), size, simd_size);
+          const auto align_end
+              = align_begin_1 + ((size - align_begin_1) & ~(simd_size - 1));
+
+          assert(align_begin_1 == align_begin_2
+                 && align_begin_2 == align_begin_3
+                 && align_begin_3 == align_begin_4);
+          assert(align_begin_1 == 0);
+
+          value_type phase_sum(0);
+
+          batch_const_type H_batch, S_batch;
+          batch_type x_batch, z_batch, phase_sum_batch(value_type(0));
+          PRAGMA_LOOP_IVDEP
+          for (auto i = align_begin_1; i < align_end; i += simd_size) {
+               xsimd::load_aligned(&x_it[i], x_batch);
+               xsimd::load_aligned(&z_it[i], z_batch);
+               xsimd::load_aligned(&H_it[i], H_batch);
+               xsimd::load_aligned(&S_it[i], S_batch);
+
+               h_and_s_kernel_iter_(x_batch, z_batch, H_batch, S_batch,
+                                    phase_sum_batch);
+
+               xsimd::store_aligned(&x_it[i], x_batch);
+               xsimd::store_aligned(&z_it[i], z_batch);
           }
-          // reduce & store phase sum (for s-gate)
-          alignas(32) uint64_t tmpvec[4];
-          _mm256_store_si256((__m256i*) &tmpvec, phase_sum);
-          const uint64_t r1 = tmpvec[0] ^ tmpvec[1];
-          const uint64_t r2 = tmpvec[2] ^ tmpvec[3];
-          const uint32_t mask = -1;
-          const uint64_t red1 = r1 ^ r2;
-          uint32_t red2 = ((red1 >> 32) & mask) ^ (red1 & mask);
-          set_phase_bit_(stab, get_phase_bit_(stab) ^ (_popcnt32(red2) & 1));
+
+          // phase_sum calculation
+          alignas(32) std::array<uint32_t, 8> tmp;
+          xsimd::store_aligned(tmp.data(), phase_sum_batch);
+          details::apply_array_func<std::bit_xor<value_type>>(tmp, phase_sum);
+
+          PRAGMA_LOOP_IVDEP
+          for (std::size_t i = align_end; i < size; ++i) {
+               h_and_s_kernel_iter_(x_it[i], z_it[i], H_it[i], S_it[i],
+                                    phase_sum);
+          }
+
+          set_phase_bit_(stab,
+                         get_phase_bit_(stab) ^ (popcnt32(phase_sum) & 1));
      }
 
      inline void cnot_kernel_(unsigned qubit1, unsigned qubit2, unsigned stab)
@@ -589,8 +653,8 @@ private:
      void H_(unsigned qubit_index)
      {
           unsigned mask_num = qubit_index / 32;
-          gates_.H[pos_[qubit_index] * gates_.nmasks_8 + mask_num] |=
-              (1 << (qubit_index - mask_num * 32));
+          gates_.H[pos_[qubit_index] * gates_.nmasks_8 + mask_num]
+              |= (1 << (qubit_index - mask_num * 32));
           ++pos_[qubit_index];
           ++gates_.num_gates;
           if (pos_[qubit_index] >= max_storage_depth) {
@@ -601,8 +665,8 @@ private:
      void S_(unsigned qubit_index)
      {
           unsigned mask_num = qubit_index / 32;
-          gates_.S[pos_[qubit_index] * gates_.nmasks_8 + mask_num] |=
-              (1 << (qubit_index - mask_num * 32));
+          gates_.S[pos_[qubit_index] * gates_.nmasks_8 + mask_num]
+              |= (1 << (qubit_index - mask_num * 32));
           ++pos_[qubit_index];
           ++gates_.num_gates;
           if (pos_[qubit_index] >= max_storage_depth) {
@@ -620,8 +684,8 @@ private:
 
      void CNOT_(unsigned control_qubit_index, unsigned target_qubit_index)
      {
-          auto pos =
-              std::max(pos_[control_qubit_index], pos_[target_qubit_index]);
+          auto pos
+              = std::max(pos_[control_qubit_index], pos_[target_qubit_index]);
           gates_.C[pos].emplace_back(control_qubit_index, target_qubit_index);
           ++pos;
           pos_[control_qubit_index] = pos;
@@ -741,9 +805,10 @@ private:
                      * resulting probability.
                      */
                     set_phase_bit_(p, state);
-                    const auto prob(0.5 * get_probability_recursive_(
-                                              bitstring_begin, bitstring_end,
-                                              qubit_ids_begin, qubit_ids_end));
+                    const auto prob(0.5
+                                    * get_probability_recursive_(
+                                        bitstring_begin, bitstring_end,
+                                        qubit_ids_begin, qubit_ids_end));
                     r_ = r_bak;
                     x_ = x_bak;
                     z_ = z_bak;
