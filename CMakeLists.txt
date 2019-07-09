@@ -32,6 +32,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/macros.cmake)
 # ==============================================================================
 # Create the HiQSimulator project
 
+set(CMAKE_OSX_SYSROOT "") # Prevent CMake from adding the -isysroot options
 project(HiQSimulator LANGUAGES CXX)
 
 # Set a default build type if none was specified
