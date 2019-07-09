@@ -9,6 +9,7 @@ set(_clang_format_default_options
     "AllowShortIfStatementsOnASingleLine: false"
     "AllowShortLoopsOnASingleLine: false"
     "BreakBeforeBraces: Custom"
+    "BreakBeforeBinaryOperators: All"
     "BraceWrapping:"
     "  AfterClass: true"
     "  AfterControlStatement: false"
@@ -16,7 +17,7 @@ set(_clang_format_default_options
     "  AfterExternBlock: true"
     "  AfterFunction: true"
     "  AfterNamespace: true"
-    "  AfterStruct: false"
+    "  AfterStruct: true"
     "  AfterUnion: true"
     "  BeforeCatch: true"
     "  BeforeElse: true"
@@ -50,7 +51,7 @@ set(_clang_format_5_options
     "SortUsingDeclarations: true")
 
 set(_clang_format_6_options "IncludeBlocks: Regroup"
-                            "IndentPPDirectives: AfterHash")
+    "IndentPPDirectives: AfterHash")
 
 macro(_generate_clang_format_config_content content)
   set(${content} ${_clang_format_default_options})
@@ -98,8 +99,7 @@ function(clangformat_setup clangformat_srcs)
   unset(clangformat_srcs_tmp)
 
   add_custom_target(${PROJECT_NAME}_clangformat
-                    COMMAND ${CLANGFORMAT_EXECUTABLE}
-                            -style=file -i
+                    COMMAND ${CLANGFORMAT_EXECUTABLE} -style=file -i
                             ${clangformat_srcs}
                     COMMENT "Formating with ${CLANGFORMAT_EXECUTABLE} ...")
 

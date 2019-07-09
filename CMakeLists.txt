@@ -59,6 +59,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/options.cmake)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake)
 
+# ==============================================================================
+# Unit testing
+
+enable_testing()
+
 #==============================================================================
 # Setup compiler flags
 

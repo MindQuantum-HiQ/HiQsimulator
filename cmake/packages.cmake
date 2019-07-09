@@ -42,6 +42,10 @@ find_package(Boost REQUIRED
                         serialization
                         thread)
 
+if(HIQ_TEST)
+  find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+endif()
+
 # ------------------------------------------------------------------------------
 # In some cases where the Boost version is too recent compared to what the
 # CMake version supports, the imported target are not properly defined.
@@ -49,7 +53,9 @@ find_package(Boost REQUIRED
 
 set(_BOOST_HAS_IMPORTED_TGT TRUE)
 
-set(Boost_ATOMIC_DEPENDENCIES thread chrono system date_time)
+if(NOT Boost_VERSION VERSION_LESS 105300 AND Boost_VERSION VERSION_LESS 105600)
+  set(Boost_ATOMIC_DEPENDENCIES thread chrono system date_time)
+endif()
 set(Boost_CHRONO_DEPENDENCIES system)
 set(Boost_MPI_DEPENDENCIES serialization)
 if(NOT Boost_VERSION VERSION_LESS 105300)
