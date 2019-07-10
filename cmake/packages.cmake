@@ -36,14 +36,15 @@ include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 
 # ==============================================================================
 
-find_package(Boost REQUIRED
+find_package(Boost 1.55 REQUIRED
              COMPONENTS program_options
                         mpi
                         serialization
                         thread)
 
-if(HIQ_TEST)
-  find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+if(BUILD_TESTING)
+  # Boost 1.59 required for Boost.Test v3
+  find_package(Boost 1.59 REQUIRED COMPONENTS unit_test_framework)
 endif()
 
 # ------------------------------------------------------------------------------
@@ -51,38 +52,52 @@ endif()
 # CMake version supports, the imported target are not properly defined.
 # In this case, try our best to define the target properly and warn the user
 
-set(_BOOST_HAS_IMPORTED_TGT TRUE)
+if(Boost_FOUND)
+  set(_BOOST_HAS_IMPORTED_TGT TRUE)
 
-if(NOT Boost_VERSION VERSION_LESS 105300 AND Boost_VERSION VERSION_LESS 105600)
-  set(Boost_ATOMIC_DEPENDENCIES thread chrono system date_time)
-endif()
-set(Boost_CHRONO_DEPENDENCIES system)
-set(Boost_MPI_DEPENDENCIES serialization)
-if(NOT Boost_VERSION VERSION_LESS 105300)
-  set(Boost_THREAD_DEPENDENCIES chrono system date_time atomic)
-elseif(NOT Boost_VERSION VERSION_LESS 105000)
-  set(Boost_THREAD_DEPENDENCIES chrono system date_time)
-else()
-  set(Boost_THREAD_DEPENDENCIES date_time)
-endif()
-
-foreach(comp ${_Boost_COMPONENTS_SEARCHED})
-  if(NOT TARGET Boost::${comp})
-    set(_BOOST_HAS_IMPORTED_TGT FALSE)
-    define_target(Boost ${comp} "${Boost_INCLUDE_DIR}")
+  if(NOT
+     Boost_VERSION
+     VERSION_LESS
+     105300
+     AND Boost_VERSION VERSION_LESS 105600)
+    set(Boost_ATOMIC_DEPENDENCIES
+        thread
+        chrono
+        system
+        date_time)
   endif()
-endforeach()
+  set(Boost_CHRONO_DEPENDENCIES system)
+  set(Boost_MPI_DEPENDENCIES serialization)
+  if(NOT Boost_VERSION VERSION_LESS 105300)
+    set(Boost_THREAD_DEPENDENCIES
+        chrono
+        system
+        date_time
+        atomic)
+  elseif(NOT Boost_VERSION VERSION_LESS 105000)
+    set(Boost_THREAD_DEPENDENCIES chrono system date_time)
+  else()
+    set(Boost_THREAD_DEPENDENCIES date_time)
+  endif()
 
-if(NOT _BOOST_HAS_IMPORTED_TGT)
-  message(
-    WARNING
-      "Your version of Boost (${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}."
-      "${Boost_SUBMINOR_VERSION}) is too recent for this version"
-      " of CMake."
-      "\nThe imported target have been defined manually, but the dependencies "
-      " might not be correct. If compilation fails, please try updating your"
-      " CMake installation to a newer version (for your information, your "
-      "CMake version is ${CMAKE_VERSION}).")
+  foreach(comp ${_Boost_COMPONENTS_SEARCHED})
+    if(NOT TARGET Boost::${comp})
+      set(_BOOST_HAS_IMPORTED_TGT FALSE)
+      define_target(Boost ${comp} "${Boost_INCLUDE_DIR}")
+    endif()
+  endforeach()
+
+  if(NOT _BOOST_HAS_IMPORTED_TGT)
+    message(
+      WARNING
+        "Your version of Boost (${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}."
+        "${Boost_SUBMINOR_VERSION}) is too recent for this version"
+        " of CMake."
+        "\nThe imported target have been defined manually, but the dependencies "
+        " might not be correct. If compilation fails, please try updating your"
+        " CMake installation to a newer version (for your information, your "
+        "CMake version is ${CMAKE_VERSION}).")
+  endif()
 endif()
 
 # ==============================================================================

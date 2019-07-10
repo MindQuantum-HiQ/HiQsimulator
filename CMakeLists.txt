@@ -59,11 +59,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/options.cmake)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake)
 
-# ==============================================================================
-# Unit testing
-
-enable_testing()
-
 #==============================================================================
 # Setup compiler flags
 
@@ -109,14 +104,15 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
 # ==============================================================================
 
 add_executable(qswap $<TARGET_OBJECTS:permutations> qswap.cpp)
-target_link_libraries(qswap Boost::boost Boost::program_options glog::glog)
+target_link_libraries(qswap
+                      Boost::boost
+                      Boost::program_options
+                      glog::glog)
 
 # --------------------------------------
 
-add_executable(qswap-mpi
-               $<TARGET_OBJECTS:permutations>
-               qswap-mpi.cpp
-               src/simulator-mpi/SwapperMT.cpp)
+add_executable(qswap-mpi $<TARGET_OBJECTS:permutations> qswap-mpi.cpp
+                         src/simulator-mpi/SwapperMT.cpp)
 target_compile_definitions(qswap-mpi PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 target_link_libraries(qswap-mpi
                       ${MPI_LIBRARIES}
@@ -176,19 +172,15 @@ target_link_libraries(_sched_cpp PUBLIC glog::glog)
 
 # ------------------------------------------------------------------------------
 
-add_library(SimulatorMPI_o
-            OBJECT
-            src/simulator-mpi/SimulatorMPI.cpp
-            src/simulator-mpi/SwapperMT.cpp)
+add_library(SimulatorMPI_o OBJECT src/simulator-mpi/SimulatorMPI.cpp
+                                  src/simulator-mpi/SwapperMT.cpp)
 add_avx2_to_target(SimulatorMPI_o)
 if(WIN32)
   target_compile_definitions(SimulatorMPI_o PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 endif()
 
-add_library(SimulatorMPI
-            SHARED
-            $<TARGET_OBJECTS:SimulatorMPI_o>
-            $<TARGET_OBJECTS:permutations>)
+add_library(SimulatorMPI SHARED $<TARGET_OBJECTS:SimulatorMPI_o>
+                                $<TARGET_OBJECTS:permutations>)
 add_avx2_to_target(SimulatorMPI)
 target_link_libraries(SimulatorMPI
                       ${MPI_LIBRARIES}
@@ -231,5 +223,18 @@ target_link_libraries(_cppsim_mpi
 pybind11_add_module(_cppstabsim _cppstabsim.cpp)
 add_avx2_to_target(_cppstabsim)
 target_link_libraries(_cppstabsim PRIVATE Boost::boost ${xsimd_tgt})
+
+# ==============================================================================
+# Unit testing
+
+if(BUILD_TESTING)
+  include(CTest)
+  include(${CMAKE_CURRENT_LIST_DIR}/src/test/CMakeLists.txt)
+  add_custom_target(build_all_test DEPENDS "${_boost_test_list}")
+else()
+  # Essentially for Travis.CI builds in case the Boost version is too old
+  add_custom_target(build_all_test)
+  add_custom_target(test)
+endif()
 
 # ==============================================================================

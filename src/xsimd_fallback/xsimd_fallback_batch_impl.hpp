@@ -41,8 +41,7 @@ batch<T, N>::batch(const std::array<T, N>& data) : array_data_{data}
  * Initializes all the values of the batch to \c val.
  */
 template <typename T, std::size_t N>
-batch<T, N>::batch(T val)
-    : array_data_(details::array_from_scalar<T, N>(val))
+batch<T, N>::batch(T val) : array_data_(details::array_from_scalar<T, N>(val))
 {}
 
 // -----------------------------------------------------------------------------
@@ -143,7 +142,7 @@ auto& batch<T, N>::operator=(U&& expr)
                                                                                \
           PRAGMA_LOOP_IVDEP                                                    \
           for (std::size_t i(0); i < size; ++i) {                              \
-               array_data_[i] OP details::make_expr(std::forward<U>(rhs))(    \
+               array_data_[i] OP details::make_expr(std::forward<U>(rhs))(     \
                    eval_visitor(i));                                           \
           }                                                                    \
           return *this;                                                        \
@@ -327,7 +326,6 @@ constexpr auto& batch<const T, N>::operator=(batch&& rhs)
      data_ = std::move(rhs.data_);
      return *this;
 }
-
 
 // -----------------------------------------------------------------------------
 
