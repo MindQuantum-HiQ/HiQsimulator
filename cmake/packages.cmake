@@ -42,11 +42,41 @@ find_package(Boost 1.55 REQUIRED
                         serialization
                         thread)
 
+if(Boost_MINOR_VERSION LESS 59)
+  set(BUILD_TESTING OFF CACHE BOOL "Build the HiQSimulator test suite?" FORCE)
+  message(WARNING "Unable to compile unit tests! Boost version is too old \
+(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} vs. 1.59). \
+Testing disabled.")
+endif()
+
 if(BUILD_TESTING)
   # Boost 1.59 required for Boost.Test v3
   find_package(Boost 1.59 REQUIRED COMPONENTS unit_test_framework)
-endif()
 
+  if(CMAKE_VERSION VERSION_LESS 3.12)
+    find_package(BPython 3.0 REQUIRED COMPONENTS Interpreter)
+  else()
+    find_package(Python 3.0 REQUIRED COMPONENTS Interpreter)
+  endif()
+
+  message(STATUS "Found Python ${Python_VERSION}:")
+  message(STATUS "  - Interpreter (${Python_INTERPRETER_ID}): "
+                 "${Python_EXECUTABLE}")
+  message(STATUS "  - Development:")
+  message(STATUS "    + site-lib: ${Python_SITELIB}")
+
+  execute_process(COMMAND ${Python_EXECUTABLE} -c
+                          "from projectq.backends import Simulator"
+                  RESULT_VARIABLE _found_projectq
+                  ERROR_VARIABLE _import_projectq_err
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT _found_projectq EQUAL 0)
+    message(WARNING "Unable to import the ProjectQ Python module. "
+                    "\nMay have to skip some unit tests.")
+  else()
+    set(_found_projectq TRUE)
+  endif()
+endif()
 # ------------------------------------------------------------------------------
 # In some cases where the Boost version is too recent compared to what the
 # CMake version supports, the imported target are not properly defined.
