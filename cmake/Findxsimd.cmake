@@ -66,25 +66,37 @@ set(xsimd_INC_PATH_SUFFIXES include include/xsimd)
 
 # ==============================================================================
 
-find_package(xsimd CONFIG)
-if(xsimd_FOUND)
-  set(xsimd_INCLUDE_DIR)
-  foreach(target xsimd xsimd::xsimd)
-    if(TARGET ${target})
-      get_target_property(xsimd_INCLUDE_DIR ${target}
-                          INTERFACE_INCLUDE_DIRECTORIES)
-    endif()
-    if(xsimd_INCLUDE_DIR)
-      break()
-    endif()
-  endforeach(target)
-else()
+# Always prefer the submodule directory if it exists
+if(EXISTS ${PROJECT_SOURCE_DIR}/xsimd)
   find_path(xsimd_INCLUDE_DIR
             NAMES xsimd.hpp
-            PATHS ${xsimd_SEARCH_PATHS}
-            PATH_SUFFIXES ${xsimd_INC_PATH_SUFFIXES})
-
+            PATHS ${PROJECT_SOURCE_DIR}/xsimd
+            PATH_SUFFIXES ${xsimd_INC_PATH_SUFFIXES}
+            NO_DEFAULT_PATH)
   get_filename_component(xsimd_INCLUDE_DIR ${xsimd_INCLUDE_DIR} DIRECTORY)
+endif()
+
+if(NOT xsimd_INCLUDE_DIR)
+  find_package(xsimd CONFIG)
+  if(xsimd_FOUND)
+    set(xsimd_INCLUDE_DIR)
+    foreach(target xsimd xsimd::xsimd)
+      if(TARGET ${target})
+        get_target_property(xsimd_INCLUDE_DIR ${target}
+                            INTERFACE_INCLUDE_DIRECTORIES)
+      endif()
+      if(xsimd_INCLUDE_DIR)
+        break()
+      endif()
+    endforeach(target)
+  else()
+    find_path(xsimd_INCLUDE_DIR
+              NAMES xsimd.hpp
+              PATHS ${xsimd_SEARCH_PATHS}
+              PATH_SUFFIXES ${xsimd_INC_PATH_SUFFIXES})
+
+    get_filename_component(xsimd_INCLUDE_DIR ${xsimd_INCLUDE_DIR} DIRECTORY)
+  endif()
 endif()
 
 # ------------------------------------------------------------------------------
