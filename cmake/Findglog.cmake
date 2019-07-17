@@ -80,27 +80,41 @@ endif()
 
 # ==============================================================================
 
+macro(extract_inc_lib_from_target target name)
+  get_target_property(${name}_INCLUDE_DIR ${target}
+                      INTERFACE_INCLUDE_DIRECTORIES)
+  set(${name}_LIBRARY)
+  foreach(prop
+          IMPORTED_LOCATION
+          IMPORTED_LOCATION_RELEASE
+          IMPORTED_LOCATION_MINSIZEREL
+          IMPORTED_LOCATION_RELWITHDEBINFO
+          IMPORTED_LOCATION_DEBUG)
+    get_target_property(${name}_LIBRARY ${target} ${prop})
+    if(${name}_LIBRARY)
+      break()
+    endif()
+  endforeach(prop)
+
+  get_target_property(_tmp ${target} INTERFACE_LINK_LIBRARIES)
+  message(STATUS "dep libs: ${_tmp}")
+endmacro(extract_inc_lib_from_target)
+
+# ==============================================================================
+
+find_package(gflags REQUIRED)
 find_package(glog CONFIG)
 if(glog_FOUND)
   if(TARGET glog::glog)
-    get_target_property(glog_INCLUDE_DIR glog::glog
-                        INTERFACE_INCLUDE_DIRECTORIES)
-    set(glog_LIBRARY)
-    foreach(prop
-            IMPORTED_LOCATION
-            IMPORTED_LOCATION_RELEASE
-            IMPORTED_LOCATION_MINSIZEREL
-            IMPORTED_LOCATION_RELWITHDEBINFO
-            IMPORTED_LOCATION_DEBUG)
-      get_target_property(glog_LIBRARY glog::glog ${prop})
-      if(glog_LIBRARY)
-        break()
-      endif()
-    endforeach(prop)
+    extract_inc_lib_from_target(glog::glog glog)
+  elseif(TARGET glog)
+    extract_inc_lib_from_target(glog glog)
+  else()
+    message(WARNING "Finding glog using the CONFIG method failed.")
   endif()
-else()
-  find_package(gflags REQUIRED)
+endif()
 
+if(NOT glog_LIBRARY)
   find_library(glog_LIBRARY
                NAMES glog libglog
                PATHS ${glog_SEARCH_PATHS}
