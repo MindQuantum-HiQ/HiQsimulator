@@ -34,7 +34,8 @@ namespace detail
 {
      template <typename Type, typename Alloc>
      struct type_caster<boost::container::vector<Type, Alloc>>
-         : list_caster<boost::container::vector<Type, Alloc>, Type> {};
+         : list_caster<boost::container::vector<Type, Alloc>, Type>
+     {};
 }  // namespace detail
 }  // namespace pybind11
 

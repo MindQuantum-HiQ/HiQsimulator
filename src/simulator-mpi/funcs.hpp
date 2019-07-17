@@ -77,10 +77,12 @@ void printAmplitudes(const Simulator& sim)
 }  // namespace hiq
 
 template <class T>
-struct Printer {};
+struct Printer
+{};
 
 template <class V>
-struct PrintVector : public Printer<PrintVector<V>> {
+struct PrintVector : public Printer<PrintVector<V>>
+{
      const V& v;
      PrintVector(const V& aSV) : v(aSV)
      {}
@@ -96,7 +98,8 @@ struct PrintVector : public Printer<PrintVector<V>> {
 
 template <>
 struct PrintVector<std::vector<bool>>
-    : public Printer<PrintVector<std::vector<bool>>> {
+    : public Printer<PrintVector<std::vector<bool>>>
+{
      const std::vector<bool>& v;
      PrintVector(const std::vector<bool>& aSV) : v(aSV)
      {}
@@ -111,7 +114,8 @@ struct PrintVector<std::vector<bool>>
 };
 
 template <class V>
-struct PrintMap : public Printer<PrintMap<V>> {
+struct PrintMap : public Printer<PrintMap<V>>
+{
      const V& v;
      PrintMap(const V& aSV) : v(aSV)
      {}
@@ -126,7 +130,8 @@ struct PrintMap : public Printer<PrintMap<V>> {
 };
 
 template <class V>
-struct PrintPairs : public Printer<PrintPairs<V>> {
+struct PrintPairs : public Printer<PrintPairs<V>>
+{
      const V& v;
      PrintPairs(const V& aSV) : v(aSV)
      {}
@@ -246,8 +251,8 @@ std::vector<T> q2bits(uint64_t aM, const std::vector<T1>& aQbitPairs,
 {
      std::map<T1, T1> m;
      for (size_t i = 0; i < aQbitPairs.size(); i += 2) {
-          m[anInversePerm[aQbitPairs[i + 1]]] =
-              anInversePerm[aQbitPairs[i]] - aM;
+          m[anInversePerm[aQbitPairs[i + 1]]]
+              = anInversePerm[aQbitPairs[i]] - aM;
      }
 
      std::vector<T> res(aQbitPairs.size());

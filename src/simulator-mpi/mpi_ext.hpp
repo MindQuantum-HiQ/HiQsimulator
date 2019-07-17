@@ -31,7 +31,8 @@ namespace mpi
           return MPI_DOUBLE_COMPLEX;
      }
      template <>
-     struct is_mpi_complex_datatype<dcomplex> : boost::mpl::true_ {};
+     struct is_mpi_complex_datatype<dcomplex> : boost::mpl::true_
+     {};
 }  // namespace mpi
 }  // namespace boost
 
@@ -41,7 +42,8 @@ namespace boost
 namespace mpi
 {
      template <>
-     struct is_commutative<dcplus, dcomplex> : mpl::true_ {};
+     struct is_commutative<dcplus, dcomplex> : mpl::true_
+     {};
 }  // namespace mpi
 }  // namespace boost
 

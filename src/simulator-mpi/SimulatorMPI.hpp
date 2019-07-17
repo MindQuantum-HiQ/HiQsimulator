@@ -69,8 +69,8 @@ public:
      using Index = int64_t;
      using Float = double;
      using Complex = std::complex<Float>;
-     using Matrix =
-         std::vector<std::vector<Complex, aligned_allocator<Complex, 64>>>;
+     using Matrix
+         = std::vector<std::vector<Complex, aligned_allocator<Complex, 64>>>;
      using StateVector = bc::vector<Complex, aligned_allocator<Complex, 64>>;
      using RndEngine = std::mt19937;
      using Duration = std::chrono::duration<Float>;
@@ -119,8 +119,8 @@ public:
      }
      size_t GlobalQubitsCount() const
      {
-          return globals_.size() -
-                 std::count(globals_.begin(), globals_.end(), -1);
+          return globals_.size()
+                 - std::count(globals_.begin(), globals_.end(), -1);
      }
      size_t TotalQubitsCount() const
      {

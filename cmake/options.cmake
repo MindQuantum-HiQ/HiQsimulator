@@ -2,6 +2,28 @@ include(CMakeDependentOption)
 
 # ------------------------------------------------------------------------------
 
+if(APPLE)
+  option(
+    PYTHON_VIRTUALENV_COMPAT
+    "(Mac OS X) Make CMake search for Python Framework *after* any available\
+  unix-style package. Can be useful in case of virtual environments." ON)
+else()
+  option(
+    PYTHON_VIRTUALENV_COMPAT
+    "(Mac OS X) Make CMake search for Python Framework *after* any available\
+  unix-style package. Can be useful in case of virtual environments." OFF)
+endif()
+
+# ------------------------------------------------------------------------------
+
+option(BUILD_TESTING "Build the HiQSimulator test suite?" OFF)
+
+# ------------------------------------------------------------------------------
+
+option(USE_CLANG_FORMAT "Setup clangformat target" OFF)
+
+# ------------------------------------------------------------------------------
+
 option(USE_INTRIN "Enable/disable the use of intrinsics" ON)
 cmake_dependent_option(USE_INTRIN_BUFFER
                        "Using intrinsics with buffer"
@@ -11,7 +33,9 @@ cmake_dependent_option(USE_INTRIN_BUFFER
 
 # ------------------------------------------------------------------------------
 
-option(USE_CLANG_FORMAT "Setup clangformat target" OFF)
+option(PYBIND11_NO_THROW_RUNTIME_ERROR "(for stabilizer simulator only) \
+Do not throw std::runtime_error exceptions, instead use the usual \
+Python C API exception mechanism" OFF)
 
 # ------------------------------------------------------------------------------
 
@@ -39,7 +63,25 @@ cmake_dependent_option(USE_SA_LWYU
 
 # ==============================================================================
 
+if(PYTHON_VIRTUALENV_COMPAT)
+  set(CMAKE_FIND_FRAMEWORK LAST)
+endif()
+
+# ------------------------------------------------------------------------------
+
+if(PYBIND11_NO_THROW_RUNTIME_ERROR)
+  add_definitions(-DPYBIND11_NO_THROW_RUNTIME_ERROR)
+endif()
+
+# ------------------------------------------------------------------------------
+
+set(xsimd_tgt)
 if(USE_INTRIN)
+  find_package(xsimd)
+  if(xsimd_FOUND)
+    set(xsimd_tgt xsimd::xsimd)
+    add_definitions(-DHAS_XSIMD)
+  endif()
   if(USE_INTRIN_BUFFER)
     add_definitions(-DINTRIN_CF)
   else()

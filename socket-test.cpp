@@ -57,8 +57,8 @@ int main(int argc, char** argv)
 
           auto t1 = std::chrono::high_resolution_clock::now();
           std::chrono::duration<double, std::milli> dt_ms = t1 - t0;
-          std::cout << boost::format("count: %d, dt: %.f ms") % count %
-                           dt_ms.count()
+          std::cout << boost::format("count: %d, dt: %.f ms") % count
+                           % dt_ms.count()
                     << std::endl;
           ++count;
      };

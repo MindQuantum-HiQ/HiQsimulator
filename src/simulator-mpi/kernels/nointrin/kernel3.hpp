@@ -56,38 +56,38 @@ inline void kernel_core(V& psi, std::size_t I, std::size_t d0, std::size_t d1,
      v[2] = psi[I + d1 + d2];
      v[3] = psi[I + d0 + d1 + d2];
 
-     psi[I] =
-         (add(tmp[0], add(mul(v[0], m[0][4]),
-                          add(mul(v[1], m[0][5]),
-                              add(mul(v[2], m[0][6]), mul(v[3], m[0][7]))))));
-     psi[I + d0] =
-         (add(tmp[1], add(mul(v[0], m[1][4]),
-                          add(mul(v[1], m[1][5]),
-                              add(mul(v[2], m[1][6]), mul(v[3], m[1][7]))))));
-     psi[I + d1] =
-         (add(tmp[2], add(mul(v[0], m[2][4]),
-                          add(mul(v[1], m[2][5]),
-                              add(mul(v[2], m[2][6]), mul(v[3], m[2][7]))))));
-     psi[I + d0 + d1] =
-         (add(tmp[3], add(mul(v[0], m[3][4]),
-                          add(mul(v[1], m[3][5]),
-                              add(mul(v[2], m[3][6]), mul(v[3], m[3][7]))))));
-     psi[I + d2] =
-         (add(tmp[4], add(mul(v[0], m[4][4]),
-                          add(mul(v[1], m[4][5]),
-                              add(mul(v[2], m[4][6]), mul(v[3], m[4][7]))))));
-     psi[I + d0 + d2] =
-         (add(tmp[5], add(mul(v[0], m[5][4]),
-                          add(mul(v[1], m[5][5]),
-                              add(mul(v[2], m[5][6]), mul(v[3], m[5][7]))))));
-     psi[I + d1 + d2] =
-         (add(tmp[6], add(mul(v[0], m[6][4]),
-                          add(mul(v[1], m[6][5]),
-                              add(mul(v[2], m[6][6]), mul(v[3], m[6][7]))))));
-     psi[I + d0 + d1 + d2] =
-         (add(tmp[7], add(mul(v[0], m[7][4]),
-                          add(mul(v[1], m[7][5]),
-                              add(mul(v[2], m[7][6]), mul(v[3], m[7][7]))))));
+     psi[I]
+         = (add(tmp[0], add(mul(v[0], m[0][4]),
+                            add(mul(v[1], m[0][5]),
+                                add(mul(v[2], m[0][6]), mul(v[3], m[0][7]))))));
+     psi[I + d0]
+         = (add(tmp[1], add(mul(v[0], m[1][4]),
+                            add(mul(v[1], m[1][5]),
+                                add(mul(v[2], m[1][6]), mul(v[3], m[1][7]))))));
+     psi[I + d1]
+         = (add(tmp[2], add(mul(v[0], m[2][4]),
+                            add(mul(v[1], m[2][5]),
+                                add(mul(v[2], m[2][6]), mul(v[3], m[2][7]))))));
+     psi[I + d0 + d1]
+         = (add(tmp[3], add(mul(v[0], m[3][4]),
+                            add(mul(v[1], m[3][5]),
+                                add(mul(v[2], m[3][6]), mul(v[3], m[3][7]))))));
+     psi[I + d2]
+         = (add(tmp[4], add(mul(v[0], m[4][4]),
+                            add(mul(v[1], m[4][5]),
+                                add(mul(v[2], m[4][6]), mul(v[3], m[4][7]))))));
+     psi[I + d0 + d2]
+         = (add(tmp[5], add(mul(v[0], m[5][4]),
+                            add(mul(v[1], m[5][5]),
+                                add(mul(v[2], m[5][6]), mul(v[3], m[5][7]))))));
+     psi[I + d1 + d2]
+         = (add(tmp[6], add(mul(v[0], m[6][4]),
+                            add(mul(v[1], m[6][5]),
+                                add(mul(v[2], m[6][6]), mul(v[3], m[6][7]))))));
+     psi[I + d0 + d1 + d2]
+         = (add(tmp[7], add(mul(v[0], m[7][4]),
+                            add(mul(v[1], m[7][5]),
+                                add(mul(v[2], m[7][6]), mul(v[3], m[7][7]))))));
 }
 
 // bit indices id[.] are given from high to low (e.g. control first for CNOT)
