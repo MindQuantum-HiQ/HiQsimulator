@@ -79,26 +79,40 @@ endif()
 
 # ==============================================================================
 
+macro(extract_inc_lib_from_target target name)
+  get_target_property(${name}_INCLUDE_DIR ${target}
+                      INTERFACE_INCLUDE_DIRECTORIES)
+  set(${name}_LIBRARY)
+  foreach(prop
+          IMPORTED_LOCATION
+          IMPORTED_LOCATION_RELEASE
+          IMPORTED_LOCATION_MINSIZEREL
+          IMPORTED_LOCATION_RELWITHDEBINFO
+          IMPORTED_LOCATION_DEBUG)
+    get_target_property(${name}_LIBRARY ${target} ${prop})
+    if(${name}_LIBRARY)
+      break()
+    endif()
+  endforeach(prop)
+endmacro(extract_inc_lib_from_target)
+
+# ==============================================================================
+
 set(GFLAGS_USE_TARGET_NAMESPACE TRUE)
 find_package(gflags CONFIG)
 if(gflags_FOUND)
   if(TARGET gflags::gflags)
-    get_target_property(gflags_INCLUDE_DIR gflags::gflags
-                        INTERFACE_INCLUDE_DIRECTORIES)
-    set(gflags_LIBRARY)
-    foreach(prop
-            IMPORTED_LOCATION
-            IMPORTED_LOCATION_RELEASE
-            IMPORTED_LOCATION_MINSIZEREL
-            IMPORTED_LOCATION_RELWITHDEBINFO
-            IMPORTED_LOCATION_DEBUG)
-      get_target_property(gflags_LIBRARY gflags::gflags ${prop})
-      if(gflags_LIBRARY)
-        break()
-      endif()
-    endforeach(prop)
+    extract_inc_lib_from_target(gflags::gflags gflags)
+  elseif(TARGET gflags)
+    extract_inc_lib_from_target(gflags gflags)
+  elseif(DEFINED gflags_LIBRARIES AND DEFINED gflags_INCLUDE_DIR)
+    set(gflags_LIBRARY ${gflags_LIBRARIES})
+  else()
+    message(WARNING "Finding gflags using the CONFIG method failed.")
   endif()
-else()
+endif()
+
+if(NOT gflags_LIBRARY)
   find_library(gflags_LIBRARY
                NAMES gflags libgflags
                PATHS ${gflags_SEARCH_PATHS}
