@@ -95,7 +95,9 @@ if(NOT xsimd_INCLUDE_DIR)
               PATHS ${xsimd_SEARCH_PATHS}
               PATH_SUFFIXES ${xsimd_INC_PATH_SUFFIXES})
 
-    get_filename_component(xsimd_INCLUDE_DIR ${xsimd_INCLUDE_DIR} DIRECTORY)
+    if(xsimd_INCLUDE_DIR)
+      get_filename_component(xsimd_INCLUDE_DIR ${xsimd_INCLUDE_DIR} DIRECTORY)
+    endif()
   endif()
 endif()
 
@@ -116,7 +118,7 @@ either the xsimd_ROOT or xsimd_DIR CMake variables.")
 
 if(xsimd_FOUND)
   if(NOT TARGET xsimd::xsimd)
-    add_library(xsimd::xsimd INTERFACE IMPORTED)
+    add_library(xsimd::xsimd IMPORTED INTERFACE)
     set_target_properties(xsimd::xsimd
                           PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
                                      "${xsimd_INCLUDE_DIR}")
@@ -126,7 +128,7 @@ endif()
 # ------------------------------------------------------------------------------
 
 # For debugging
-if(NOT xsimd_FIND_QUIETLY)
+if(NOT xsimd_FIND_QUIETLY AND xsimd_FOUND)
   message(STATUS "Found xsimd and defined the xsimd::xsimd imported target:")
   message(STATUS "  - include:      ${xsimd_INCLUDE_DIR}")
 endif()
