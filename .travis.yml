@@ -1,29 +1,72 @@
-dist: xenial
-sudo: true
-language: python
+sudo: false
+addons:
+  apt:
+    update: true
+    packages:
+      - cmake
+      - build-essential
+      - openmpi-bin
+      - openmpi-doc
+      - libhwloc-dev
+      - libopenmpi-dev
+      - libboost-all-dev
+      - libgoogle-glog-dev
+      - python3
+      - python3-pip
+  homebrew:
+    update: true
+    packages:
+      - cmake
+      - llvm
+      - boost-mpi
+      - glog
+      - hwloc
+      - python
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install build-essential cmake
-  - sudo apt-get install openmpi-bin openmpi-doc libopenmpi-dev
-  - sudo apt-get install libboost-all-dev
-  - sudo apt-get install libgoogle-glog-dev
-  - sudo apt-get install python3 python3-pip
+matrix:
+  include:
+  - os: linux
+    dist: xenial
+    language: python
+    env:
+      - CXX=g++
+  - os: linux
+    dist: xenial
+    language: python
+    env:
+      - CXX=clang++ LD_LIBRARY_PATH=/usr/local/clang/lib:$LD_LIBRARY_PATH
+  - os: osx
+    language: generic
+    env: CXX=/usr/bin/clang++ CXXFLAGS=-I/usr/local/include
+  # - os: windows
+  #   before_install:
+  #     - choco install python3
+  #     - ...
+  allow_failures:
+  - os: osx
+    language: generic
+    env: CXX=/usr/bin/clang++ CXXFLAGS=-I/usr/local/include
 
 install:
-  - pip3 install -r requirements.txt
-  - pip3 install -e .
+ - pip3 install --upgrade -r requirements.txt
+ - pip3 install -v -e .
+ - pip3 freeze
+ - mkdir -p build
+ - cd build
+ - cmake -DBUILD_TESTING=ON -DPYTHON_EXECUTABLE=`which python3` ..
+ - make -j2 build_all_test
+ - cd ..
 
-# command to run tests
 script:
-  - python3 examples/BV_algorithm_constant_mpi.py
-  - python3 examples/exactgrover_mpi.py
-  - python3 examples/grover_mpi.py
-  - python3 examples/maximum_search_constant_mpi.py
-  - python3 examples/phase_estimation_mpi.py
-  - python3 examples/qecc9_sta.py
-  - python3 examples/SymMatrixSolver_mpi.py
-  - python3 examples/teleport_mpi.py
-  - python3 examples/ToeplitzSimplify_constant.py
-  - python3 examples/grover_mpi.py
-  - python3 examples/unknown_num_search_constant_mpi.py
+ - make -C build test
+ - python3 examples/BV_algorithm_constant_mpi.py
+ - python3 examples/exactgrover_mpi.py
+ - python3 examples/grover_mpi.py
+ - python3 examples/maximum_search_constant_mpi.py
+ - python3 examples/phase_estimation_mpi.py
+ - python3 examples/qecc9_sta.py
+ - python3 examples/SymMatrixSolver_mpi.py
+ - python3 examples/teleport_mpi.py
+ - python3 examples/ToeplitzSimplify_constant.py
+ - python3 examples/grover_mpi.py
+ - python3 examples/unknown_num_search_constant_mpi.py
