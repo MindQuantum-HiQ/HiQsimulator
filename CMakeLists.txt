@@ -24,6 +24,11 @@ foreach(_policy ${_policy_list})
   # CMP0074: XXX_ROOT variables for find_package(XXX)
 endforeach()
 
+if(CMAKE_VERSION VERSION_LESS 3.11)
+  # Test target was always reserved prior to CMake 3.11
+  cmake_policy(SET CMP0037 OLD)
+endif()
+
 # ==============================================================================
 # Macro definitions
 
