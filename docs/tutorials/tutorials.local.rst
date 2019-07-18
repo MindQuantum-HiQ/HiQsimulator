@@ -45,7 +45,11 @@ After completing the above preparations, you can start to clone the repository t
     If you download the project code by copying or other methods, 
     the directory pybind11 in the project is git Submodule, please make sure that the 
     `pybind11 source code <https://github.com/pybind/pybind11>`__ is also downloaded correctly. 
-
+    
+.. note::    
+    The default boost version is not compatible with cmake version on Ubuntu 18.04. 
+    The recommended solution is to upgrade `cmake <https://cmake.org/download/>`__ to version 3.9.3 or higher.
+    
 How to Start Running
 ---------------------
 
