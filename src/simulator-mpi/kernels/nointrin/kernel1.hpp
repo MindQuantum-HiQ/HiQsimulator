@@ -17,35 +17,32 @@ namespace nointrin
 template <class V, class M>
 inline void kernel_core(V& psi, std::size_t I, std::size_t d0, M const& m)
 {
-     std::complex<double> v[2];
-     v[0] = psi[I];
-     v[1] = psi[I + d0];
+     const auto v0 = psi[I];
 
-     psi[I] = (add(mul(v[0], m[0][0]), mul(v[1], m[0][1])));
-     psi[I + d0] = (add(mul(v[0], m[1][0]), mul(v[1], m[1][1])));
+     psi[I] = (add(mul(v0, m[0][0]), mul(psi[I + d0], m[0][1])));
+     psi[I + d0] = (add(mul(v0, m[1][0]), mul(psi[I + d0], m[1][1])));
 }
 
 // bit indices id[.] are given from high to low (e.g. control first for CNOT)
 template <class V, class M>
 void kernel(V& psi, unsigned id0, M const& m, std::size_t ctrlmask)
 {
-     std::size_t n = psi.size();
-     std::size_t d0 = 1UL << id0;
-     std::size_t dsorted[] = {d0};
-     std::sort(dsorted, dsorted + 1, std::greater<std::size_t>());
+     const auto n = psi.size();
+     const std::size_t d0 = 1UL << id0;
+     const auto dsorted = d0;
 
      if (ctrlmask == 0) {
 #pragma omp for collapse(LOOP_COLLAPSE1) schedule(static)
-          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted[0]) {
-               for (std::size_t i1 = 0; i1 < dsorted[0]; ++i1) {
+          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted) {
+               for (std::size_t i1 = 0; i1 < dsorted; ++i1) {
                     kernel_core(psi, i0 + i1, d0, m);
                }
           }
      }
      else {
 #pragma omp for collapse(LOOP_COLLAPSE1) schedule(static)
-          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted[0]) {
-               for (std::size_t i1 = 0; i1 < dsorted[0]; ++i1) {
+          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted) {
+               for (std::size_t i1 = 0; i1 < dsorted; ++i1) {
                     if (((i0 + i1) & ctrlmask) == ctrlmask)
                          kernel_core(psi, i0 + i1, d0, m);
                }
@@ -57,23 +54,22 @@ void kernel(V& psi, unsigned id0, M const& m, std::size_t ctrlmask)
 template <class V, class M, void K(V&, std::size_t, std::size_t, const M&)>
 void kernelK(V& psi, unsigned id0, M const& m, std::size_t ctrlmask)
 {
-     std::size_t n = psi.size();
-     std::size_t d0 = 1UL << id0;
-     std::size_t dsorted[] = {d0};
-     std::sort(dsorted, dsorted + 1, std::greater<std::size_t>());
+     const auto n = psi.size();
+     const std::size_t d0 = 1UL << id0;
+     const auto dsorted = d0;
 
      if (ctrlmask == 0) {
 #pragma omp for collapse(LOOP_COLLAPSE1) schedule(static)
-          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted[0]) {
-               for (std::size_t i1 = 0; i1 < dsorted[0]; ++i1) {
+          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted) {
+               for (std::size_t i1 = 0; i1 < dsorted; ++i1) {
                     K(psi, i0 + i1, d0, m);
                }
           }
      }
      else {
 #pragma omp for collapse(LOOP_COLLAPSE1) schedule(static)
-          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted[0]) {
-               for (std::size_t i1 = 0; i1 < dsorted[0]; ++i1) {
+          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted) {
+               for (std::size_t i1 = 0; i1 < dsorted; ++i1) {
                     if (((i0 + i1) & ctrlmask) == ctrlmask)
                          K(psi, i0 + i1, d0, m);
                }

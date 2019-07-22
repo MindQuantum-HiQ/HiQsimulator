@@ -24,6 +24,22 @@
 #include "funcs.hpp"
 #include "mpi_ext.hpp"
 
+#if defined(NOINTRIN) || (!defined(INTRIN) && !defined(INTRIN_CF))
+#     include "simulator-mpi/kernels/nointrin/kernels.hpp"
+#     include "simulator-mpi/kernels/nointrin/kernels_diag.hpp"
+using nointrin::kernel_core;
+using nointrin::kernel_core_diag;
+using nointrin::kernelK;
+using nointrin::kernelK_diag1;
+#else
+#     include "simulator-mpi/kernels/intrin/kernels.hpp"
+#     include "simulator-mpi/kernels/intrin/kernels_diag.hpp"
+using intrin::kernel_core;
+using intrin::kernel_core_diag;
+using intrin::kernelK;
+using intrin::kernelK_diag1;
+#endif
+
 constexpr size_t SimulatorMPI::kNotFound_;
 
 class GlogSingleton

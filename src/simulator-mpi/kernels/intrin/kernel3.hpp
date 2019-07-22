@@ -11,11 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-using intrin::add;
-using intrin::load;
-using intrin::load2;
-using intrin::mul;
-using intrin::store;
 
 namespace intrin
 {
@@ -24,12 +19,8 @@ inline void kernel_compute(V &psi, std::size_t I, std::size_t d0,
                            std::size_t d1, std::size_t d2, const __m256d m[],
                            const __m256d mt[])
 {
-     __m256d v[4];
-
-     v[0] = load2(&psi[I]);
-     v[1] = load2(&psi[I + d0]);
-     v[2] = load2(&psi[I + d1]);
-     v[3] = load2(&psi[I + d0 + d1]);
+     __m256d v[4] = {load2(&psi[I]), load2(&psi[I + d0]), load2(&psi[I + d1]),
+                     load2(&psi[I + d0 + d1])};
 
      __m256d tmp[4];
 
@@ -75,103 +66,37 @@ inline void kernel_compute(V &psi, std::size_t I, std::size_t d0,
 }
 
 // bit indices id[.] are given from high to low (e.g. control first for CNOT)
-template <class V, class M>
-void kernel(V &psi, unsigned id2, unsigned id1, unsigned id0, M const &m,
-            std::size_t ctrlmask)
-{
-     std::size_t n = psi.size();
-     std::size_t d0 = 1UL << id0;
-     std::size_t d1 = 1UL << id1;
-     std::size_t d2 = 1UL << id2;
 
-     __m256d mm[] = {load(&m[0][0], &m[1][0]), load(&m[0][1], &m[1][1]),
-                     load(&m[0][2], &m[1][2]), load(&m[0][3], &m[1][3]),
-                     load(&m[2][0], &m[3][0]), load(&m[2][1], &m[3][1]),
-                     load(&m[2][2], &m[3][2]), load(&m[2][3], &m[3][3]),
-                     load(&m[4][0], &m[5][0]), load(&m[4][1], &m[5][1]),
-                     load(&m[4][2], &m[5][2]), load(&m[4][3], &m[5][3]),
-                     load(&m[6][0], &m[7][0]), load(&m[6][1], &m[7][1]),
-                     load(&m[6][2], &m[7][2]), load(&m[6][3], &m[7][3]),
-                     load(&m[0][4], &m[1][4]), load(&m[0][5], &m[1][5]),
-                     load(&m[0][6], &m[1][6]), load(&m[0][7], &m[1][7]),
-                     load(&m[2][4], &m[3][4]), load(&m[2][5], &m[3][5]),
-                     load(&m[2][6], &m[3][6]), load(&m[2][7], &m[3][7]),
-                     load(&m[4][4], &m[5][4]), load(&m[4][5], &m[5][5]),
-                     load(&m[4][6], &m[5][6]), load(&m[4][7], &m[5][7]),
-                     load(&m[6][4], &m[7][4]), load(&m[6][5], &m[7][5]),
-                     load(&m[6][6], &m[7][6]), load(&m[6][7], &m[7][7])};
-     __m256d mmt[32];
-
-     __m256d neg = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
-     for (unsigned i = 0; i < 32; ++i) {
-          auto badc = _mm256_permute_pd(mm[i], 5);
-          mmt[i] = _mm256_mul_pd(badc, neg);
-     }
-
-     std::size_t dsorted[] = {d0, d1, d2};
-     std::sort(dsorted, dsorted + 3, std::greater<std::size_t>());
-
-     if (ctrlmask == 0) {
-#pragma omp for collapse(LOOP_COLLAPSE3) schedule(static)
-          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted[0]) {
-               for (std::size_t i1 = 0; i1 < dsorted[0]; i1 += 2 * dsorted[1]) {
-                    for (std::size_t i2 = 0; i2 < dsorted[1];
-                         i2 += 2 * dsorted[2]) {
-                         for (std::size_t i3 = 0; i3 < dsorted[2]; ++i3) {
-                              kernel_compute(psi, i0 + i1 + i2 + i3, d0, d1, d2,
-                                             mm, mmt);
-                         }
-                    }
-               }
-          }
-     }
-     else {
-#pragma omp for collapse(LOOP_COLLAPSE3) schedule(static)
-          for (std::size_t i0 = 0; i0 < n; i0 += 2 * dsorted[0]) {
-               for (std::size_t i1 = 0; i1 < dsorted[0]; i1 += 2 * dsorted[1]) {
-                    for (std::size_t i2 = 0; i2 < dsorted[1];
-                         i2 += 2 * dsorted[2]) {
-                         for (std::size_t i3 = 0; i3 < dsorted[2]; ++i3) {
-                              if (((i0 + i1 + i2 + i3) & ctrlmask) == ctrlmask)
-                                   kernel_compute(psi, i0 + i1 + i2 + i3, d0,
-                                                  d1, d2, mm, mmt);
-                         }
-                    }
-               }
-          }
-     }
-}
 template <class V, class M>
 inline void kernel_core(V &psi, unsigned id2, unsigned id1, unsigned id0,
                         M const &m, std::size_t ctrlmask)
 {
-     std::size_t n = psi.size();
+     const auto n = psi.size();
      std::size_t d0 = 1UL << id0;
      std::size_t d1 = 1UL << id1;
      std::size_t d2 = 1UL << id2;
 
-     __m256d mm[] = {load(&m[0][0], &m[1][0]), load(&m[0][1], &m[1][1]),
-                     load(&m[0][2], &m[1][2]), load(&m[0][3], &m[1][3]),
-                     load(&m[2][0], &m[3][0]), load(&m[2][1], &m[3][1]),
-                     load(&m[2][2], &m[3][2]), load(&m[2][3], &m[3][3]),
-                     load(&m[4][0], &m[5][0]), load(&m[4][1], &m[5][1]),
-                     load(&m[4][2], &m[5][2]), load(&m[4][3], &m[5][3]),
-                     load(&m[6][0], &m[7][0]), load(&m[6][1], &m[7][1]),
-                     load(&m[6][2], &m[7][2]), load(&m[6][3], &m[7][3]),
-                     load(&m[0][4], &m[1][4]), load(&m[0][5], &m[1][5]),
-                     load(&m[0][6], &m[1][6]), load(&m[0][7], &m[1][7]),
-                     load(&m[2][4], &m[3][4]), load(&m[2][5], &m[3][5]),
-                     load(&m[2][6], &m[3][6]), load(&m[2][7], &m[3][7]),
-                     load(&m[4][4], &m[5][4]), load(&m[4][5], &m[5][5]),
-                     load(&m[4][6], &m[5][6]), load(&m[4][7], &m[5][7]),
-                     load(&m[6][4], &m[7][4]), load(&m[6][5], &m[7][5]),
-                     load(&m[6][6], &m[7][6]), load(&m[6][7], &m[7][7])};
+     const __m256d mm[] = {load(&m[0][0], &m[1][0]), load(&m[0][1], &m[1][1]),
+                           load(&m[0][2], &m[1][2]), load(&m[0][3], &m[1][3]),
+                           load(&m[2][0], &m[3][0]), load(&m[2][1], &m[3][1]),
+                           load(&m[2][2], &m[3][2]), load(&m[2][3], &m[3][3]),
+                           load(&m[4][0], &m[5][0]), load(&m[4][1], &m[5][1]),
+                           load(&m[4][2], &m[5][2]), load(&m[4][3], &m[5][3]),
+                           load(&m[6][0], &m[7][0]), load(&m[6][1], &m[7][1]),
+                           load(&m[6][2], &m[7][2]), load(&m[6][3], &m[7][3]),
+                           load(&m[0][4], &m[1][4]), load(&m[0][5], &m[1][5]),
+                           load(&m[0][6], &m[1][6]), load(&m[0][7], &m[1][7]),
+                           load(&m[2][4], &m[3][4]), load(&m[2][5], &m[3][5]),
+                           load(&m[2][6], &m[3][6]), load(&m[2][7], &m[3][7]),
+                           load(&m[4][4], &m[5][4]), load(&m[4][5], &m[5][5]),
+                           load(&m[4][6], &m[5][6]), load(&m[4][7], &m[5][7]),
+                           load(&m[6][4], &m[7][4]), load(&m[6][5], &m[7][5]),
+                           load(&m[6][6], &m[7][6]), load(&m[6][7], &m[7][7])};
      __m256d mmt[32];
 
      __m256d neg = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
      for (unsigned i = 0; i < 32; ++i) {
-          auto badc = _mm256_permute_pd(mm[i], 5);
-          mmt[i] = _mm256_mul_pd(badc, neg);
+          mmt[i] = _mm256_mul_pd(_mm256_permute_pd(mm[i], 5), neg);
      }
 
      std::size_t dsorted[] = {d0, d1, d2};
