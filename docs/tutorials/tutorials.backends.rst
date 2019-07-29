@@ -45,7 +45,7 @@ Below, we will briefly introduce the compiling environment:
 .. code-block:: python
    :linenos:
 
-    from projectq.ops import H, Z, X, Measure, All, Ph
+    from projectq.ops import H, Z, X, CNOT, Measure, All, Ph
     from projectq.meta import Loop, Compute, Uncompute, Control
     from projectq.cengines import (MainEngine,
                                     AutoReplacer,
@@ -103,7 +103,7 @@ Below, we will briefly introduce the compiling environment:
    :linenos:
 
     # make a Bell-pair
-    b1, b2 = _create_bell_pair(eng)
+    b1, b2 = create_bell_pair(eng)
 
     # Alice creates a nice state to send
     psi = eng.allocate_qubit()
@@ -140,6 +140,16 @@ Below, we will briefly introduce the compiling environment:
     eng.flush()
 
     print("\\t Bob successfully arrived at \|0>")
+
+where the creation function for the Bell pair could be implemented as:
+
+.. code-block:: python
+   :linenos:
+    def create_bell_pair(eng):
+        b1, b2 = eng.allocate_qureg(2)
+        H | b1
+        CNOT | (b1, b2)
+        return b1, b2
 
 
 Single amplitude simulator
