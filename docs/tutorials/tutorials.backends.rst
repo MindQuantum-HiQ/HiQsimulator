@@ -45,19 +45,19 @@ Below, we will briefly introduce the compiling environment:
 .. code-block:: python
    :linenos:
 
-    from projectq.ops import H, Z, X, CNOT, Measure, All, Ph
-    from projectq.meta import Loop, Compute, Uncompute, Control
-    from projectq.cengines import (MainEngine,
-                                    AutoReplacer,
-                                    LocalOptimizer,
-                                    TagRemover,
-                                    DecompositionRuleSet)
-    import projectq.setups.decompositions
+   from projectq.ops import H, Z, X, CNOT, Measure, All, Ph
+   from projectq.meta import Loop, Compute, Uncompute, Control
+   from projectq.cengines import (MainEngine,
+                                  AutoReplacer,
+                                  LocalOptimizer,
+                                  TagRemover,
+                                  DecompositionRuleSet)
+   import projectq.setups.decompositions
 
-    from hiq.projectq.backends import SimulatorMPI
-    from hiq.projectq.cengines import GreedyScheduler, HiQMainEngine
+   from hiq.projectq.backends import SimulatorMPI
+   from hiq.projectq.cengines import GreedyScheduler, HiQMainEngine
 
-    from mpi4py import MPI
+   from mpi4py import MPI
 
 
 (1)Package ops include all supported quantum gates.
@@ -78,17 +78,17 @@ Below, we will briefly introduce the compiling environment:
 .. code-block:: python
    :linenos:
 
-    # create a main compiler engine with a simulator backend:
-    cache_depth = 10
-    rule_set = DecompositionRuleSet(modules  = [projectq.setups.decompositions])
-    engines = [TagRemover(),
-                LocalOptimizer(cache_depth),
-                AutoReplacer(rule_set),
-                TagRemover(),
-                LocalOptimizer(cache_depth),
-                GreedyScheduler()]
+   # create a main compiler engine with a simulator backend:
+   cache_depth = 10
+   rule_set = DecompositionRuleSet(modules  = [projectq.setups.decompositions])
+   engines = [TagRemover(),
+              LocalOptimizer(cache_depth),
+              AutoReplacer(rule_set),
+              TagRemover(),
+              LocalOptimizer(cache_depth),
+              GreedyScheduler()]
 
-    eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20), engines)
+   eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20), engines)
     
 .. note::
     The parameter **num_local_qubits** represents the number of qubits supported by an MPI node, 
@@ -102,54 +102,55 @@ Below, we will briefly introduce the compiling environment:
 .. code-block:: python
    :linenos:
 
-    # make a Bell-pair
-    b1, b2 = create_bell_pair(eng)
-
-    # Alice creates a nice state to send
-    psi = eng.allocate_qubit()
-
-    print("= Step 1. Alice creates the state to be sent from \|0>")
-    state_creation_function(eng, psi)
-
-    # entangle it with Alice's b1
-    CNOT | (psi, b1)
-    print("= Step 2. Alice entangles the state with her share of the Bell-pair")
-
-    # measure two values (once in Hadamard basis) and send the bits to Bob
-    H | psi
-    Measure | psi
-    Measure | b1
-    msg_to_bob = [int(psi), int(b1)]
-    print("= Step 3. Alice sends the classical message {} to Bob".format(msg_to_bob))
-
-    # Bob may have to apply up to two operation depending on the message sent
-    # by Alice:
-    with Control(eng, b1):
-        X | b2
-    with Control(eng, psi):
-        Z | b2
-
-    # try to uncompute the psi state
-    print("= Step 4. Bob tries to recover the state created by Alice")
-    with Dagger(eng):
-        state_creation_function(eng, b2)
-
-    # check whether the uncompute was successful. The simulator only allows to
-    # delete qubits which are in a computational basis state.
-    del b2
-    eng.flush()
-
-    print("\\t Bob successfully arrived at \|0>")
+   # make a Bell-pair
+   b1, b2 = create_bell_pair(eng)
+   
+   # Alice creates a nice state to send
+   psi = eng.allocate_qubit()
+   
+   print("= Step 1. Alice creates the state to be sent from \|0>")
+   state_creation_function(eng, psi)
+   
+   # entangle it with Alice's b1
+   CNOT | (psi, b1)
+   print("= Step 2. Alice entangles the state with her share of the Bell-pair")
+   
+   # measure two values (once in Hadamard basis) and send the bits to Bob
+   H | psi
+   Measure | psi
+   Measure | b1
+   msg_to_bob = [int(psi), int(b1)]
+   print("= Step 3. Alice sends the classical message {} to Bob".format(msg_to_bob))
+   
+   # Bob may have to apply up to two operation depending on the message sent
+   # by Alice:
+   with Control(eng, b1):
+       X | b2
+   with Control(eng, psi):
+       Z | b2
+   
+   # try to uncompute the psi state
+   print("= Step 4. Bob tries to recover the state created by Alice")
+   with Dagger(eng):
+       state_creation_function(eng, b2)
+   
+   # check whether the uncompute was successful. The simulator only allows to
+   # delete qubits which are in a computational basis state.
+   del b2
+   eng.flush()
+   
+   print("\\t Bob successfully arrived at \|0>")
 
 where the creation function for the Bell pair could be implemented as:
 
 .. code-block:: python
    :linenos:
-    def create_bell_pair(eng):
-        b1, b2 = eng.allocate_qureg(2)
-        H | b1
-        CNOT | (b1, b2)
-        return b1, b2
+
+   def create_bell_pair(eng):
+       b1, b2 = eng.allocate_qureg(2)
+       H | b1
+       CNOT | (b1, b2)
+       return b1, b2
 
 
 Single amplitude simulator
@@ -177,9 +178,9 @@ The basic procedure is as follows:
 .. code-block:: python
    :linenos:
 
-    from projectq.ops import CNOT, H, Measure
-    from hiq.projectq.backends import StabilizerSimulator
-    from hiq.projectq.cengines import HiQMainEngine
+   from projectq.ops import CNOT, H, Measure, All
+   from hiq.projectq.backends import StabilizerSimulator
+   from hiq.projectq.cengines import HiQMainEngine
 
 
 2. Initialize the simulator.
@@ -187,8 +188,8 @@ The basic procedure is as follows:
 .. code-block:: python
    :linenos:
 
-    simulator = StabilizerSimulator(9)
-    eng = HiQMainEngine(simulator, [])
+   simulator = StabilizerSimulator(9)
+   eng = HiQMainEngine(simulator, [])
 
 
 3. Program the algorithm logic.
@@ -196,48 +197,33 @@ The basic procedure is as follows:
 .. code-block:: python
    :linenos:
 
-    #allocate
-    qubits = eng.allocate_qureg(9)
+   #allocate
+   qubits = eng.allocate_qureg(9)
     
-    #prepares a uniform superposition over 5-bit strings in qubits 0 to 4
-    H | qubits[0]
-    H | qubits[1]
-    H | qubits[2]
-    H | qubits[3]
-    H | qubits[4]
+   # Prepares a uniform superposition over 5-bit strings in qubits 0 to 4
+   All(H) | qubits[:5]
 
-    #computes f in qubits 5 to 8
-    CNOT | (qubits[0], qubits[5])
-    CNOT | (qubits[1], qubits[5])
-    CNOT | (qubits[1], qubits[6])
-    CNOT | (qubits[2], qubits[6])
-    CNOT | (qubits[2], qubits[7])
-    CNOT | (qubits[3], qubits[7])
-    CNOT | (qubits[3], qubits[8])
-    CNOT | (qubits[4], qubits[8])
+   # Compute f in qubits 5 to 8
+   CNOT | (qubits[0], qubits[5])
+   CNOT | (qubits[1], qubits[5])
+   CNOT | (qubits[1], qubits[6])
+   CNOT | (qubits[2], qubits[6])
+   CNOT | (qubits[2], qubits[7])
+   CNOT | (qubits[3], qubits[7])
+   CNOT | (qubits[3], qubits[8])
+   CNOT | (qubits[4], qubits[8])
 
-    #measures those qubits "for pedagogical purposes."
-    Measure | qubits[5]
-    Measure | qubits[6]
-    Measure | qubits[7]
-    Measure | qubits[8]
-    eng.flush()
-    print("= The qubits5-8 state:{}{}{}{} ".format(int(qubits[5]),
-           int(qubits[6]), int(qubits[7]), int(qubits[8])))
+   # Measure those qubits "for pedagogical purposes."
+   All(Measure) | qubits[5:]
+   eng.flush()
+   print("= The qubits 5-8 state:{}{}{}{} ".format(int(qubits[5]),
+          int(qubits[6]), int(qubits[7]), int(qubits[8])))
 
-    #performs a Fourier transform on qubits 0 to 4
-    H | qubits[0]
-    H | qubits[1]
-    H | qubits[2]
-    H | qubits[3]
-    H | qubits[4]
+   # Perform a Fourier transform on qubits 0 to 4
+   All(H) | qubits[:5]
 
-    #measure
-    Measure | qubits[0]
-    Measure | qubits[1]
-    Measure | qubits[2]
-    Measure | qubits[3]
-    Measure | qubits[4]
-    eng.flush()
-    print("= The qubits0-4 state: {}{}{}{}{}".format(int(qubits[0]),
-           int(qubits[1]), int(qubits[2]), int(qubits[3]), int(qubits[4])))
+   # Measure
+   All(Measure) | qubits[:5]
+   eng.flush()
+   print("= The qubits 0-4 state: {}{}{}{}{}".format(int(qubits[0]),
+          int(qubits[1]), int(qubits[2]), int(qubits[3]), int(qubits[4])))
