@@ -548,7 +548,7 @@ auto load_aligned(T* t)
 }
 //! \brief Load unaligned data
 template <typename T>
-auto load_ualigned(T* t)
+auto load_unaligned(T* t)
 {
      return load_aligned(t);
 }
