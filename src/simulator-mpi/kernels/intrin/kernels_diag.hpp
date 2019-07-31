@@ -55,7 +55,7 @@ template <class V, class M>
 inline void kernel_core_diag(V& v, unsigned id1, unsigned id0, M const& m,
                              std::size_t cmask)
 {
-     std::size_t n = v.size();
+     const auto n = v.size();
      __m256d neg = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
 
      __m256d dv[4], dvt[4];
@@ -77,7 +77,7 @@ template <class V, class M>
 inline void kernel_core_diag(V& v, unsigned id2, unsigned id1, unsigned id0,
                              M const& m, std::size_t cmask)
 {
-     std::size_t n = v.size();
+     const auto n = v.size();
      __m256d neg = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
      __m256d dv[8], dvt[8];
      for (unsigned i = 0; i < 8; ++i) {
@@ -99,7 +99,7 @@ template <class V, class M>
 inline void kernel_core_diag(V& v, unsigned id3, unsigned id2, unsigned id1,
                              unsigned id0, M const& m, std::size_t cmask)
 {
-     std::size_t n = v.size();
+     const auto n = v.size();
      __m256d neg = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
      __m256d dv[16], dvt[16];
      for (unsigned i = 0; i < 16; ++i) {
@@ -123,7 +123,7 @@ inline void kernel_core_diag(V& v, unsigned id4, unsigned id3, unsigned id2,
                              unsigned id1, unsigned id0, M const& m,
                              std::size_t cmask)
 {
-     std::size_t n = v.size();
+     const auto n = v.size();
      __m256d neg = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
      __m256d dv[32], dvt[32];
      for (unsigned i = 0; i < 32; ++i) {

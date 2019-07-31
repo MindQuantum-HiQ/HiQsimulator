@@ -1,18 +1,36 @@
-#define buf_sz (1 << 5)
+// Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef INTRIN_CF_BUFFER
+#     error INTRIN_CF_BUFFER must be defined!
+#endif  // !INTRIN_CF_BUFFER
+
+#define buf_sz INTRIN_CF_BUFFER
+
+namespace intrin_cf
+{
 using intrin::add;
 using intrin::load;
 using intrin::load2;
 using intrin::mul;
 using intrin::store;
 
-namespace intrin_cf
+auto get_idx(std::size_t n, std::size_t m0, std::size_t m1, std::size_t m2,
+             std::size_t m3, std::size_t m4)
 {
-inline std::size_t get_idx(std::size_t n, std::size_t m0, std::size_t m1,
-                           std::size_t m2, std::size_t m3, std::size_t m4)
-{
-     std::size_t res = (n & m0) ^ ((n & m1) << 1) ^ ((n & m2) << 2)
-                       ^ ((n & m3) << 3) ^ ((n & m4) << 4);
-     return res;
+     return (n & m0) ^ ((n & m1) << 1) ^ ((n & m2) << 2) ^ ((n & m3) << 3)
+            ^ ((n & m4) << 4);
 }
 
 template <class V>
@@ -581,12 +599,12 @@ template <class V, class M>
 inline void kernel_core(V &v, unsigned id3, unsigned id2, unsigned id1,
                         unsigned id0, M const &m, std::size_t ctrlmask)
 {
-     std::size_t n = v.size();
-     std::size_t d0 = 1UL << id0;
-     std::size_t d1 = 1UL << id1;
-     std::size_t d2 = 1UL << id2;
-     std::size_t d3 = 1UL << id3;
-     __m256d mm[]
+     const auto n = v.size();
+     const std::size_t d0 = 1UL << id0;
+     const std::size_t d1 = 1UL << id1;
+     const std::size_t d2 = 1UL << id2;
+     const std::size_t d3 = 1UL << id3;
+     const __m256d mm[]
          = {load(&m[0][0], &m[1][0]),     load(&m[0][1], &m[1][1]),
             load(&m[0][2], &m[1][2]),     load(&m[0][3], &m[1][3]),
             load(&m[2][0], &m[3][0]),     load(&m[2][1], &m[3][1]),
@@ -655,16 +673,15 @@ inline void kernel_core(V &v, unsigned id3, unsigned id2, unsigned id1,
 
      __m256d neg = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
      for (unsigned i = 0; i < 128; ++i) {
-          auto badc = _mm256_permute_pd(mm[i], 5);
-          mmt[i] = _mm256_mul_pd(badc, neg);
+          mmt[i] = _mm256_mul_pd(_mm256_permute_pd(mm[i], 5), neg);
      }
      std::size_t dsorted[] = {d0, d1, d2, d3};
      std::sort(dsorted, dsorted + 4, std::greater<std::size_t>());
-     std::size_t m0 = dsorted[3] - 1;
-     std::size_t m1 = (dsorted[2] >> 1) - dsorted[3];
-     std::size_t m2 = (dsorted[1] >> 2) - (dsorted[2] >> 1);
-     std::size_t m3 = (dsorted[0] >> 3) - (dsorted[1] >> 2);
-     std::size_t m4 = (n >> 4) - (dsorted[0] >> 3);
+     const auto m0 = dsorted[3] - 1;
+     const auto m1 = (dsorted[2] >> 1) - dsorted[3];
+     const auto m2 = (dsorted[1] >> 2) - (dsorted[2] >> 1);
+     const auto m3 = (dsorted[0] >> 3) - (dsorted[1] >> 2);
+     const auto m4 = (n >> 4) - (dsorted[0] >> 3);
      if (ctrlmask == 0) {
 #pragma omp for collapse(1) schedule(static)
           for (std::size_t i = 0; i<n>> 4; i += buf_sz) {

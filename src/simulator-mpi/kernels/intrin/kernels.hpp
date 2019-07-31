@@ -30,5 +30,14 @@
 #include "kernel1.hpp"
 #include "kernel2.hpp"
 #include "kernel3.hpp"
-#include "kernel4.hpp"
+#ifdef INTRIN_CF
+#     include "kernel4_cf.hpp"
+namespace intrin {
+     using intrin_cf::kernel_compute;
+     using intrin_cf::kernel_core;
+     using intrin_cf::kernelK;
+}  // intrin
+#else
+#     include "kernel4.hpp"
+#endif  // INTRIN_CF
 #include "kernel5.hpp"
