@@ -17,8 +17,11 @@ endif
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-clean:
+clean: clean_doxygen
 	rm -rf $(BUILDDIR)/*
+
+clean_doxygen:
+	rm -rf xml
 
 .PHONY: help Makefile
 

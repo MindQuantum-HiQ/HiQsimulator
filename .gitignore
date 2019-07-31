@@ -32,3 +32,6 @@
 *.app
 
 __pycache__/
+
+docs/build/
+docs/xml/
