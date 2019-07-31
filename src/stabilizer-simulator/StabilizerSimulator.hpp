@@ -50,15 +50,28 @@
                               "valid! (ie. unallocated Qubit)");               \
      }
 
+//! Maximum storage depth for H, S and CNOT gates
 constexpr auto max_storage_depth = 10U;
 
+//! Aligned vector of unsigned integers
 using AlignedIntVec
     = std::vector<uint32_t, xsimd::aligned_allocator<uint32_t, 256>>;
+//! Vector of CNOT operations
 using VecOfCNOT = std::vector<std::vector<std::pair<unsigned, unsigned>>>;
 
+namespace details {
+//! Gate storage
+/*!
+ * Class used to cache gate operations
+ */
 struct Gates
 {
 public:
+     //! Constructor
+     /*!
+      * \param n number of qubits
+      * \param max_d_a Maximum number of gates to cache
+      */
      Gates(unsigned n = 1, unsigned max_d_a = 1)
          : num_gates(0),
            max_d(max_d_a),
@@ -72,6 +85,7 @@ public:
           }
      }
 
+     //! Reset the state of the cache
      void reset()
      {
           std::fill(begin(H), end(H), 0);
@@ -91,7 +105,13 @@ public:
      AlignedIntVec S;
      VecOfCNOT C;
 };
+}  // details
 
+/*!
+ * \brief Stabilizer simulator class
+ *
+ * Simulator class implemented using the stabilizer formalism.
+ */
 class StabilizerSimulator
 {
      using calc_type = double;
@@ -99,6 +119,11 @@ class StabilizerSimulator
      using Map = std::map<unsigned, unsigned>;
 
 public:
+     //! Constructor
+     /*!
+      * \param num_qubits Maximum number of allocated qubits
+      * \param seed Seed for pseudo-random number generator
+      */
      StabilizerSimulator(unsigned num_qubits, unsigned seed)
          : num_qubits_(num_qubits)
            // number of 32-bit integers for one row/stabilizer generator
@@ -140,6 +165,13 @@ public:
      // =========================================================================
      // Qubit allocation/deallocation methods
 
+     //! Allocate one qubit with a given id
+     /*!
+      * \param qubit_id ID of the qubit to allocate
+      * \throw std::runtime_error if the qubit de-allocation fails either due
+      *        to the qubit being already allocated or if the maximum number of
+      *        allocated qubit has been reached.
+      */
      void allocate_qubit(unsigned qubit_id)
      {
           sync();
@@ -160,6 +192,7 @@ public:
           }
      }
 
+     //! Convenience function to allocate all qubits
      void allocate_all_qubits()
      {
           for (auto id(0UL); id < num_qubits_; ++id) {
@@ -167,6 +200,12 @@ public:
           }
      }
 
+     //! De-allocate one qubit with a given id
+     /*!
+      * \param qubit_id ID of the qubit to de-allocate
+      * \throw std::runtime_error if the qubit de-allocation fails either due
+      *        to the qubit not being allocated or not in a classical state.
+      */
      void deallocate_qubit(unsigned qubit_id)
      {
           QUBIT_ALLOCATE_CHECK(qubit_id, "DeallocateGate");
@@ -195,24 +234,45 @@ public:
      // =========================================================================
      // Quantum gates
 
+     //! Apply a Hadamard gate
+     /*!
+      * \param qubit_id ID of a qubit
+      * \throw std::runtime_error if the desired qubit is not already allocated
+      */
      void H(unsigned qubit_id)
      {
           QUBIT_ALLOCATE_CHECK(qubit_id, "HGate");
           H_(allocated_qubits_[qubit_id]);
      }
 
+     //! Apply an S gate
+     /*!
+      * \param qubit_id ID of a qubit
+      * \throw std::runtime_error if the desired qubit is not already allocated
+      */
      void S(unsigned qubit_id)
      {
           QUBIT_ALLOCATE_CHECK(qubit_id, "SGate");
           S_(allocated_qubits_[qubit_id]);
      }
 
+     //! Apply a X (or NOT) gate
+     /*!
+      * \param qubit_id ID of a qubit
+      * \throw std::runtime_error if the desired qubit is not already allocated
+      */
      void X(unsigned qubit_id)
      {
           QUBIT_ALLOCATE_CHECK(qubit_id, "XGate");
           X_(allocated_qubits_[qubit_id]);
      }
 
+     //! Apply a controlled-NOT gate
+     /*!
+      * \param control_qubit_id ID of the control qubit
+      * \param target_qubit_id ID of the target qubit
+      * \throw std::runtime_error if the desired qubit is not already allocated
+      */
      void CNOT(unsigned control_qubit_id, unsigned target_qubit_id)
      {
           QUBIT_ALLOCATE_CHECK(control_qubit_id, "CNOTGate");
@@ -224,6 +284,12 @@ public:
      // =========================================================================
      // Misc. ProjectQ utility functions
 
+     //! Apply measurement gates to a set of qubits
+     /*!
+      * \param qubit_ids Array of qubit IDs
+      * \return Array of the measured values
+      * \throw std::runtime_error if any of the qubit IDs are invalid
+      */
      std::vector<bool> measure_qubits_return(
          std::vector<unsigned> const& qubit_ids)
      {
@@ -238,6 +304,12 @@ public:
           return ret;
      }
 
+     //! Apply a measurement gate to a single qubit
+     /*!
+      * \param qubit_id ID of a qubit
+      * \return Measured value
+      * \throw std::runtime_error if the desired qubit is not already allocated
+      */
      bool measure(unsigned qubit_id)
      {
           sync();
@@ -245,6 +317,13 @@ public:
           return measure_(allocated_qubits_[qubit_id]);
      }
 
+     //! Get the classical value of a qubit
+     /*!
+      * \param qubit_id ID of a qubit
+      * \param tol Tolerance for floating point comparison
+      * \return Classical value of the qubit
+      * \throw std::runtime_error if the desired qubit is not already allocated
+      */
      bool get_classical_value(unsigned qubit_id, calc_type tol = 1.e-12)
      {
           QUBIT_ALLOCATE_CHECK(qubit_id, "is_classical");
@@ -264,6 +343,14 @@ public:
           }
      }
 
+     //! Test whether a qubit is in a classical state or not
+     /*!
+      * \param qubit_id ID of a qubit
+      * \param tol Tolerance for floating point comparison
+      * \return \c true/\c false depending on whether the qubit is in a 
+      *         classical state or not
+      * \throw std::runtime_error if the desired qubit is not already allocated
+      */
      bool is_classical(unsigned qubit_id, calc_type tol = 1.e-12)
      {
           QUBIT_ALLOCATE_CHECK(qubit_id, "is_classical");
@@ -278,6 +365,15 @@ public:
           }
      }
 
+     /*!
+      * \brief Return the probability of the outcome bit_string when measuring 
+      *        the quantum register qureg.
+      * \param bitstring Measurement outcome.
+      * \param qubit_ids Array of qubit IDs
+      * \return The required probability
+      * \throw std::runtime_error if any of the desired qubits are not already
+      *        allocated
+      */
      double get_probability(const std::vector<bool>& bitstring,
                             const std::vector<unsigned>& qubit_ids)
      {
@@ -290,6 +386,13 @@ public:
                                             cbegin(qubit_ids), cend(qubit_ids));
      }
 
+     //! Collapse a quantum register onto a classical basis state.
+     /*!
+      * \param qubit_ids Array of qubit IDs
+      * \param bitstring Measurement outcome for each of the qubits
+      * \throw std::runtime_error if any of the desired qubits are not already
+      *        allocated
+      */
      void collapse_wavefunction(const std::vector<unsigned>& qubit_ids,
                                 const std::vector<bool>& bitstring)
      {
@@ -349,6 +452,7 @@ public:
      // =========================================================================
      // Misc. methods
 
+     //! Flush gate cache
      void sync()
      {
           if (gates_.num_gates == 0) {
@@ -913,7 +1017,7 @@ private:
      std::mt19937 rnd_eng_;
      std::uniform_int_distribution<int> dist_;
 
-     Gates gates_;
+     details::Gates gates_;
      std::vector<unsigned> pos_;
 
      // Qubits
