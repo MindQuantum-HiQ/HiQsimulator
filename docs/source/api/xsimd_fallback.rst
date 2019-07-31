@@ -11,8 +11,13 @@ One possible use cases would be to allow this code to compile, even in the case 
 
 Compared to the one provided as part of XSIMD, this implementation makes heavy use of expression templates to avoid unnessary copies and temporaries for better performance. To take full advantage of these features, it is highly recommended to use a recent version of your compiler and make sure to enable compiler optimizations during the compilation process.
 
-.. toctree::
+.. note::
 
+   The recommended way of using this library is by including the ``xsimd_include.hpp`` file. In this way, you ensure that your code will work regardless of whether the user has the XSIMD library installed on his system or not.
+
+.. toctree::
+   :caption: Table of contents
+   
    xsimd_fallback_batch
    xsimd_fallback_expressions
    xsimd_fallback_functions

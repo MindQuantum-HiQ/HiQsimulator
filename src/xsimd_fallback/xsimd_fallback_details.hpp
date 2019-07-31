@@ -102,6 +102,7 @@ class binary_op_expr_impl;
 template <typename T>
 struct expr_base;
 
+//! Namespace containing helper classes and functions
 namespace details
 {
      //! Convenience template alias
@@ -113,6 +114,7 @@ namespace details
 
      //! Type trait class to detect batch<T, N> values
      /*!
+      * \class is_batch
       * General implementation for all types
       */
      template <typename T>
@@ -120,6 +122,7 @@ namespace details
      {};
      //! Type trait class to detect batch<T, N> values
      /*!
+      * \class is_batch
       * Specialization for batch<T, N>
       */
      template <typename T, std::size_t N>
@@ -128,6 +131,7 @@ namespace details
 
      //! Type trait class to detect expr_base<T> values
      /*!
+      * \class is_expr
       * General implementation for all types
       */
      template <typename T>
@@ -135,6 +139,7 @@ namespace details
      {};
      //! Type trait class to detect expr_base<T> values
      /*!
+      * \class is_expr
       * Specialization for expr_base<T>
       */
      template <typename T>
@@ -143,6 +148,7 @@ namespace details
 
      //! Type trait class to detect valid expressions
      /*!
+      * \class is_valid_expr
       * A valid expression for our purposes is either:
       *   - an arithmetic value
       *   - a batch<T, N> value (provided that it does not inherit from
@@ -198,6 +204,7 @@ namespace details
      // Expression size calculations
 
      //! Trait class to calculate the size of an expression
+     //! \class expr_size_impl
      template <typename T>
      struct expr_size_impl
      {
@@ -245,6 +252,7 @@ namespace details
 
      //! Expression creation helper class
      /*!
+      * \class expr_maker
       * Implementation for general expressions
       */
      template <typename T, bool = std::is_arithmetic<T>::value>
