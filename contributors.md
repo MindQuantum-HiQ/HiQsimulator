@@ -1,6 +1,6 @@
 # List of contributors:
 
-### Computational kernels and stabilaser simulator:
+### Computational kernels and stabilizer simulator:
   + Damian Steiger https://github.com/damiansteiger
   + Thomas Haener https://github.com/thomashaener
 ### Quantum circuit execution scheduler:
