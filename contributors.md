@@ -6,7 +6,7 @@
 ### Quantum circuit execution scheduler:
   + Andrei Kalendarov https://github.com/akalendarov
 ### More optimized computational kernels:
-  + Semen Merkulov 
+  + Semen Merkulov
 ### Core distributed simulator development:
-  + Dmitriy Kolmakov
+  + Dmitriy Kolmakov https://github.com/dkolmakov
   + Yuriy Zotov https://github.com/yzotov
