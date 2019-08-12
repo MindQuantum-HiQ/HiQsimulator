@@ -16,7 +16,7 @@
 
 //! Default constructor
 template <typename T, std::size_t N>
-batch<T, N>::batch() : array_data_{}
+xsimd::batch<T, N>::batch() : array_data_{}
 {}
 
 //! Constructor from an array of values
@@ -24,7 +24,7 @@ batch<T, N>::batch() : array_data_{}
  * Initializes a batch to the values pointed by \c data.
  */
 template <typename T, std::size_t N>
-batch<T, N>::batch(T data[N])
+xsimd::batch<T, N>::batch(T data[N])
     : array_data_{details::array_from_pointer<T, N>(data)}
 {}
 
@@ -33,7 +33,7 @@ batch<T, N>::batch(T data[N])
  * Initializes a batch to the values pointed by \c data.
  */
 template <typename T, std::size_t N>
-batch<T, N>::batch(const std::array<T, N>& data) : array_data_{data}
+xsimd::batch<T, N>::batch(const std::array<T, N>& data) : array_data_{data}
 {}
 
 //! Constructor from scalar values
@@ -41,7 +41,8 @@ batch<T, N>::batch(const std::array<T, N>& data) : array_data_{data}
  * Initializes all the values of the batch to \c val.
  */
 template <typename T, std::size_t N>
-batch<T, N>::batch(T val) : array_data_(details::array_from_scalar<T, N>(val))
+xsimd::batch<T, N>::batch(T val)
+    : array_data_(details::array_from_scalar<T, N>(val))
 {}
 
 // -----------------------------------------------------------------------------
@@ -52,7 +53,7 @@ batch<T, N>::batch(T val) : array_data_(details::array_from_scalar<T, N>(val))
  * \return The element at the specified position
  */
 template <typename T, std::size_t N>
-auto batch<T, N>::operator[](std::size_t idx) const
+auto xsimd::batch<T, N>::operator[](std::size_t idx) const
 {
      return array_data_[idx];
 }
@@ -63,7 +64,7 @@ auto batch<T, N>::operator[](std::size_t idx) const
  * \return A reference to the element at the specified position
  */
 template <typename T, std::size_t N>
-auto& batch<T, N>::operator[](std::size_t idx)
+auto& xsimd::batch<T, N>::operator[](std::size_t idx)
 {
      return array_data_[idx];
 }
@@ -79,7 +80,7 @@ auto& batch<T, N>::operator[](std::size_t idx)
  * \return A reference to \c this.
  */
 template <typename T, std::size_t N>
-auto& batch<T, N>::operator=(const batch<const T, N>& rhs)
+auto& xsimd::batch<T, N>::operator=(const batch<const T, N>& rhs)
 {
      PRAGMA_LOOP_IVDEP
      for (std::size_t i(0); i < size; ++i) {
@@ -96,7 +97,7 @@ auto& batch<T, N>::operator=(const batch<const T, N>& rhs)
  * \return A reference to \c this.
  */
 template <typename T, std::size_t N>
-auto& batch<T, N>::operator=(batch<const T, N>&& rhs)
+auto& xsimd::batch<T, N>::operator=(batch<const T, N>&& rhs)
 {
      PRAGMA_LOOP_IVDEP
      for (std::size_t i(0); i < size; ++i) {
@@ -112,7 +113,7 @@ auto& batch<T, N>::operator=(batch<const T, N>&& rhs)
  */
 template <typename T, std::size_t N>
 template <typename U, typename>
-auto& batch<T, N>::operator=(U&& expr)
+auto& xsimd::batch<T, N>::operator=(U&& rhs)
 {
      static_assert(size == details::expr_size<U>::size,
                    "Expression size must match batch size");
@@ -123,7 +124,7 @@ auto& batch<T, N>::operator=(U&& expr)
      PRAGMA_LOOP_IVDEP
      for (std::size_t i(0); i < size; ++i) {
           array_data_[i]
-              = details::make_expr(std::forward<U>(expr))(eval_visitor(i));
+              = details::make_expr(std::forward<U>(rhs))(eval_visitor(i));
      }
      return *this;
 }
@@ -134,7 +135,7 @@ auto& batch<T, N>::operator=(U&& expr)
 #define DEFINE_INPLACE_OP(OP)                                                  \
      template <typename T, std::size_t N>                                      \
      template <typename U, typename>                                           \
-     auto& batch<T, N>::operator OP(U&& rhs)                                   \
+     auto& xsimd::batch<T, N>::operator OP(U&& rhs)                            \
      {                                                                         \
           static_assert(std::is_arithmetic<details::remove_cvref_t<U>>::value  \
                             || size == details::expr_size<U>::size,            \
@@ -163,7 +164,7 @@ DEFINE_INPLACE_OP(^=)
  * \return A reference to \c this.
  */
 template <typename T, std::size_t N>
-auto& batch<T, N>::operator++()
+auto& xsimd::batch<T, N>::operator++()
 {
      PRAGMA_LOOP_IVDEP
      for (auto& b: *this) {
@@ -176,7 +177,7 @@ auto& batch<T, N>::operator++()
  * \return A reference to \c this.
  */
 template <typename T, std::size_t N>
-auto batch<T, N>::operator++(int)
+auto xsimd::batch<T, N>::operator++(int)
 {
      auto tmp(*this);
      ++(*this);
@@ -187,7 +188,7 @@ auto batch<T, N>::operator++(int)
  * \return A reference to \c this.
  */
 template <typename T, std::size_t N>
-auto& batch<T, N>::operator--()
+auto& xsimd::batch<T, N>::operator--()
 {
      PRAGMA_LOOP_IVDEP
      for (auto& b: *this) {
@@ -200,7 +201,7 @@ auto& batch<T, N>::operator--()
  * \return A reference to \c this.
  */
 template <typename T, std::size_t N>
-auto batch<T, N>::operator--(int)
+auto xsimd::batch<T, N>::operator--(int)
 {
      auto tmp(*this);
      --(*this);
@@ -212,37 +213,37 @@ auto batch<T, N>::operator--(int)
 
 //! Returns iterator to beginning
 template <typename T, std::size_t N>
-auto batch<T, N>::begin() -> iterator
+auto xsimd::batch<T, N>::begin() -> iterator
 {
      return array_data_.begin();
 }
 //! Returns iterator to end
 template <typename T, std::size_t N>
-auto batch<T, N>::end() -> iterator
+auto xsimd::batch<T, N>::end() -> iterator
 {
      return array_data_.end();
 }
 //! Returns const_iterator to beginning
 template <typename T, std::size_t N>
-auto batch<T, N>::begin() const -> const_iterator
+auto xsimd::batch<T, N>::begin() const -> const_iterator
 {
      return cbegin();
 }
 //! Returns const_iterator to end
 template <typename T, std::size_t N>
-auto batch<T, N>::end() const -> const_iterator
+auto xsimd::batch<T, N>::end() const -> const_iterator
 {
      return cend();
 }
 //! Returns const_iterator to beginning
 template <typename T, std::size_t N>
-auto batch<T, N>::cbegin() const -> const_iterator
+auto xsimd::batch<T, N>::cbegin() const -> const_iterator
 {
      return array_data_.cbegin();
 }
 //! Returns const_iterator to end
 template <typename T, std::size_t N>
-auto batch<T, N>::cend() const -> const_iterator
+auto xsimd::batch<T, N>::cend() const -> const_iterator
 {
      return array_data_.cend();
 }
@@ -251,37 +252,37 @@ auto batch<T, N>::cend() const -> const_iterator
 
 //! Return reverse_iterator to reverse beginning
 template <typename T, std::size_t N>
-auto batch<T, N>::rbegin() -> reverse_iterator
+auto xsimd::batch<T, N>::rbegin() -> reverse_iterator
 {
      return reverse_iterator(end());
 }
 //! Return reverse_iterator to reverse end
 template <typename T, std::size_t N>
-auto batch<T, N>::rend() -> reverse_iterator
+auto xsimd::batch<T, N>::rend() -> reverse_iterator
 {
      return reverse_iterator(begin());
 }
 //! Return const_reverse_iterator to reverse beginning
 template <typename T, std::size_t N>
-auto batch<T, N>::rbegin() const -> const_reverse_iterator
+auto xsimd::batch<T, N>::rbegin() const -> const_reverse_iterator
 {
      return crbegin();
 }
 //! Return const_reverse_iterator to reverse end
 template <typename T, std::size_t N>
-auto batch<T, N>::rend() const -> const_reverse_iterator
+auto xsimd::batch<T, N>::rend() const -> const_reverse_iterator
 {
      return crend();
 }
 //! Return const_reverse_iterator to reverse beginning
 template <typename T, std::size_t N>
-auto batch<T, N>::crbegin() const -> const_reverse_iterator
+auto xsimd::batch<T, N>::crbegin() const -> const_reverse_iterator
 {
      return const_reverse_iterator(cend());
 }
 //! Return const_reverse_iterator to reverse end
 template <typename T, std::size_t N>
-auto batch<T, N>::crend() const -> const_reverse_iterator
+auto xsimd::batch<T, N>::crend() const -> const_reverse_iterator
 {
      return const_reverse_iterator(cbegin());
 }
@@ -291,37 +292,38 @@ auto batch<T, N>::crend() const -> const_reverse_iterator
 // Constructor for const batches
 
 template <typename T, std::size_t N>
-constexpr batch<const T, N>::batch() : data_(nullptr)
+constexpr xsimd::batch<const T, N>::batch() : data_(nullptr)
 {}
 
 template <typename T, std::size_t N>
-constexpr batch<const T, N>::batch(const T data[N]) : data_(data)
+constexpr xsimd::batch<const T, N>::batch(const T data[N]) : data_(data)
 {}
 
 template <typename T, std::size_t N>
-constexpr batch<const T, N>::batch(const std::array<T, N>& data)
+constexpr xsimd::batch<const T, N>::batch(const std::array<T, N>& data)
     : data_(&data[0])
 {}
 
 template <typename T, std::size_t N>
-constexpr batch<const T, N>::batch(const batch& rhs) : data_(rhs.data_)
+constexpr xsimd::batch<const T, N>::batch(const batch& rhs) : data_(rhs.data_)
 {}
 
 template <typename T, std::size_t N>
-constexpr batch<const T, N>::batch(batch&& rhs) : data_(std::move(rhs.data_))
+constexpr xsimd::batch<const T, N>::batch(batch&& rhs)
+    : data_(std::move(rhs.data_))
 {}
 
 // -----------------------------------------------------------------------------
 
 template <typename T, std::size_t N>
-constexpr auto& batch<const T, N>::operator=(const batch& rhs)
+constexpr auto& xsimd::batch<const T, N>::operator=(const batch& rhs)
 {
      data_ = rhs.data_;
      return *this;
 }
 
 template <typename T, std::size_t N>
-constexpr auto& batch<const T, N>::operator=(batch&& rhs)
+constexpr auto& xsimd::batch<const T, N>::operator=(batch&& rhs)
 {
      data_ = std::move(rhs.data_);
      return *this;
@@ -335,7 +337,7 @@ constexpr auto& batch<const T, N>::operator=(batch&& rhs)
  * \return The element at the specified position
  */
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::operator[](std::size_t idx) const
+constexpr auto xsimd::batch<const T, N>::operator[](std::size_t idx) const
 {
      return data_[idx];
 }
@@ -345,25 +347,25 @@ constexpr auto batch<const T, N>::operator[](std::size_t idx) const
 
 //! Returns const_iterator to beginning
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::begin() const -> const_iterator
+constexpr auto xsimd::batch<const T, N>::begin() const -> const_iterator
 {
      return cbegin();
 }
 //! Returns const_iterator to end
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::end() const -> const_iterator
+constexpr auto xsimd::batch<const T, N>::end() const -> const_iterator
 {
      return cend();
 }
 //! Returns const_iterator to beginning
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::cbegin() const -> const_iterator
+constexpr auto xsimd::batch<const T, N>::cbegin() const -> const_iterator
 {
      return data_;
 }
 //! Returns const_iterator to end
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::cend() const -> const_iterator
+constexpr auto xsimd::batch<const T, N>::cend() const -> const_iterator
 {
      return data_ + size;
 }
@@ -372,25 +374,27 @@ constexpr auto batch<const T, N>::cend() const -> const_iterator
 
 //! Return const_reverse_iterator to reverse beginning
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::rbegin() const -> const_reverse_iterator
+constexpr auto xsimd::batch<const T, N>::rbegin() const
+    -> const_reverse_iterator
 {
      return crbegin();
 }
 //! Return const_reverse_iterator to reverse end
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::rend() const -> const_reverse_iterator
+constexpr auto xsimd::batch<const T, N>::rend() const -> const_reverse_iterator
 {
      return crend();
 }
 //! Return const_reverse_iterator to reverse beginning
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::crbegin() const -> const_reverse_iterator
+constexpr auto xsimd::batch<const T, N>::crbegin() const
+    -> const_reverse_iterator
 {
      return const_reverse_iterator(cend());
 }
 //! Return const_reverse_iterator to reverse end
 template <typename T, std::size_t N>
-constexpr auto batch<const T, N>::crend() const -> const_reverse_iterator
+constexpr auto xsimd::batch<const T, N>::crend() const -> const_reverse_iterator
 {
      return const_reverse_iterator(cbegin());
 }

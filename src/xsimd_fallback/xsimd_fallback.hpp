@@ -32,26 +32,37 @@ class batch;
 //! Namespace containing all known tags
 namespace tags
 {
+     //! Tag for constant values
      struct cst_tag
      {};
+     //! Tag for batch values
      struct batch_tag
      {};
+     //! Tag for the "logical not" operation
      struct logical_not_tag
      {};
+     //! Tag for the "logical and" operation
      struct logical_and_tag
      {};
+     //! Tag for the "logical or" operation
      struct logical_or_tag
      {};
+     //! Tag for the "logical xor" operation
      struct logical_xor_tag
      {};
+     //! Tag for the "negate" operation
      struct negate_tag
      {};
+     //! Tag for the "add" operation
      struct add_tag
      {};
+     //! Tag for the "subtraction" operation
      struct sub_tag
      {};
+     //! Tag for the "multiplication" operation
      struct mul_tag
      {};
+     //! Tag for the "division" operation
      struct div_tag
      {};
 }  // namespace tags
@@ -59,9 +70,8 @@ namespace tags
 // =============================================================================
 // Helper functions to build expressions
 
-//!
 /*!
- * \class batch_expr_impl
+ * \class expr_base
  * \brief Base class for all expressions
  *
  * \tparam derived_t CRTP derived type
@@ -73,7 +83,7 @@ struct expr_base
 };
 
 /*!
- * \class batch_expr_impl
+ * \class cst_expr_impl
  * \brief Expression class encapsulating an arithmetic value
  *
  * \tparam T Underlying arithmetic type
@@ -84,9 +94,11 @@ class cst_expr_impl : public expr_base<cst_expr_impl<T>>
 public:
      using base_type = expr_base<cst_expr_impl<T>>;
 
+     //! Constructor
      explicit constexpr cst_expr_impl(T val) : val_(val)
      {}
 
+     //! Call operator for visitor access
      template <typename visitor_t>
      constexpr auto operator()(visitor_t visitor) const
      {
@@ -110,9 +122,11 @@ class batch_expr_impl : public expr_base<batch_expr_impl<T, N>>
 public:
      using base_type = expr_base<batch_expr_impl<T, N>>;
 
+     //! Constructor
      explicit constexpr batch_expr_impl(const batch<T, N>& b) : b_(b)
      {}
 
+     //! Call operator for visitor access
      template <typename visitor_t>
      constexpr auto operator()(visitor_t visitor) const
      {
@@ -136,9 +150,11 @@ class unary_op_expr_impl : public expr_base<unary_op_expr_impl<T, tag_type>>
 public:
      using base_type = expr_base<unary_op_expr_impl<T, tag_type>>;
 
+     //! Constructor
      explicit constexpr unary_op_expr_impl(T rhs) : rhs_(std::move(rhs))
      {}
 
+     //! Call operator for visitor access
      template <typename visitor_t>
      constexpr auto operator()(visitor_t visitor) const
      {
@@ -164,10 +180,12 @@ class binary_op_expr_impl
 public:
      using base_type = expr_base<binary_op_expr_impl<T, U, tag_type>>;
 
+     //! Constructor
      constexpr binary_op_expr_impl(T lhs, U rhs)
          : lhs_(std::move(lhs)), rhs_(std::move(rhs))
      {}
 
+     //! Call operator for visitor access
      template <typename visitor_t>
      constexpr auto operator()(visitor_t visitor) const
      {
@@ -214,72 +232,87 @@ DEFINE_BINARY_FUNC(div);
 
 /*!
  * \class eval_visitor
- * \brief Expression evaluator class
+* \brief Expression evaluator class
  *
  * Visitor class to evaluate an expression given an index
  */
 struct eval_visitor
 {
+     //! Constructor
+     /*!
+      * \param idx Index of value within expression
+      */
      explicit constexpr eval_visitor(std::size_t idx) : idx_(idx)
      {}
 
+     //! Call operator for constant values
      template <typename T>
      constexpr auto operator()(tags::cst_tag, T c)
      {
           return c;
      }
 
+     //! Call operator for batch values
      template <typename T>
      constexpr auto operator()(tags::batch_tag, T& b)
      {
           return b[idx_];
      }
 
+     //! Call operator for logical not operations
      template <typename T>
      constexpr auto operator()(tags::logical_not_tag, T rhs)
      {
           return ~rhs;
      }
+     //! Call operator for logical and operations
      template <typename T, typename U>
      constexpr auto operator()(tags::logical_and_tag, T lhs, U rhs)
      {
           return lhs & rhs;
      }
+     //! Call operator for logical or operations
      template <typename T, typename U>
      constexpr auto operator()(tags::logical_or_tag, T lhs, U rhs)
      {
           return lhs | rhs;
      }
+     //! Call operator for logical xor operations
      template <typename T, typename U>
      constexpr auto operator()(tags::logical_xor_tag, T lhs, U rhs)
      {
           return lhs ^ rhs;
      }
 
+     //! Call operator for negation operations
      template <typename T>
      constexpr auto operator()(tags::negate_tag, T rhs)
      {
           return -rhs;
      }
 
+     //! Call operator for addition operations
      template <typename T, typename U>
      constexpr auto operator()(tags::add_tag, T lhs, U rhs)
      {
           return lhs + rhs;
      }
 
+     //! Call operator for subtraction operations
      template <typename T, typename U>
      constexpr auto operator()(tags::sub_tag, T lhs, U rhs)
      {
           return lhs - rhs;
      }
 
+     //! Call operator for multiplication operations
      template <typename T, typename U>
      constexpr auto operator()(tags::mul_tag, T lhs, U rhs)
      {
           return lhs * rhs;
      }
 
+     //! Call operator for division operations
      template <typename T, typename U>
      constexpr auto operator()(tags::div_tag, T lhs, U rhs)
      {
@@ -438,8 +471,6 @@ private:
      const T* data_;
 };
 
-#include "xsimd_fallback_batch_impl.hpp"
-
 // =============================================================================
 // Declare and define operators
 
@@ -479,6 +510,8 @@ DEFINE_BINARY_OP(/, div)
 #undef DEFINE_UNARY_OP
 #undef DEFINE_BINARY_OP
 }  // namespace xsimd
+
+#include "xsimd_fallback_batch_impl.hpp"
 
 // =============================================================================
 // Other XSIMD-related functions
@@ -537,24 +570,32 @@ DEFINE_SIMD_TRAITS_SPECIALISATION(double, XSIMD_FALLBACK_BATCH_DOUBLE_SIZE);
 #     undef DEFINE_SIMD_TRAITS_SPECIALISATION
 
 //! Convenience template alias
+//! \ingroup xsimd_functions
 template <typename T>
 using simd_type = typename simd_traits<T>::type;
 
+#ifndef DOXYGEN_DOC
+
 //! \brief Load aligned data
+//! \ingroup xsimd_functions
 template <typename T>
 auto load_aligned(T* t)
 {
      return batch<T, simd_type<T>::size>(t);
 }
 //! \brief Load unaligned data
+//! \ingroup xsimd_functions
 template <typename T>
-auto load_ualigned(T* t)
+auto load_unaligned(T* t)
 {
      return load_aligned(t);
 }
 
+#endif // DOXYGEN_DOC
+
 //! Get the alignment offset of some memory
 /*!
+ *\ingroup xsimd_functions
  * Taken \e as-is from XSIMD
  */
 template <typename T>
@@ -581,12 +622,18 @@ using const_simd_traits = simd_traits<T>;
 #endif  // !HAS_XSIMD
 
 /*!
+ *\ingroup xsimd_functions
  * \brief Load unaligned data
  * Loads the memory array pointed to by \c src into a batch and returns it.
  * \c src is not required to be aligned.
  *
  * \param src the pointer to the memory array to load.
- * \param dst the destination batch.
+ * \param b the destination batch.
+ *
+ * \tparam T Type of memory to read from
+ *
+ * \note Uses SFINAE to remove this overload from resolution when using the
+ *       real XSIMD
  */
 template <typename T, typename batch_type,
           typename U = details::remove_cvref_t<batch_type>,
@@ -599,12 +646,18 @@ void load_unaligned(T* src, batch_type& b)
      load_aligned(src, b);
 }
 /*!
+ *\ingroup xsimd_functions
  * \brief Load aligned data
  * Loads the memory array pointed to by \c src into a batch and returns it.
  * \c src is required to be aligned.
  *
  * \param src the pointer to the memory array to load.
- * \param dst the destination batch.
+ * \param b the destination batch.
+ *
+ * \tparam T Type of memory to read from
+ *
+ * \note Uses SFINAE to remove this overload from resolution when using the
+ *       real XSIMD
  */
 template <typename T, typename batch_type,
           typename U = details::remove_cvref_t<batch_type>,
@@ -624,6 +677,11 @@ void load_aligned(T* src, batch_type& b)
  *
  * \param dest the pointer to the memory array.
  * \param expr the expression to store
+ *
+ * \tparam T Type of memory to read from
+ *
+ * \note Uses SFINAE to remove this overload from resolution when using the
+ *       real XSIMD
  */
 template <typename T, typename expr_type,
           typename U = details::remove_cvref_t<expr_type>,
@@ -637,12 +695,18 @@ void store_unaligned(T* dest, expr_type&& expr)
      store_aligned(dest, std::forward<expr_type>(expr));
 }
 /*!
+ *\ingroup xsimd_functions
  * \brief Store aligned data
  * Stores the expression \c expr into the memory array pointed to by \c dest.
  * \c dest is required to be aligned.
  *
  * \param dest the pointer to the memory array.
  * \param expr the expression to store
+ *
+ * \tparam T Type of memory to read from
+ *
+ * \note Uses SFINAE to remove this overload from resolution when using the
+ *       real XSIMD
  */
 template <typename T, typename expr_type,
           typename U = details::remove_cvref_t<expr_type>,

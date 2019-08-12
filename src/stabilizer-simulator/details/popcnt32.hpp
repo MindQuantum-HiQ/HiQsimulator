@@ -14,28 +14,49 @@
 
 #pragma once
 
-#ifndef __has_builtin
-#     define NO_HAS_BUILTIN
-#     define __has_builtin(x) 0
-#endif  // __has_builtin
+/*!
+ * \file
+ * \brief Provide the \c popcnt32 function
+ *
+ * Either by using processor intrinsics, compiler builtin or by a generic
+ * implementation
+ */
 
-#if XSIMD_FALLBACK_X86_INSTR_SET >= XSIMD_FALLBACK_X86_SSE4_2_VERSION
-#     include <nmmintrin.h>
-#     define popcnt32 _mm_popcnt_u32
-#elif defined(_MSC_VER)
-#     include <intrin.h>
-#     define popcnt32 __popcnt
-#elif __has_builtin(__builtin_popcount)
-#     define popcnt32 __builtin_popcount
+#ifdef DOXYGEN_DOC
+/*!
+ * \brief Generic implementation of population count for 32-bit unsigned 
+ *        integers
+ *
+ * Only used if if no-intrinsics or compiler builtin can be found
+ *
+ * \param a Unsigned integer
+ * \return Number of of bit set to \c 1 in integer
+ */
+uint32_t popcnt32(uint32_t a);
 #else
+#     ifndef __has_builtin
+#          define NO_HAS_BUILTIN
+#          define __has_builtin(x) 0
+#     endif  // __has_builtin
+
+#     if XSIMD_FALLBACK_X86_INSTR_SET >= XSIMD_FALLBACK_X86_SSE4_2_VERSION
+#          include <nmmintrin.h>
+#          define popcnt32 _mm_popcnt_u32
+#     elif defined(_MSC_VER)
+#          include <intrin.h>
+#          define popcnt32 __popcnt
+#     elif __has_builtin(__builtin_popcount)
+#          define popcnt32 __builtin_popcount
+#     else
 uint32_t popcnt32(uint32_t a)
 {
      a -= ((a >> 1) & 0x55555555);
      a = (a & 0x33333333) + ((a >> 2) & 0x33333333);
      return ((a + (a >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
 }
-#endif  // __has_builtin(__builtin_popcount) || _MSC_VER || >= SSE4
+#     endif  // __has_builtin(__builtin_popcount) || _MSC_VER || >= SSE4
 
-#ifdef NO_HAS_BUILTIN
-#     undef __has_builtin
-#endif  // NO_HAS_BUILTIN
+#     ifdef NO_HAS_BUILTIN
+#          undef __has_builtin
+#     endif  // NO_HAS_BUILTIN
+#endif       // !DOXYGEN_DOC

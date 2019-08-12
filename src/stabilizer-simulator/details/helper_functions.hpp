@@ -19,15 +19,18 @@
 
 namespace details
 {
+//! Trait class to identify array types
 template <typename T>
 struct array_traits;
 
+//! Specialisation to identify std::array
 template <typename T, std::size_t N>
 struct array_traits<std::array<T, N>>
 {
      using type = T;
      static constexpr auto size = N;
 };
+//! Specialisation to identify C-style arrays
 template <typename T, std::size_t N>
 struct array_traits<T[N]>
 {
@@ -35,16 +38,42 @@ struct array_traits<T[N]>
      static constexpr auto size = N;
 };
 
+//! Apply a function to each element of an array while accumulating the result
+/*!
+ * \c func_t must be a functor class which implements the ()-operator:
+ * \code
+ T func_t::operator()( const T& lhs, const T& rhs ) const;
+ * \endcode
+ *
+ * \param array Array of value to apply the function to
+ * \param val Value used to accumulate the result
+ *
+ * \tparam func_t Class implementing a function via the ()-operator
+ * \tparam array_t Array class
+ */
 template <typename func_t, typename array_t>
-constexpr auto apply_array_func(const array_t& array,
+constexpr void apply_array_func(const array_t& array,
                                 typename array_traits<array_t>::type& val)
 {
      for (const auto& el: array) {
           val = func_t()(val, el);
      }
 }
+
+//! Apply a function to each element of an array while accumulating the result
+/*!
+ * \c func_t must be a functor class which implements the ()-operator:
+ * \code
+ T func_t::operator()( const T& lhs, const T& rhs ) const;
+ * \endcode
+ *
+ * \param array Array of value to apply the function to
+ *
+ * \tparam func_t Class implementing a function via the ()-operator
+ * \tparam array_t Array class
+ */
 template <typename func_t, typename array_t>
-constexpr auto apply_array_func(const array_t& array)
+constexpr void apply_array_func(const array_t& array)
 {
      using value_type = typename array_traits<array_t>::type;
      auto val = value_type();
