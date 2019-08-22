@@ -170,14 +170,42 @@ target_link_libraries(himembind hwloc::hwloc)
 
 pybind11_add_module(_sched_cpp
                     _sched_cpp.cpp
+                    src/scheduler/swap_scheduler.h
                     src/scheduler/swap_scheduler.cpp
+                    src/scheduler/cluster_scheduler.h
                     src/scheduler/cluster_scheduler.cpp
+                    src/scheduler/definitions.h
+                    src/scheduler/convertors.h
                     src/scheduler/convertors.cpp)
 target_link_libraries(_sched_cpp PUBLIC glog::glog)
 
 # ------------------------------------------------------------------------------
 
-add_library(SimulatorMPI_o OBJECT src/simulator-mpi/SimulatorMPI.cpp
+add_library(SimulatorMPI_o OBJECT src/simulator-mpi/swapping.hpp
+                                  src/simulator-mpi/fusion_mpi.hpp
+                                  src/simulator-mpi/alignedallocator.hpp
+
+                                  src/simulator-mpi/kernels/nointrin/kernel1.hpp
+                                  src/simulator-mpi/kernels/nointrin/kernel2.hpp
+                                  src/simulator-mpi/kernels/nointrin/kernel3.hpp
+                                  src/simulator-mpi/kernels/nointrin/kernel4.hpp
+                                  src/simulator-mpi/kernels/nointrin/kernel5.hpp
+                                  src/simulator-mpi/kernels/nointrin/kernels.hpp
+                                  src/simulator-mpi/kernels/nointrin/kernels_diag.hpp
+
+                                  src/simulator-mpi/kernels/intrin/cintrin.hpp
+                                  src/simulator-mpi/kernels/intrin/kernel1.hpp
+                                  src/simulator-mpi/kernels/intrin/kernel2.hpp
+                                  src/simulator-mpi/kernels/intrin/kernel3.hpp
+                                  src/simulator-mpi/kernels/intrin/kernel4.hpp
+                                  src/simulator-mpi/kernels/intrin/kernel4_cf.hpp
+                                  src/simulator-mpi/kernels/intrin/kernel5.hpp
+                                  src/simulator-mpi/kernels/intrin/kernels.hpp
+                                  src/simulator-mpi/kernels/intrin/kernels_diag.hpp
+
+                                  src/simulator-mpi/SimulatorMPI.hpp
+                                  src/simulator-mpi/SimulatorMPI.cpp
+                                  src/simulator-mpi/SwapperMT.hpp
                                   src/simulator-mpi/SwapperMT.cpp)
 add_avx2_to_target(SimulatorMPI_o)
 if(WIN32)
