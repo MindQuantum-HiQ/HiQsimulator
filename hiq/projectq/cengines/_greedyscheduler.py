@@ -19,12 +19,62 @@ from projectq.types import BasicQubit, WeakQubitRef
 
 from hiq.projectq.cengines import SwapScheduler, ClusterScheduler
 from hiq.projectq.ops import MetaSwap, AllocateQuregGate
+"""
+Contains the projectq interface to a C++-based simulator, which has to be
+built first. If the c++ simulator is not exported to python, a (slow) python
+implementation is used as an alternative.
+"""
 
 BasicGate.is_diagonal = lambda _: False
 
 
 class GreedyScheduler(BasicEngine):
+    """
+    Greedy Scheduler is a new method optimizing simulator performance
+    not previously described.
+
+    Key concepts:
+        There are local and global qubits. If gate is acting on local qubits
+        matrix-vector product can be calculated without access to non-local parts.
+        To apply gate to global qubits one need to make them local, i.e. reorder
+        qubits.
+
+        Gates are reordered into sequences called stages. A stage contains gates
+        acting on local qubits. Inside the stage gates form subsequences called
+        clusters. Gates from the same cluster are fused into single multi-qubit
+        gate and this gate is simulated by single matrix-vector multiplication.
+        Between stages qubit reordering occur.
+
+    Greedy algorithm calculates a permutation of gates and permutation
+    of qubits which lead to minimum number of clusters in a stage and minimum number
+    of stages during quantum circuit simulation.
+
+    Example:
+        Shor MPI creates the main engine using Greedy Scheduler.
+
+    .. code-block:: python
+
+       compilerengines = [GreedyScheduler()]
+       simulator = SimulatorMPI(gate_fusion=True, num_local_qubits=20)
+
+       # make the compiler and use the SimulatorMPI as a backend
+       eng = HiQMainEngine(simulator, compilerengines)
+    Note:
+        In this example HiQMainEngine can be replaced by MainEngine from ProjectQ.
+    Note:
+        Greedy Scheduler should be the last engine in the list.
+
+    """
     def __init__(self, supremacy_circuit=False, num_splits=10 ** 6, cluster_size=4):
+        """
+        Args:
+            supremacy_circuit (bool): If you want to use random circuit, you can
+                specify this parameter as True. Then all last CZ gates will be
+                ignored, because they do not affect the result of final measurement.
+            num_splits (int): Number of branch splits
+            cluster_size (int): The maximum number of qubits in fused multi-qubit
+                gate
+        """
         BasicEngine.__init__(self)
         self._cmd_list = []
         self._was_scheduling = False
