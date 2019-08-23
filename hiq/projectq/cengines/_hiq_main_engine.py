@@ -20,14 +20,20 @@ from hiq.projectq.ops import AllocateQuregGate
 
 
 class HiQMainEngine(MainEngine):
+    """
+    HiQ Main Engine provides all functionality of the main compiler engine.
+    It is an extension of ProjectQ MainEngine adopted for using with
+    SimulatorMPI.
+
+    """
     def allocate_qureg(self, n, init=0.0):
         """
         Allocate n qubits and return them as a quantum register, which is a
         list of qubit objects.
 
         Args:
-            :param n: Number of qubits to allocate
-            :param init: assign this value to every amplitude
+            n (int): Number of qubits to allocate
+            init (complex): Assign this value to every amplitude
         Returns:
             Qureg of length n, a list of n newly allocated qubits.
         """
