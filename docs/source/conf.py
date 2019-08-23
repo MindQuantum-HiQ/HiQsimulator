@@ -16,7 +16,7 @@
 import os
 import subprocess
 import sys
-sys.path.insert(0, os.path.abspath('../hiq'))
+sys.path.insert(0, os.path.abspath('../../'))
 
 import inspect
 import hiq
