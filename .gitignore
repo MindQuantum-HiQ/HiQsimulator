@@ -35,3 +35,5 @@ __pycache__/
 
 docs/build/
 docs/xml/
+cmake-build/
+venv/
