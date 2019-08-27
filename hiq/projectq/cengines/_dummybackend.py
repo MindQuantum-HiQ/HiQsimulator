@@ -21,6 +21,9 @@ from hiq.projectq.ops._gates import MetaSwapGate
 
 
 class FakeSimulator:
+    """
+    FakeSimulator used only for testing.
+    """
     def __init__(self):
         pass
 
