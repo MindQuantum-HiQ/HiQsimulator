@@ -21,3 +21,4 @@ Documentation for the C++ namespaces, functions and classes part of HiQSimulator
 
    stabilizer_simulator
    xsimd_fallback
+   simulator_mpi
