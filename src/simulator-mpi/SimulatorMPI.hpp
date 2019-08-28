@@ -40,12 +40,6 @@ namespace bc = boost::container;
 #     define EXPORT_API
 #endif  // _WIN32
 
-
-/*!
- * \brief SimulatorMPI is a distributed state vector quantum circuit simulator. It uses qubit reordering technique to manage distributed quantum state.
-
- References: *Massively parallel quantum computer simulator, K. De Raedt et al. Computer Physics Communications 176 (2007) 121–136*
- */
 class EXPORT_API SimulatorMPI
 {
 public:
