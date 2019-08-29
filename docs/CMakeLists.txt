@@ -1,3 +1,10 @@
+cmake_minimum_required(VERSION 3.5)
+
+add_subdirectory("../" "build/HiQSimulator" EXCLUDE_FROM_ALL)
+
+# Add the cmake folder so the FindSphinx module is found
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
 find_package(Doxygen REQUIRED)
 find_package(Sphinx REQUIRED)
 
@@ -6,7 +13,7 @@ get_target_property(HIQ_SIMULATOR_PUBLIC_HEADER_DIR SimulatorMPI_o INTERFACE_INC
 file(GLOB_RECURSE HIQ_SIMULATOR_PUBLIC_HEADERS ${HIQ_SIMULATOR_PUBLIC_HEADER_DIR}/*.hpp *.h)
 
 
-set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/src)
+set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/../src)
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/docs/doxygen)
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/html/index.html)
 set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
@@ -23,7 +30,7 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                    MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}
                    COMMENT "Generating docs")
 
-add_custom_target(Doxygen DEPENDS ${DOXYGEN_INDEX_FILE})
+add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
 
 
 
@@ -53,7 +60,7 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
                    COMMENT "Generating documentation with Sphinx")
 
 # Nice named target so we can run the job easily
-add_custom_target(Docs DEPENDS Doxygen ${SPHINX_INDEX_FILE})
+add_custom_target(Sphinx ALL DEPENDS Doxygen ${SPHINX_INDEX_FILE})
 
 # Add an install target to install the docs
 include(GNUInstallDirs)
