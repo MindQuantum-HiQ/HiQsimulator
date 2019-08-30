@@ -100,6 +100,7 @@ set(CMAKE_LINK_FLAGS_RELEASE_MPI "${MPI_LINK_FLAGS}")
 set(CMAKE_DEBUG_POSTFIX "d")
 set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 set(CMAKE_MINSIZEREL_POSTFIX "rm")
+set(_doc_targets)
 
 # ==============================================================================
 
@@ -183,6 +184,7 @@ target_sources(_sched_cpp
                ${SRC_DIR}/scheduler/definitions.h
                ${SRC_DIR}/scheduler/convertors.h)
 target_link_libraries(_sched_cpp PUBLIC glog::glog)
+list(APPEND _doc_targets _sched_cpp)
 
 # ------------------------------------------------------------------------------
 
@@ -215,6 +217,7 @@ add_avx2_to_target(SimulatorMPI_o)
 if(WIN32)
   target_compile_definitions(SimulatorMPI_o PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 endif()
+list(APPEND _doc_targets SimulatorMPI_o)
 
 add_library(SimulatorMPI SHARED $<TARGET_OBJECTS:SimulatorMPI_o>
                                 $<TARGET_OBJECTS:permutations>)
@@ -276,4 +279,7 @@ endif()
 
 # ==============================================================================
 
+find_package(Doxygen)
+if(Doxygen_FOUND)
   add_subdirectory(docs)
+endif()
