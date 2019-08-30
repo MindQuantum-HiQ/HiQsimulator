@@ -56,7 +56,6 @@ public:
      static constexpr size_t kNotFound_ = static_cast<size_t>(-1);
      //! Constructor
      /*!
-      * \param aWorld A MPI communicator
       * \param seed Seed for pseudo-random number generator
       * \param max_local Maximum number of local qubits
       * \param max_cluster_size Maximum number of qubits in fused multi-qubit gate
