@@ -20,7 +20,7 @@ set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 # ------------------------------------------------------------------------------
 
 file(READ ${DOXYFILE_IN} _doxyfile_content)
-string(REPLACE "INPUT                  = "
+string(REPLACE "INPUT                  = ../src"
                "INPUT                  = ${DOXYGEN_INPUT_DIR}"
                _doxyfile_content
                ${_doxyfile_content})
