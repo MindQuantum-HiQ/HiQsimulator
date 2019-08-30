@@ -9,7 +9,8 @@ set(_policy_list
     CMP0051
     CMP0054
     CMP0057
-    CMP0074)
+    CMP0074
+    CMP0076)
 foreach(_policy ${_policy_list})
   if(POLICY ${_policy})
     cmake_policy(SET ${_policy} NEW)
@@ -22,6 +23,7 @@ foreach(_policy ${_policy_list})
   # CMP0054: no more de-referencing of "expr" in if() statements
   # CMP0057: if IN_LIST
   # CMP0074: XXX_ROOT variables for find_package(XXX)
+  # CMP0076: target_sources relative paths
 endforeach()
 
 if(CMAKE_VERSION VERSION_LESS 3.11)
@@ -103,8 +105,9 @@ set(CMAKE_MINSIZEREL_POSTFIX "rm")
 
 add_subdirectory(pybind11)
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
+set(SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
+add_subdirectory(${SRC_DIR})
+include_directories(${SRC_DIR})
 
 # ==============================================================================
 
@@ -170,43 +173,44 @@ target_link_libraries(himembind hwloc::hwloc)
 
 pybind11_add_module(_sched_cpp
                     _sched_cpp.cpp
-                    src/scheduler/swap_scheduler.h
                     src/scheduler/swap_scheduler.cpp
-                    src/scheduler/cluster_scheduler.h
                     src/scheduler/cluster_scheduler.cpp
-                    src/scheduler/definitions.h
-                    src/scheduler/convertors.h
                     src/scheduler/convertors.cpp)
+target_sources(_sched_cpp
+               INTERFACE
+               ${SRC_DIR}/scheduler/swap_scheduler.h
+               ${SRC_DIR}/scheduler/cluster_scheduler.h
+               ${SRC_DIR}/scheduler/definitions.h
+               ${SRC_DIR}/scheduler/convertors.h)
 target_link_libraries(_sched_cpp PUBLIC glog::glog)
 
 # ------------------------------------------------------------------------------
 
-add_library(SimulatorMPI_o OBJECT src/simulator-mpi/swapping.hpp
-                                  src/simulator-mpi/fusion_mpi.hpp
-                                  src/simulator-mpi/alignedallocator.hpp
-
-                                  src/simulator-mpi/kernels/nointrin/kernel1.hpp
-                                  src/simulator-mpi/kernels/nointrin/kernel2.hpp
-                                  src/simulator-mpi/kernels/nointrin/kernel3.hpp
-                                  src/simulator-mpi/kernels/nointrin/kernel4.hpp
-                                  src/simulator-mpi/kernels/nointrin/kernel5.hpp
-                                  src/simulator-mpi/kernels/nointrin/kernels.hpp
-                                  src/simulator-mpi/kernels/nointrin/kernels_diag.hpp
-
-                                  src/simulator-mpi/kernels/intrin/cintrin.hpp
-                                  src/simulator-mpi/kernels/intrin/kernel1.hpp
-                                  src/simulator-mpi/kernels/intrin/kernel2.hpp
-                                  src/simulator-mpi/kernels/intrin/kernel3.hpp
-                                  src/simulator-mpi/kernels/intrin/kernel4.hpp
-                                  src/simulator-mpi/kernels/intrin/kernel4_cf.hpp
-                                  src/simulator-mpi/kernels/intrin/kernel5.hpp
-                                  src/simulator-mpi/kernels/intrin/kernels.hpp
-                                  src/simulator-mpi/kernels/intrin/kernels_diag.hpp
-
-                                  src/simulator-mpi/SimulatorMPI.hpp
-                                  src/simulator-mpi/SimulatorMPI.cpp
-                                  src/simulator-mpi/SwapperMT.hpp
+add_library(SimulatorMPI_o OBJECT src/simulator-mpi/SimulatorMPI.cpp
                                   src/simulator-mpi/SwapperMT.cpp)
+target_sources(SimulatorMPI_o
+               INTERFACE
+               ${SRC_DIR}/simulator-mpi/swapping.hpp
+               ${SRC_DIR}/simulator-mpi/fusion_mpi.hpp
+               ${SRC_DIR}/simulator-mpi/alignedallocator.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel1.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel2.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel3.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel4.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel5.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernels.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernels_diag.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/cintrin.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel1.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel2.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel3.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel4.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel4_cf.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel5.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernels.hpp
+               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernels_diag.hpp
+               ${SRC_DIR}/simulator-mpi/SimulatorMPI.hpp
+               ${SRC_DIR}/simulator-mpi/SwapperMT.hpp)
 add_avx2_to_target(SimulatorMPI_o)
 if(WIN32)
   target_compile_definitions(SimulatorMPI_o PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
@@ -272,8 +276,4 @@ endif()
 
 # ==============================================================================
 
-# Add the cmake folder so the FindSphinx module is found
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-
-
-add_subdirectory ("docs")
+  add_subdirectory(docs)
