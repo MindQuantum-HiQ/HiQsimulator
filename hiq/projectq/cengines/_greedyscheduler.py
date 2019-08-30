@@ -59,8 +59,10 @@ class GreedyScheduler(BasicEngine):
 
        # make the compiler and use the SimulatorMPI as a backend
        eng = HiQMainEngine(simulator, compilerengines)
-    Note:
-        In this example HiQMainEngine can be replaced by MainEngine from ProjectQ.
+
+       # In the above line HiQMainEngine can be replaced by MainEngine from
+       # ProjectQ.
+
     Note:
         Greedy Scheduler should be the last engine in the list.
 
@@ -68,7 +70,7 @@ class GreedyScheduler(BasicEngine):
     def __init__(self, supremacy_circuit=False, num_splits=10 ** 6, cluster_size=4):
         """
         Args:
-            supremacy_circuit (bool): If you want to use random circuit, you can
+            supremacy_circuit (bool): If you want to use random circuits, you can
                 specify this parameter as True. Then all last CZ gates will be
                 ignored, because they do not affect the result of final measurement.
             num_splits (int): Number of branch splits
