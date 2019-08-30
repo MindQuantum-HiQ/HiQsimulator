@@ -1,16 +1,23 @@
 find_package(Sphinx REQUIRED)
 
+# ==============================================================================
+
 set(_hiq_public_headers)
 foreach(tgt ${_doc_targets})
   get_target_property(_header_list ${tgt} INTERFACE_SOURCES)
   list(APPEND _hiq_public_headers ${_header_list})
 endforeach()
 
+# ==============================================================================
+# Doxygen
+
 set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/src)
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/html/index.html)
 set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
 set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+# ------------------------------------------------------------------------------
 
 file(READ ${DOXYFILE_IN} _doxyfile_content)
 string(REPLACE "INPUT                  = "
@@ -24,6 +31,8 @@ string(REPLACE "OUTPUT_DIRECTORY       = "
 file(WRITE ${DOXYFILE_OUT} ${_doxyfile_content})
 file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 
+# ------------------------------------------------------------------------------
+
 add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                    DEPENDS ${_hiq_public_headers}
                    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
@@ -31,16 +40,22 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                    ${DOXYFILE_IN}
                    COMMENT "Generating docs")
 
-add_custom_target(Doxygen DEPENDS ${DOXYGEN_INDEX_FILE})
+add_custom_target(doxygen DEPENDS ${DOXYGEN_INDEX_FILE})
+
+# ==============================================================================
+# Sphinx (sphinx-build)
 
 set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
 set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 
+# ------------------------------------------------------------------------------
+
 # Only regenerate Sphinx when:
 # - Doxygen has rerun
 # - Our doc files have been updated
 # - The Sphinx config has been updated
+
 add_custom_command(
   OUTPUT ${SPHINX_INDEX_FILE}
   COMMAND ${Sphinx_EXECUTABLE} -b html
@@ -55,8 +70,10 @@ add_custom_command(
   COMMENT "Generating documentation with Sphinx")
 
 # Nice named target so we can run the job easily
-add_custom_target(docs DEPENDS Doxygen ${SPHINX_INDEX_FILE})
+add_custom_target(docs DEPENDS doxygen ${SPHINX_INDEX_FILE})
 
+# ==============================================================================
 # Add an install target to install the docs
+
 include(GNUInstallDirs)
 install(DIRECTORY ${SPHINX_BUILD} DESTINATION ${CMAKE_INSTALL_DOCDIR})
