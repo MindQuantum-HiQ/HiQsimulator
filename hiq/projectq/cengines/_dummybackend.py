@@ -33,13 +33,17 @@ class FakeSimulator:
 
 class DummyBackend(BasicEngine):
     """
-    DummyBackend used for testing. It keeps counters: number of gates and swaps,
-    number of matrix-vector multiplications, etc. Prints the final statistics.
+    DummyBackend used for testing.
+    It keeps tracks of
+      - number of gates and swaps,
+      - number of matrix-vector multiplications, etc. 
+    and prints the final statistics.
     """
     def __init__(self, cluster_size, num_global):
         """
         Args:
-            cluster_size (int): The maximum number of qubits in fused multi-qubit gate
+            cluster_size (int): The maximum number of qubits in fused
+                                multi-qubit gate
             num_global (int): Number of global qubits
         """
         BasicEngine.__init__(self)
