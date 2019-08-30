@@ -43,7 +43,7 @@ set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 # - The Sphinx config has been updated
 add_custom_command(
   OUTPUT ${SPHINX_INDEX_FILE}
-  COMMAND ${SPHINX_EXECUTABLE} -b html
+  COMMAND ${Sphinx_EXECUTABLE} -b html
           # Tell Breathe where to find the Doxygen output
           -Dbreathe_projects.HiQSimulator=${DOXYGEN_OUTPUT_DIR}/xml
           ${SPHINX_SOURCE} ${SPHINX_BUILD}
