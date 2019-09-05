@@ -30,14 +30,29 @@ public:
      // Uses backtracking on qubits ids
      // Works in O(C(num_qubits, _cluster_size) * num_gates) time,
      // O(C(num_qubits, _cluster_size)) memory
+
+     /*!
+      * \brief Find the largest subset of gates than can be fused into one cluster. Use backtracking on qubits IDs. Print logs.
+      * \return Indices of gates (from list gate) from one cluster
+      */
      std::vector<int> ScheduleCluster();
 
+     //! Constructor
+     /*!
+      * \param gate For each gate (from the analyzed quantum circuit) a list of qubits on which it acts
+      * \param gate_ctrl For each gate a list of control qubits on which it acts
+      * \param gate_diag For each gate **false** (non-diagonal gate) or **true** (diagonal gate)
+      * \param locals IDs of local qubits
+      * \param globals IDs of global qubits
+      * \param cluster_size Maximum number of qubits in fused multi-qubit gate
+      */
      ClusterScheduler(const std::vector<std::vector<id_num_t>>& gate,
                       const std::vector<std::vector<id_num_t>>& gate_ctrl,
                       std::vector<bool> gate_diag,
                       const std::vector<id_num_t>& locals,
                       const std::vector<id_num_t>& globals, int cluster_size);
 
+     //! Destructor
      ~ClusterScheduler()
      {}
 

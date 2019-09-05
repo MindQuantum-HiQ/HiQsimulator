@@ -23,17 +23,31 @@
 class SwapScheduler
 {
 public:
-     // Chooses which qubits have to be local during next stage.
+     // Choose which qubits have to be local during next stage.
      // Uses backtracking with limited number of branches _num_splits.
      // In worst case works in O(_num_splits * num_gates) time, O(num_gates)
      // memory
+
+     /*!
+      * \brief Choose which qubits have to be local during next stage. Uses backtracking with limited number of branches _num_splits.
+      * \return Qubits IDs that should be local
+      */
      std::vector<id_num_t> ScheduleSwap();
 
+     //! Constructor
+     /*!
+      * \param gate For each gate (from the analyzed quantum circuit) a list of qubits on which it acts
+      * \param gate_ctrl For each gate a list of control qubits on which it acts
+      * \param gate_diag For each gate **false** (if non-diagonal gate) or **true** (if diagonal gate)
+      * \param num_splits Number of branch splits
+      * \param num_locals Number of local qubits
+      * \param fuse If True then of single-qubit gates will be fused
+      */
      SwapScheduler(const std::vector<std::vector<id_num_t>>& gate,
                    const std::vector<std::vector<id_num_t>>& gate_ctrl,
                    std::vector<bool> gate_diag, int num_splits, int num_locals,
                    bool fuse);
-
+      //! Destructor
      ~SwapScheduler()
      {}
 

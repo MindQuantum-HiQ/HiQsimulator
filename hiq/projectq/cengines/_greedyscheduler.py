@@ -74,7 +74,7 @@ class GreedyScheduler(BasicEngine):
                 specify this parameter as True. Then all last CZ gates will be
                 ignored, because they do not affect the result of final measurement.
             num_splits (int): Number of branch splits
-            cluster_size (int): The maximum number of qubits in fused multi-qubit
+            cluster_size (int): Maximum number of qubits in fused multi-qubit
                 gate
         """
         BasicEngine.__init__(self)
