@@ -59,6 +59,7 @@ class CMakeBuild(build_ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
+                      '-DBoost_NO_BOOST_CMAKE=ON',
                       '-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
 
         cfg = 'Debug_MPI' if self.debug else 'Release_MPI'
