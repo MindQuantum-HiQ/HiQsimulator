@@ -9,7 +9,7 @@ composer and the coding environment.
 
 First, open the `HiQ Home Page <http://hiq.huaweicloud.com/>`__ and
 click "`Experience Quantum
-Programming <http://hiq.huaweicloud.com:9002/ide>`__" or "HiQ Simulator"
+Programming <https://hiq.huaweicloud.com:9002/ide>`__" or "HiQ Simulator"
 from the main menu to find the login prompt. 
 
 .. image:: /images/loginfrontpage.png
@@ -21,7 +21,7 @@ Then input your account and password.
 
 **II. Project management**
 
-If you are in the IDE environment, navigate to **New Project** to
+If you are in the IDE environment, navigate to **NEW PROJECT** to
 choose the editing environment, create a project and edit it.
 
 .. image:: /images/createproject.png
