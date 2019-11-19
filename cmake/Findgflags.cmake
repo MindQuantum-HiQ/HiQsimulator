@@ -113,6 +113,13 @@ if(gflags_FOUND)
   endif()
 endif()
 
+if(gflags_LIBRARY AND NOT EXISTS ${gflags_LIBRARY})
+  message(STATUS "gflags with CONFIG method not valid")
+  set(gflags_FOUND FALSE)
+  set(gflags_LIBRARY)
+  set(gflags_INCLUDE_DIR)
+endif()
+
 if(NOT gflags_LIBRARY)
   find_library(gflags_LIBRARY
                NAMES gflags libgflags

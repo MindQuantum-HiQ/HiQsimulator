@@ -115,6 +115,13 @@ if(glog_FOUND)
   endif()
 endif()
 
+if(glog_LIBRARY AND NOT EXISTS ${glog_LIBRARY})
+  message(STATUS "glog with CONFIG method not valid")
+  set(glog_FOUND FALSE)
+  set(glog_LIBRARY)
+  set(glog_INCLUDE_DIR)
+endif()
+
 if(NOT glog_LIBRARY)
   find_library(glog_LIBRARY
                NAMES glog libglog
@@ -167,6 +174,19 @@ if(glog_FOUND)
                                      "${glog_INCLUDE_DIR}"
                                      INTERFACE_LINK_LIBRARIES
                                      gflags::gflags)
+  else()
+    # Make sure that the glog::glog target depends on gflags::gflags
+    get_target_property(_libraries glog::glog INTERFACE_LINK_LIBRARIES)
+    set(_new_libraries)
+    foreach(_dep ${_libraries})
+      if(_dep STREQUAL gflags)
+        list(APPEND _new_libraries gflags::gflags)
+      else()
+        list(APPEND _new_libraries ${_dep})
+      endif()
+    endforeach()
+    set_target_properties(glog::glog
+                          PROPERTIES INTERFACE_LINK_LIBRARIES ${_new_libraries})
   endif()
 endif()
 
