@@ -42,6 +42,22 @@ find_package(Boost 1.55 REQUIRED
                         serialization
                         thread)
 
+get_target_property(_headers_path Boost::boost INTERFACE_INCLUDE_DIRECTORIES)
+if(NOT _header_path)
+  if(TARGET Boost::headers)
+    get_target_property(_tmp Boost::headers INTERFACE_INCLUDE_DIRECTORIES)
+    set_property(TARGET Boost::boost
+                 APPEND
+                 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${_tmp})
+  else()
+    get_target_property(_tmp Boost::program_options
+                        INTERFACE_INCLUDE_DIRECTORIES)
+    set_property(TARGET Boost::boost
+                 APPEND
+                 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${_tmp})
+  endif()
+endif()
+
 if(Boost_MINOR_VERSION LESS 59)
   set(BUILD_TESTING OFF CACHE BOOL "Build the HiQSimulator test suite?" FORCE)
   message(WARNING "Unable to compile unit tests! Boost version is too old \
