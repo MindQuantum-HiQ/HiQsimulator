@@ -60,9 +60,10 @@ class CMakeBuild(build_ext):
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       '-DBoost_NO_BOOST_CMAKE=ON',
+                      '-DBUILD_TESTING=OFF',
                       '-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
 
-        cfg = 'Debug_MPI' if self.debug else 'Release_MPI'
+        cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":
