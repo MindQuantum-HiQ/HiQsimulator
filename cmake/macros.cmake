@@ -139,3 +139,47 @@ macro(add_boost_test SOURCE_FILE_NAME)
 endmacro()
 
 # ==============================================================================
+
+macro(define_object_library target)
+  cmake_parse_arguments(${target}
+                        ""
+                        ""
+                        "SOURCES;HEADERS;DEPENDENCIES;"
+                        ${ARGN})
+
+  if(CMAKE_VERSION VERSION_LESS 3.12)
+    add_custom_target(${target})
+    set_target_properties(${target}
+                          PROPERTIES SOURCES
+                                     "${${target}_SOURCES}"
+                                     INTERFACE_SOURCES
+                                     "${${target}_HEADERS}"
+                                     LINK_LIBRARIES
+                                     "${${target}_DEPENDENCIES}")
+  else()
+    add_library(${target} OBJECT ${${target}_SOURCES})
+    target_sources(${target} INTERFACE ${${target}_HEADERS})
+    target_link_libraries(${target} PUBLIC ${${target}_DEPENDENCIES})
+  endif()
+  list(APPEND _doc_targets ${target})
+endmacro()
+
+# ==============================================================================
+
+macro(add_object_library_dependency
+      target
+      visibility
+      object_library)
+  if(CMAKE_VERSION VERSION_LESS 3.12)
+    get_target_property(_sources ${object_library} SOURCES)
+    get_target_property(_headers ${object_library} INTERFACE_SOURCES)
+    get_target_property(_dependencies ${object_library} LINK_LIBRARIES)
+    target_sources(${target} ${visibility} ${_sources})
+    target_sources(${target} INTERFACE ${_headers})
+    target_link_libraries(${target} ${visibility} ${_dependencies})
+  else()
+    target_link_libraries(${target} ${visibility} ${object_library})
+  endif()
+endmacro()
+
+# ==============================================================================

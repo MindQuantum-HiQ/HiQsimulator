@@ -109,25 +109,22 @@ include_directories(${SRC_DIR})
 
 # ==============================================================================
 
-add_executable(qswap $<TARGET_OBJECTS:permutations> qswap.cpp)
-target_link_libraries(qswap
-                      Boost::boost
-                      Boost::program_options
-                      glog::glog)
+add_executable(qswap qswap.cpp)
+add_object_library_dependency(qswap PUBLIC permutations)
+target_link_libraries(qswap PUBLIC Boost::boost Boost::program_options)
 
 # --------------------------------------
 
-add_executable(qswap-mpi $<TARGET_OBJECTS:permutations> qswap-mpi.cpp
-                         src/simulator-mpi/SwapperMT.cpp)
+add_executable(qswap-mpi qswap-mpi.cpp src/simulator-mpi/SwapperMT.cpp)
+add_object_library_dependency(qswap-mpi PUBLIC permutations)
 target_compile_definitions(qswap-mpi PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 target_link_libraries(qswap-mpi
-                      ${MPI_LIBRARIES}
-                      Boost::program_options
-                      Boost::mpi
-                      Boost::serialization
-                      Boost::thread
-                      ${OpenMP_tgt}
-                      glog::glog)
+                      PUBLIC ${MPI_LIBRARIES}
+                             Boost::program_options
+                             Boost::mpi
+                             Boost::serialization
+                             Boost::thread
+                             ${OpenMP_tgt})
 
 # ------------------------------------------------------------------------------
 
@@ -185,67 +182,69 @@ list(APPEND _doc_targets _sched_cpp)
 
 # ------------------------------------------------------------------------------
 
-add_library(SimulatorMPI_o OBJECT src/simulator-mpi/SimulatorMPI.cpp
-                                  src/simulator-mpi/SwapperMT.cpp)
-target_sources(SimulatorMPI_o
-               INTERFACE
-               ${SRC_DIR}/simulator-mpi/swapping.hpp
-               ${SRC_DIR}/simulator-mpi/fusion_mpi.hpp
-               ${SRC_DIR}/simulator-mpi/alignedallocator.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel1.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel2.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel3.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel4.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel5.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernels.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernels_diag.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/cintrin.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel1.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel2.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel3.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel4.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel4_cf.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel5.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernels.hpp
-               ${SRC_DIR}/simulator-mpi/kernels/intrin/kernels_diag.hpp
-               ${SRC_DIR}/simulator-mpi/SimulatorMPI.hpp
-               ${SRC_DIR}/simulator-mpi/SwapperMT.hpp)
-add_avx2_to_target(SimulatorMPI_o)
+define_object_library(SimulatorMPI_o
+                      SOURCES
+                      ${SRC_DIR}/simulator-mpi/SimulatorMPI.cpp
+                      ${SRC_DIR}/simulator-mpi/SwapperMT.cpp
+                      HEADERS
+                      ${SRC_DIR}/simulator-mpi/swapping.hpp
+                      ${SRC_DIR}/simulator-mpi/fusion_mpi.hpp
+                      ${SRC_DIR}/simulator-mpi/alignedallocator.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel1.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel2.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel3.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel4.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernel5.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernels.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/nointrin/kernels_diag.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/cintrin.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel1.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel2.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel3.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel4.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel4_cf.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/kernel5.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/kernels.hpp
+                      ${SRC_DIR}/simulator-mpi/kernels/intrin/kernels_diag.hpp
+                      ${SRC_DIR}/simulator-mpi/SimulatorMPI.hpp
+                      ${SRC_DIR}/simulator-mpi/SwapperMT.hpp
+                      DEPENDENCIES
+                      Boost::boost)
 if(WIN32)
   target_compile_definitions(SimulatorMPI_o PRIVATE -DSIMULATOR_LIBRARY_EXPORT)
 endif()
-list(APPEND _doc_targets SimulatorMPI_o)
 
-add_library(SimulatorMPI SHARED $<TARGET_OBJECTS:SimulatorMPI_o>
-                                $<TARGET_OBJECTS:permutations>)
+add_library(SimulatorMPI SHARED ${SRC_DIR}/simulator-mpi/dummy.cpp)
+add_object_library_dependency(SimulatorMPI PUBLIC SimulatorMPI_o)
+add_object_library_dependency(SimulatorMPI PUBLIC permutations)
 add_avx2_to_target(SimulatorMPI)
 target_link_libraries(SimulatorMPI
-                      ${MPI_LIBRARIES}
-                      Boost::program_options
-                      Boost::mpi
-                      Boost::serialization
-                      Boost::thread
-                      ${OpenMP_tgt}
-                      glog::glog)
+                      PUBLIC ${MPI_LIBRARIES}
+                             Boost::program_options
+                             Boost::mpi
+                             Boost::serialization
+                             Boost::thread
+                             ${OpenMP_tgt}
+                             glog::glog)
 
 # ------------------------------------------------------------------------------
 
 add_executable(cppsim-mpi cppsim-mpi.cpp)
 add_avx2_to_target(cppsim-mpi)
 target_link_libraries(cppsim-mpi
-                      SimulatorMPI
-                      ${MPI_LIBRARIES}
-                      Boost::program_options
-                      Boost::mpi
-                      Boost::serialization
-                      Boost::thread
-                      glog::glog
-                      ${OpenMP_tgt})
+                      PUBLIC SimulatorMPI
+                             ${MPI_LIBRARIES}
+                             Boost::program_options
+                             Boost::mpi
+                             Boost::serialization
+                             Boost::thread
+                             glog::glog
+                             ${OpenMP_tgt})
 
 # ------------------------------------------------------------------------------
 
-pybind11_add_module(_cppsim_mpi _cppsim_mpi.cpp
-                    $<TARGET_OBJECTS:SimulatorMPI_o>)
+pybind11_add_module(_cppsim_mpi _cppsim_mpi.cpp)
+add_object_library_dependency(_cppsim_mpi PUBLIC SimulatorMPI_o)
 add_avx2_to_target(_cppsim_mpi)
 target_link_libraries(_cppsim_mpi
                       PUBLIC ${MPI_LIBRARIES}
