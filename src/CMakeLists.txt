@@ -4,4 +4,5 @@ define_object_library(permutations
                       HEADERS
                       ${CMAKE_CURRENT_LIST_DIR}/simulator-mpi/funcs.hpp
                       DEPENDENCIES
-                      glog::glog)
+                      glog::glog
+                      Boost::boost)

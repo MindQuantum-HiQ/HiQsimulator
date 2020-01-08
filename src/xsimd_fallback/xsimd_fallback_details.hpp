@@ -27,7 +27,7 @@
 #     define PRAGMA_LOOP_IVDEP
 #elif defined(__GNUC__)
 #     define PRAGMA_LOOP_IVDEP _Pragma("GCC ivdep")
-#elif define(_MSC_VER)
+#elif defined(_MSC_VER)
 #     define PRAGMA_LOOP_IVDEP __pragma("loop ivdep")
 #else
 #     define PRAGMA_LOOP_IVDEP
