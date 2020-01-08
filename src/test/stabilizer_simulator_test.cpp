@@ -12,9 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-#define private public
+#define _STABSIM_TEST_ENV
 #include "stabilizer-simulator/StabilizerSimulator.hpp"
-#undef private
+#undef _STABSIM_TEST_ENV
 
 #define BOOST_TEST_MODULE stabilizer_simulator_test
 #define BOOST_TEST_DYN_LINK

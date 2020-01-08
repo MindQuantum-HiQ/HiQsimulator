@@ -107,6 +107,10 @@ public:
 };
 }  // details
 
+#ifdef _STABSIM_TEST_ENV
+#  define private public
+#endif // _STABSIM_TEST_ENV
+
 /*!
  * \brief Stabilizer simulator class
  *
@@ -1024,6 +1028,11 @@ private:
      Map allocated_qubits_;
      Vec available_qubits_;
 };
+
+
+#ifdef _STABSIM_TEST_ENV
+#  undef private
+#endif // _STABSIM_TEST_ENV
 
 std::ostream& operator<<(std::ostream& out, StabilizerSimulator const& sim)
 {
