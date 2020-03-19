@@ -28,12 +28,12 @@ from projectq.meta import Control, LogicalQubitIDTag
 from projectq.types import WeakQubitRef
 
 from projectq.backends import Simulator
-from hiq.projectq.backends import StabilizerSimulator
+from ._stabilizer_simulator import StabilizerSimulator
 
 
 def test_is_cpp_simulator_present():
-    import hiq.projectq.backends._sim._cppstabsim
-    assert hiq.projectq.backends._sim._cppstabsim
+    from . import _cppstabsim
+    assert _cppstabsim
 
 
 @pytest.fixture(params=["mapper", "no_mapper"])

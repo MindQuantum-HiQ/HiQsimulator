@@ -420,7 +420,7 @@ public:
                                            *bitstring_it);
                }
           }
-          catch (pybind11::error_already_set& e) {
+          catch (std::exception& e) {
                r_ = r_bak;
                x_ = x_bak;
                z_ = z_bak;
