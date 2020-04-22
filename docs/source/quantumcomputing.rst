@@ -174,7 +174,7 @@ Quantum State Evolution and Quantum Gate Operation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In a closed system, the evolution of a quantum state can be described by
-a unitary transformation. The quantum state at t1 instance :math:`|\psi({t1})\rangle` can be transformed to :math:`|\psi({t1})\rangle` by a unitary operator U(unitary operator),
+a unitary transformation. The quantum state at t1 instance :math:`|\psi({t1})\rangle` can be transformed to :math:`|\psi({t2})\rangle` by a unitary operator U(unitary operator),
 which is only dependent on time t1 and t2
 
 .. math::
