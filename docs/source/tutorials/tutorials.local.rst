@@ -24,7 +24,7 @@ You need to install Python and Pip:
 .. code-block:: bash
    :linenos:
 
-    sudo apt-get install python3 python3-pip
+    sudo apt-get install python3 python3-pip python3-tk
 
 
 After completing the above preparations, you can start to clone the repository to your machine(e.g., to your /home directory), enter
