@@ -32,20 +32,24 @@ After completing the above preparations, you can start to clone the repository t
 .. code-block:: bash
    :linenos:
 
-    git clone --recursive https://github.com/Huawei-HiQ/HiQsimulator.git 
+    git clone --recursive https://github.com/Huawei-HiQ/HiQsimulator.git
     cd HiQsimulator
     python3 -m pip install --user .
+
+The parameter **--user** localizes the installation for the current user only.
+If you want to share the software for all users on the machine (like for a computer cluster),
+you can remove this **--user** parameter and install the package under the root's account. 
 
 
 .. note::
     The HiQsimulator relies on Projectq (programming language, compiler), which will be installed automatically.
     You can find more information in the `projectq tutorials <https://projectq.readthedocs.io/en/latest/index.html>`__.
-    
-.. note::    
-    If you download the project code by copying or other methods, 
-    the directory pybind11 in the project is git Submodule, please make sure that the 
-    `pybind11 source code <https://github.com/pybind/pybind11>`__ is also downloaded correctly. 
-    
+
+.. note::
+    If you download the project code by copying or other methods,
+    the directory pybind11 in the project is git Submodule, please make sure that the
+    `pybind11 source code <https://github.com/pybind/pybind11>`__ is also downloaded correctly.
+
 How to Start Running
 ---------------------
 
@@ -56,16 +60,16 @@ If you just run the simulator on a server, simply run:
 .. code-block:: bash
    :linenos:
 
-   mpirun -np 2 python3 ./examples/teleport_mpi.py 
+   mpirun -np 2 python3 ./examples/teleport_mpi.py
 
 The parameter **-np** indicates the number of parallel processes.
-The parameters can be adjusted according to the CPU resources of the server, 
+The parameters can be adjusted according to the CPU resources of the server,
 and the HiQsimulator will balance the allocation of memory and computing resources between processes.
 
 
 **Running through the slurm job scheduler:**
 
-If you want to run HiQ programs on a clustered environment, 
+If you want to run HiQ programs on a clustered environment,
 it is recommended to install a cluster management software, such as Slurm.
 For example, the above example can be split over 4 MPI nodes (each with 2 processes) and writing a Slurm submission script "run.slurm":
 
