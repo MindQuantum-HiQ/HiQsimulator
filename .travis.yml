@@ -49,6 +49,12 @@ matrix:
     env: CXX=/usr/bin/clang++ CXXFLAGS=-I/usr/local/include
 
 install:
+ # install pybind11 first
+ - cd pybind11
+ - python3 setup.py install
+ - cd ..
+ # workaround for the issue: https://github.com/pypa/setuptools/issues/58 
+ - pip3 install setuptools==45.3.0
  - pip3 install --upgrade -r requirements.txt
  - pip3 install -v -e .
  - pip3 freeze
