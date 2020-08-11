@@ -564,7 +564,7 @@ operations on Bob based on the results of Bell measurements.
    :math:`\beta|0\rangle+\alpha|1\rangle`, which requires an X operation
    and turns it into :math:`\alpha|0\rangle+\beta|1\rangle`.
 
--  The Bell state of Alice is measured as :math:`|\psi^{-}_{AC}`, then
+-  The Bell state of Alice is measured as :math:`|\psi^{-}_{AC}\rangle`, then
    the quantum state of B at Bob collapses to
    :math:`\beta|0\rangle-\alpha|1\rangle`. Here, an X gate operation is
    applied and transfer the state into

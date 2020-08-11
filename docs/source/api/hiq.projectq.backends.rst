@@ -5,14 +5,14 @@ The HiQ backends package.
 
 .. autosummary::
 	
-	hiq.projectq.backends.SimulatorMPI
-	hiq.projectq.backends.StabilizerSimulator
+	projectq.backends.SimulatorMPI
+	projectq.backends.StabilizerSimulator
 
 
 Module contents
 ---------------
 
-.. automodule:: hiq.projectq.backends
-    :members:
+.. automodule:: projectq.backends
+    :members: SimulatorMPI, StabilizerSimulator
     :special-members: __init__
     :imported-members:

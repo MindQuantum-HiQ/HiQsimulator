@@ -1,42 +1,40 @@
 .. _Use-HiQsimulator-as-backends:
 
 Use HiQsimulator as backends
-=============================
+============================
 
 
 Full-amplitude simulator
--------------------------
+------------------------
 
-The full-amplitude quantum computing simulator is a basic module of the
-HiQ quantum computation simulation software. It can calculate the
-amplitude of all quantum state density matrix elements after evolution.
-We take this simulator as an example to describe the basic syntax of HiQ
-programming.
+The full-amplitude quantum computing simulator is a basic module of the HiQ
+quantum computation simulation software. It can calculate the amplitude of all
+quantum state density matrix elements after evolution.  We take this simulator
+as an example to describe the basic syntax of HiQ programming.
 
-The design concept of HiQ is to provide intuitive syntax for users to
-write quantum programs, making the learning curve relatively smooth.
-Based on this idea, the syntax of HiQ is similar to that of mathematical
-symbols in quantum computing. For example, we now turn the x-revolving
-gate to a certain qubit, and the rotation angle of the revolving gate is
-theta. Mathematically, this operation can be expressed as
+The design concept of HiQ is to provide intuitive syntax for users to write
+quantum programs, making the learning curve relatively smooth.  Based on this
+idea, the syntax of HiQ is similar to that of mathematical symbols in quantum
+computing. For example, we now turn the x-revolving gate to a certain qubit,
+and the rotation angle of the revolving gate is theta. Mathematically, this
+operation can be expressed as
 
 .. math::
     Rx(\theta) \left | \psi \right \rangle
 
 
-where :math:`\left | \psi \right \rangle` represents the state of the qubit. The corresponding HiQ
-implementation is
+where :math:`\left | \psi \right \rangle` represents the state of the
+qubit. The corresponding HiQ implementation is
 ::
 
     Rx(theta) | qubit
 
 The state of the qubit register Rx belongs to the quantum gate type. It
 reloads \| (or) operator. The reload is to apply the Rx gate to the
-qubit. More importantly, the \| operator separates the classical
-parameter (object on the left-hand-side of \| -- the Rx(theta) operator,
-in this case) and the quantum parameter (object on the right-hand-side
-of \|, or the qubit here) to facilitate the compiler to handle them
-individually.
+qubit. More importantly, the \| operator separates the classical parameter
+(object on the left-hand-side of \| -- the Rx(theta) operator, in this case)
+and the quantum parameter (object on the right-hand-side of \|, or the qubit
+here) to facilitate the compiler to handle them individually.
 
 Below, we will briefly introduce the compiling environment:
 
@@ -54,23 +52,32 @@ Below, we will briefly introduce the compiling environment:
                                   DecompositionRuleSet)
    import projectq.setups.decompositions
 
-   from hiq.projectq.backends import SimulatorMPI
-   from hiq.projectq.cengines import GreedyScheduler, HiQMainEngine
+   from projectq.backends import SimulatorMPI
+   from projectq.cengines import GreedyScheduler, HiQMainEngine
 
    from mpi4py import MPI
 
+Below you will find some explanations about each of the lines in the above
+example
 
-(1)Package ops include all supported quantum gates.
+Line 1
+   Package ``projectq.ops`` include all supported quantum gates. 
 
-(2)Package meta includes optimizations of some implemented operations.
+Line 2
+    Package ``projectq.meta`` includes optimizations of some implemented
+    operations.
 
-(3)Package backends include all supported backends.
+Line 3
+    Package ``projectq.backends`` include all supported backends.
 
-(4)Package engines include all modules of the compiler engine.
+Line 4
+    Package ``projectq.cengines`` include all modules of the compiler engine.
 
-(5)Package setups can be used to configure the main engine.
+Line 5
+    Package ``projectq.setups`` can be used to configure the main engine.
 
-(6)Package mpi4py are used to call the dependent MPI library.
+Line 6
+    Package ``mpi4py`` are used to call the dependent MPI library.
 
 
 2. Indicate the backend simulator and create a main engine.
@@ -88,14 +95,16 @@ Below, we will briefly introduce the compiling environment:
               LocalOptimizer(cache_depth),
               GreedyScheduler()]
 
-   eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20), engines)
+   eng = HiQMainEngine(SimulatorMPI(gate_fusion=True, num_local_qubits=20),
+                      engines)
     
 .. note::
-    The parameter **num_local_qubits** represents the number of qubits supported by an MPI node, 
-    depending on the available memory of the node. The 20 qubits probably require about 16M of memory. 
-    For each additional qubit, the required memory will double. 
-    In actual use, the appropriate value can be set according to the algorithm requirements, 
-    the available memory of the single node, and the number of nodes.
+    The parameter **num_local_qubits** represents the number of qubits
+    supported by an MPI node, depending on the available memory of the
+    node. The 20 qubits probably require about 16MB of memory.  For each
+    additional qubit, the required memory will double.  In actual use, the
+    appropriate value can be set according to the algorithm requirements, the
+    available memory of the single node, and the number of nodes.
 
 3. Program the algorithm logic.
 
@@ -160,18 +169,17 @@ Comming soon.
 
 
 Quantum Error Correction simulator (Stabilizer Circuit simulator)
-------------------------------------------------------------------
+-----------------------------------------------------------------
 
-The Stabilizer Circuit Simulator can be used to efficiently simulate
-circuits merely composed by a Stabilizer gate set (including CNOT,
-Hadamard, and Phase gate) and measurement meters. This kind of quantum
-circuit is called Stabilizer circuit, which is basic for studying
-quantum error correction and fault-tolerant quantum circuit designs. It
-is also an effective means for the research of error correction encoder
-and decoder. By using algorithm optimization and distributed computing
-capabilities in the HiQ software package, the simulator can easily
-simulate hundreds of thousands of qubits of Stabilizer quantum circuits.
-The basic procedure is as follows:
+The Stabilizer Circuit Simulator can be used to efficiently simulate circuits
+merely composed by a Stabilizer gate set (including CNOT, Hadamard, and Phase
+gate) and measurement meters. This kind of quantum circuit is called
+Stabilizer circuit, which is basic for studying quantum error correction and
+fault-tolerant quantum circuit designs. It is also an effective means for the
+research of error correction encoder and decoder. By using algorithm
+optimization and distributed computing capabilities in the HiQ software
+package, the simulator can easily simulate hundreds of thousands of qubits of
+Stabilizer quantum circuits.  The basic procedure is as follows:
 
 1. Import the simulator package.
 
@@ -179,8 +187,8 @@ The basic procedure is as follows:
    :linenos:
 
    from projectq.ops import CNOT, H, Measure, All
-   from hiq.projectq.backends import StabilizerSimulator
-   from hiq.projectq.cengines import HiQMainEngine
+   from projectq.backends import StabilizerSimulator
+   from projectq.cengines import HiQMainEngine
 
 
 2. Initialize the simulator.
@@ -226,4 +234,4 @@ The basic procedure is as follows:
    All(Measure) | qubits[:5]
    eng.flush()
    print("= The qubits 0-4 state: {}{}{}{}{}".format(int(qubits[0]),
-          int(qubits[1]), int(qubits[2]), int(qubits[3]), int(qubits[4])))
+         int(qubits[1]), int(qubits[2]), int(qubits[3]), int(qubits[4])))

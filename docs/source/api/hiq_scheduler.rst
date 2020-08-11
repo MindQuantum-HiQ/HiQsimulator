@@ -8,7 +8,7 @@ HiQ Scheduler
 **Cluster Scheduler** works within a single stage and merges gates into clusters using Greedy Algorithm: it tries to maximize the number of gates in a single cluster.
 Each time the scheduler is run, it calculates and returns a cluster.
 
-See :meth:`GreedyScheduler class <hiq.projectq.cengines.GreedyScheduler>` to learn more about local and global qubits, stages and clusters.
+See :meth:`GreedyScheduler class <projectq.cengines.GreedyScheduler>` to learn more about local and global qubits, stages and clusters.
 
 .. toctree::
    :caption: Table of contents

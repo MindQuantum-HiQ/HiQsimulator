@@ -178,8 +178,8 @@ follows:
                                 DecompositionRuleSet)
     import projectq.setups.decompositions
 
-    from hiq.projectq.backends import SimulatorMPI
-    from hiq.projectq.cengines import GreedyScheduler, HiQMainEngine
+    from projectq.backends import SimulatorMPI
+    from projectq.cengines import GreedyScheduler, HiQMainEngine
 
     from mpi4py import MPI
 

@@ -19,15 +19,15 @@ import sys
 sys.path.insert(0, os.path.abspath('../../'))
 
 import inspect
-import hiq
+import projectq
 
 # -- General declarations ----------------------------------------------------
 
 # Mock
 autodoc_mock_imports = [
-    "hiq.projectq.backends._sim._cppsim_mpi",
-    "hiq.projectq.backends._sim._cppstabsim",
-    "hiq.projectq.cengines._sched_cpp",
+    "projectq.backends._hiqsim._cppsim_mpi",
+    "projectq.backends._hiqsim._cppstabsim",
+    "projectq.cengines._sched_cpp",
     "mpi4py","pybind11"]
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
@@ -39,7 +39,7 @@ if on_rtd:
 # -- Project information -----------------------------------------------------
 
 project = 'Huawei HiQ'
-copyright = '2019, Huawei HiQ'
+copyright = '2020, Huawei HiQ'
 author = 'Huawei HiQ developers'
 
 # -- General configuration ---------------------------------------------------
@@ -140,7 +140,7 @@ todo_include_todos = False
 
 # -- Options for C++ documentation
 
-breathe_projects = { 'HiQSimulator': '../xml' }
+breathe_projects = { 'HiQSimulator': '../doxygen/xml' }
 highlight_language = 'c++'
 
 # -- Options for HTML output -------------------------------------------------
@@ -378,7 +378,7 @@ def linkcode_resolve(domain, info):
     if on_rtd:
         rtd_tag = os.environ.get('READTHEDOCS_VERSION')
         if rtd_tag == 'latest':
-            github_tag = 'master'
+            github_tag = 'develop'
         else:
             # RTD changes "/" in branch name to "-"
             # As we use branches like fix/cool-feature, this is a
@@ -392,6 +392,7 @@ def linkcode_resolve(domain, info):
                 github_tag = rtd_tag
     else:
         github_tag = 'v' + __version__
+
     if domain != 'py':
         return None
     else:
@@ -421,9 +422,15 @@ def linkcode_resolve(domain, info):
                 line_number = inspect.getsourcelines(obj)[1]
             except:
                 return None
+
         # Only require relative path project/relative_path
-        project_path = hiq.__path__.__dict__["_path"][0]
+        project_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                     '../../python'))
+        # Skip files not in this current package
+        if project_path not in filepath:
+            return None
+
         relative_path = os.path.relpath(filepath, project_path)
-        url = (github_url + github_tag + "/hiq/" + relative_path + "#L" +
+        url = (github_url + github_tag + '/python/' + relative_path + "#L" +
                str(line_number))
         return url

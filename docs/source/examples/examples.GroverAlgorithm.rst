@@ -68,8 +68,8 @@ The quantum circuit of Grover’s algorithm is:
                                 LocalOptimizer,
                                 TagRemover,
                                 DecompositionRuleSet)
-    from hiq.projectq.cengines import GreedyScheduler, HiQMainEngine
-    from hiq.projectq.backends import SimulatorMPI
+    from projectq.cengines import GreedyScheduler, HiQMainEngine
+    from projectq.backends import SimulatorMPI
     import projectq.setups.decompositions
 
     from mpi4py import MPI
@@ -244,8 +244,8 @@ where :math:`m=\pi 2^{n-2}` and :math:`\sin^2(\beta)=1/2^{n}`.
                                 DecompositionRuleSet)
     import projectq.setups.decompositions
 
-    from hiq.projectq.backends import SimulatorMPI
-    from hiq.projectq.cengines import GreedyScheduler, HiQMainEngine
+    from projectq.backends import SimulatorMPI
+    from projectq.cengines import GreedyScheduler, HiQMainEngine
 
     from mpi4py import MPI
 

@@ -1,3 +1,22 @@
+# ==============================================================================
+#
+# Copyright 2020 <Huawei Technologies Co., Ltd>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ==============================================================================
+
+find_package(Python REQUIRED COMPONENTS Interpreter)
 find_package(Sphinx REQUIRED)
 
 # ==============================================================================
@@ -24,8 +43,10 @@ string(REPLACE "INPUT                  = ../src"
                "INPUT                  = ${DOXYGEN_INPUT_DIR}"
                _doxyfile_content
                ${_doxyfile_content})
-string(REPLACE "OUTPUT_DIRECTORY       = "
-               "OUTPUT_DIRECTORY       = ${DOXYGEN_OUTPUT_DIR}"
+# Not using DOXYGEN_OUTPUT_DIR because Doxygen adds '/doxygen' to the end of
+# this path
+string(REPLACE "OUTPUT_DIRECTORY       ="
+               "OUTPUT_DIRECTORY       = ${CMAKE_CURRENT_BINARY_DIR}"
                _doxyfile_content
                ${_doxyfile_content})
 file(WRITE ${DOXYFILE_OUT} ${_doxyfile_content})
@@ -58,7 +79,10 @@ set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 
 add_custom_command(
   OUTPUT ${SPHINX_INDEX_FILE}
-  COMMAND ${Sphinx_EXECUTABLE} -b html
+  COMMAND $<TARGET_FILE:Python::Interpreter>
+          ${Sphinx_EXECUTABLE}
+          -b
+          html
           # Tell Breathe where to find the Doxygen output
           -Dbreathe_projects.HiQSimulator=${DOXYGEN_OUTPUT_DIR}/xml
           ${SPHINX_SOURCE} ${SPHINX_BUILD}
@@ -69,11 +93,26 @@ add_custom_command(
   MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
   COMMENT "Generating documentation with Sphinx")
 
-# Nice named target so we can run the job easily
-add_custom_target(docs DEPENDS doxygen ${SPHINX_INDEX_FILE})
+# ==============================================================================
+# Sphinx (sphinx-build)
+
+set(DOCS_INDEX_FILE ${CMAKE_CURRENT_BINARY_DIR}/index.html)
+set(DOCS_INDEX_FILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/index.html.in)
+
+# ------------------------------------------------------------------------------
+
+add_custom_command(OUTPUT ${DOCS_INDEX_FILE}
+                   COMMAND ${CMAKE_COMMAND}
+                           -E
+                           copy
+                           ${DOCS_INDEX_FILE_IN}
+                           ${DOCS_INDEX_FILE})
 
 # ==============================================================================
 # Add an install target to install the docs
+
+# Nice named target so we can run the job easily
+add_custom_target(docs DEPENDS doxygen ${SPHINX_INDEX_FILE} ${DOCS_INDEX_FILE})
 
 include(GNUInstallDirs)
 install(DIRECTORY ${SPHINX_BUILD} DESTINATION ${CMAKE_INSTALL_DOCDIR})

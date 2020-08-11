@@ -5,8 +5,8 @@
 # from the environment for the first two.
 SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
-SOURCEDIR     = source
-BUILDDIR      = build
+SOURCEDIR     ?= source
+BUILDDIR      ?= build
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -23,11 +23,16 @@ clean: clean_doxygen
 clean_doxygen:
 	rm -rf xml
 
-.PHONY: help Makefile
+.PHONY: help Makefile doxygen
 
+doxygen:
+	mkdir -p doxygen/
+	doxygen
+
+%_only: Makefile
+	@$(SPHINXBUILD) -M $(subst _only,,$@) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	doxygen
+%: Makefile doxygen
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
