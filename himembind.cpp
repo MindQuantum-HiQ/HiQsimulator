@@ -151,9 +151,9 @@ int is_valid_character(char character) {
     if (isalpha(character) || isnumber(character))
         return 1;
     /**
-     * check other allowed character '-','.','_'
+     * check other allowed character '-','.','_','/','\'
      */
-    if (character == '-' || character == '.' || character == '_')
+    if (character == '-' || character == '.' || character == '_' || character == '/' || character == '\')
         return 1;
 
     return 0;
