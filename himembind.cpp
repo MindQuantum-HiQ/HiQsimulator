@@ -27,6 +27,7 @@
 #include <cctype>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include "details/scope_guard.hpp"
 
@@ -142,13 +143,11 @@ bool is_valid_arguments(char **args, int argc)
  * @param call_name
  * @return result
  */
-bool is_valid_call_name(const std::string call_name) {
-     constexpr const char* valid_names[] = {
-          "python",
-          "python3"
-     };
+bool is_valid_call_name(const std::string call_name)
+{
+     constexpr const char *valid_names[] = {"python", "python3"};
 
-     for(const auto& name: valid_names) {
+     for (const auto &name: valid_names) {
           const auto N = strlen(name);
           if (call_name.size() >= N) {
                if (std::equal(std::end(call_name) - N, std::end(call_name),
