@@ -27,7 +27,6 @@
 #include <cctype>
 #include <iostream>
 #include <memory>
-#include <string_view>
 
 #include "details/scope_guard.hpp"
 
@@ -125,8 +124,15 @@ bool is_valid_arguments(char **args, int argc)
      return std::all_of(args, args + argc, [](std::string_view arg) {
           return std::all_of(
               std::begin(arg), std::end(arg), [](unsigned char c) {
-                   return std::isalnum(c) || c == '-' || c == '.' || c == '_'
-                          || c == '/' || c == '\\' || c == ' ';
+                   // clang-format off
+               return std::isalnum(c)
+                    || c == '-'
+                    || c == '.'
+                    || c == '_'
+                    || c == '/'
+                    || c == '\\'
+                    || c == ' ';
+                   // clang-format on
               });
      });
 }
