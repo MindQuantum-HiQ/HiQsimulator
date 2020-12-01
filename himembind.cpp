@@ -30,7 +30,7 @@
 
 #include "details/scope_guard.hpp"
 
-bool is_valid_call_name(const char *call_name);
+bool is_valid_call_name(const std::string call_name);
 
 bool is_valid_arguments(char **args, int argc);
 
@@ -142,19 +142,20 @@ bool is_valid_arguments(char **args, int argc)
  * @param call_name
  * @return result
  */
-bool is_valid_call_name(const char *call_name) {
-    std::string call_name_str(call_name);
-    std::string_view valid_names[] = {
-            "python",
-            "python3"
-    };
-    for (const auto &name: valid_names) {
-        if (call_name_str.size() >= name.size()) {
-            if (std::equal(std::crbegin(call_name_str), std::crbegin(call_name_str) + name.size(),
-                           std::crbegin(name))) {
-                return true;
-            }
-        }
-    }
-    return false;
+bool is_valid_call_name(const std::string call_name) {
+     constexpr const char* valid_names[] = {
+          "python",
+          "python3"
+     };
+
+     for(const auto& name: valid_names) {
+          const auto N = strlen(name);
+          if (call_name.size() >= N) {
+               if (std::equal(std::end(call_name) - N, std::end(call_name),
+                              name)) {
+                    return true;
+               }
+          }
+     }
+     return false;
 }
