@@ -138,8 +138,6 @@ bool is_valid_arguments(char **args, int argc)
  */
 bool is_valid_call_name(const char *call_name)
 {
-     if (strcmp(call_name, "mpirun") == 0)
-          return true;
      if (strcmp(call_name, "python") == 0)
           return true;
      if (strcmp(call_name, "python3") == 0)
