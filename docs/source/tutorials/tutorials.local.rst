@@ -14,10 +14,12 @@ After having installed the build tools (for g++):
 .. code-block:: bash
    :linenos:
 
-    sudo apt-get install build-essential cmake
-    sudo apt-get install openmpi-bin openmpi-doc libopenmpi-dev
-    sudo apt-get install libboost-all-dev
-    sudo apt-get install libgoogle-glog-dev
+    sudo apt-get -y install build-essential cmake
+    sudo apt-get -y install openmpi-bin openmpi-doc libopenmpi-dev
+    sudo apt-get install libboost-mpi-python-dev
+    sudo apt-get install cmake libblkid-dev e2fslibs-dev libboost-all-dev libaudit-dev
+    sudo apt-get install libgflags-dev
+    sudo apt-get -y install libgoogle-glog-dev
 
 You need to install Python and Pip:
 
